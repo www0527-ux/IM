@@ -1,0 +1,42 @@
+Name: user-api
+Host: 0.0.0.0
+Port: 8104
+
+DataSource: root:YOUR_MYSQL_PASSWORD@tcp(127.0.0.1:3306)/infinitechat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+
+Cache:
+  - Host: 127.0.0.1:6379
+    Pass: ""
+    Type: node
+
+Redis:
+  Host: 127.0.0.1:6379
+  Pass: ""
+  Type: node
+
+Log:
+  Mode: console
+  Level: info
+  Stat: false
+
+Email:
+  Host: smtp.qq.com
+  Port: 465
+  Username: YOUR_EMAIL_ADDRESS
+  Password: YOUR_EMAIL_AUTH_CODE
+  FromName: InfiniteChat
+  Subject: 注册验证码
+
+Auth:
+  Issuer: infinitechat-user-api
+  AccessSecret: REPLACE_WITH_A_LONG_RANDOM_SECRET
+  AccessExpire: 900
+  RefreshExpire: 604800
+
+Minio:
+  Endpoint: 127.0.0.1:9000
+  AccessKey: YOUR_MINIO_ACCESS_KEY
+  SecretKey: YOUR_MINIO_SECRET_KEY
+  UseSSL: false
+  Bucket: infinitechat
+

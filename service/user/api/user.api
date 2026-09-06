@@ -1,0 +1,431 @@
+syntax = "v1"
+
+info (
+	title: "用户服务"
+	desc:  "实现用户相关功能"
+)
+
+type PingResponse {
+	Message string `json:"message"`
+}
+
+type SendCaptchaReq {
+	Account string `form:"account,optional" validate:"required,min=5,max=50" msg:"required=账号不能为空;min=账号长度不能小于5;max=账号长度不能超过50"`
+}
+
+type LoginPasswordRequest {
+	Account  string `json:"account" form:"account,optional" validate:"required" msg:"账号不能为空"`
+	Password string `json:"password" form:"password,optional" validate:"required" msg:"密码不能为空"`
+}
+
+type LogoutRequest {
+	RefreshToken string `json:"refreshToken,optional" validate:"required" msg:"RefreshToken不能为空"`
+}
+
+type LogoutResponse {
+	Success bool `json:"success"`
+}
+
+type LoginCodeRequest {
+	Account string `json:"account,optional" form:"account,optional" validate:"required" msg:"账号不能为空"`
+	Code    string `json:"code,optional" form:"code,optional" validate:"required,len=6" msg:"required=验证码不能为空;len=验证码必须为6位"`
+}
+
+type UserIdRequest {
+	UserId int64 `form:"userId,optional" validate:"required" msg:"用户ID不能为空"`
+}
+
+type RefreshTokenRequest {
+	RefreshToken string `json:"refreshToken,optional" validate:"required" msg:"RefreshToken不能为空"`
+}
+
+type UpdatePasswordRequest {
+	Account         string `json:"account,optional" validate:"required" msg:"账号不能为空"`
+	Password        string `json:"password,optional" validate:"required,min=6,max=64" msg:"required=密码不能为空;min=密码长度不能小于6;max=密码长度不能超过64"`
+	ConfirmPassword string `json:"confirmPassword,optional" validate:"required" msg:"确认密码不能为空"`
+	Code            string `json:"code,optional" validate:"required,len=6" msg:"required=验证码不能为空;len=验证码必须为6位"`
+}
+
+type TokenPairResponse {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refreshToken"`
+}
+
+type UserInfoResponse {
+	UserId      int64  `json:"userId"`
+	Nickname    string `json:"nickname"`
+	Avatar      string `json:"avatar"`
+	Description string `json:"description"`
+	Account     string `json:"account"`
+	Gender      int64  `json:"gender"`
+}
+
+type UserRegisterRequest {
+	Account         string `json:"account,optional" form:"account,optional" validate:"required" msg:"账号不能为空"`
+	Password        string `json:"password,optional" form:"password,optional" validate:"required,min=6,max=64" msg:"required=密码不能为空;min=密码长度不能小于6;max=密码长度不能超过64"`
+	ConfirmPassword string `json:"confirmPassword,optional" form:"confirmPassword,optional" validate:"required" msg:"确认密码不能为空"`
+	Code            string `json:"code,optional" form:"code,optional" validate:"required,len=6" msg:"required=验证码不能为空;len=验证码必须为6位"`
+	Nickname        string `json:"nickname,optional" form:"nickname,optional" validate:"required,max=32" msg:"required=昵称不能为空;max=昵称长度不能超过32"`
+}
+
+type LoginResponse {
+	UserId       int64  `json:"userId"`
+	Account      string `json:"account"`
+	Nickname     string `json:"nickname"`
+	Avatar       string `json:"avatar"`
+	Gender       int32  `json:"gender"`
+	Description  string `json:"description"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refreshToken"`
+	WsServerUri  string `json:"wsServerUri"`
+}
+
+type SearchUserRequest {
+	Keyword string `form:"keyword,optional" validate:"required,min=5,max=50" msg:"required=搜索内容不能为空;min=搜索内容长度不能小于5;max=搜索内容长度不能超过50"`
+}
+
+type SearchUserResponse {
+	UserId      int64  `json:"userId"`
+	Nickname    string `json:"nickname"`
+	Avatar      string `json:"avatar"`
+	Description string `json:"description"`
+	Gender      int64  `json:"gender"`
+}
+
+type GetUploadUrlRequest {
+	ContentType string `form:"contentType,optional" validate:"required,oneof=image/jpeg image/png image/webp" msg:"required=图片类型不能为空;oneof=仅支持JPEG、PNG和WebP图片"`
+}
+
+type UploadUrlResponse {
+	UploadUrl   string `json:"uploadUrl"`
+	DownloadUrl string `json:"downloadUrl"`
+}
+
+type UpdateAvatarRequest {
+	Avatar string `json:"avatar" validate:"required,url,max=512" msg:"required=头像地址不能为空;url=头像地址格式不正确;max=头像地址不能超过512个字符"`
+}
+
+type UpdateAvatarResponse {
+	Avatar string `json:"avatar"`
+}
+
+type GetUserBalanceResponse {
+	BalanceCents int64 `json:"balanceCents"`
+}
+
+type GetBalanceDetailRequest {
+	PageNum  int32 `form:"pageNum,default=1" validate:"gte=1"`
+	PageSize int32 `form:"pageSize,default=20" validate:"gte=1,lte=100"`
+}
+
+type BalanceLogItem {
+	BalanceLogId int64  `json:"balanceLogId"`
+	Amount       int64  `json:"amount"`
+	Type         int64  `json:"type"`
+	RelatedId    int64  `json:"relatedId"`
+	CreatedTime  string `json:"createdTime"`
+}
+
+type GetBalanceDetailResponse {
+	List        []BalanceLogItem `json:"list"`
+	Total       int64            `json:"total"`
+	PageSize    int64            `json:"pageSize"`
+	PageNum     int64            `json:"pageNum"`
+	Pages       int64            `json:"pages"`
+	HasNext     bool             `json:"hasNext"`
+	HasPrevious bool             `json:"hasPrevious"`
+}
+
+type FriendPageRequest {
+	PageNum  int32  `form:"pageNum,default=1" validate:"gte=1"`
+	PageSize int32  `form:"pageSize,default=20" validate:"gte=1,lte=100"`
+	Keyword  string `form:"keyword,optional" validate:"max=50" msg:"max=搜索内容不能超过50个字符"`
+}
+
+type FriendItem {
+	UserId      int64  `json:"userId"`
+	Nickname    string `json:"nickname"`
+	Avatar      string `json:"avatar"`
+	Description string `json:"description"`
+	Gender      int64  `json:"gender"`
+	Status      int64  `json:"status"`
+	SessionId   int64  `json:"sessionId"`
+}
+
+type FriendPageResponse {
+	List        []FriendItem `json:"list"`
+	Total       int64        `json:"total"`
+	PageSize    int64        `json:"pageSize"`
+	PageNum     int64        `json:"pageNum"`
+	Pages       int64        `json:"pages"`
+	HasNext     bool         `json:"hasNext"`
+	HasPrevious bool         `json:"hasPrevious"`
+}
+
+type FriendDetailRequest {
+	FriendId int64 `path:"friendId" validate:"required" msg:"好友ID不能为空"`
+}
+
+type FriendApplicationPageRequest {
+	PageNum  int32 `form:"pageNum,default=1" validate:"gte=1"`
+	PageSize int32 `form:"pageSize,default=20" validate:"gte=1,lte=100"`
+}
+
+type FriendApplicationItem {
+	ApplyFriendId int64  `json:"applyFriendId"`
+	UserId        int64  `json:"userId"`
+	Nickname      string `json:"nickname"`
+	Avatar        string `json:"avatar"`
+	Message       string `json:"message"`
+	Status        int64  `json:"status"`
+	IsReceiver    bool   `json:"isReceiver"`
+	UpdatedTime   string `json:"updatedTime"`
+}
+
+type FriendApplicationPageResponse {
+	List        []FriendApplicationItem `json:"list"`
+	Total       int64                   `json:"total"`
+	PageSize    int64                   `json:"pageSize"`
+	PageNum     int64                   `json:"pageNum"`
+	Pages       int64                   `json:"pages"`
+	HasNext     bool                    `json:"hasNext"`
+	HasPrevious bool                    `json:"hasPrevious"`
+}
+
+type UnreadFriendApplicationCountResponse {
+	Count int64 `json:"count"`
+}
+
+type SendFriendApplicationRequest {
+	ReceiverId int64  `json:"receiverId" validate:"required" msg:"接收者用户ID不能为空"`
+	Message    string `json:"message,optional" validate:"max=255" msg:"max=申请信息不能超过255个字符"`
+}
+
+type SendFriendApplicationResponse {
+	ApplyFriendId int64 `json:"applyFriendId"`
+	Status        int64 `json:"status"`
+}
+
+type FriendOperationRequest {
+	FriendId int64 `path:"friendId" validate:"required" msg:"好友ID不能为空"`
+}
+
+type FriendApplicationOperationRequest {
+	ApplyFriendId int64 `path:"applyFriendId" validate:"required" msg:"好友申请ID不能为空"`
+}
+
+type AcceptFriendApplicationResponse {
+	FriendId  int64 `json:"friendId"`
+	SessionId int64 `json:"sessionId"`
+}
+
+type OperationResponse {
+	Success bool `json:"success"`
+}
+
+type MarkFriendApplicationsReadResponse {
+	Updated int64 `json:"updated"`
+}
+
+type CreateGroupRequest {
+	Name      string  `json:"name,optional" validate:"max=64" msg:"max=群名称不能超过64个字符"`
+	Avatar    string  `json:"avatar,optional" validate:"omitempty,url,max=512" msg:"url=群头像地址格式不正确;max=群头像地址不能超过512个字符"`
+	MemberIds []int64 `json:"memberIds,optional"`
+}
+
+type CreateGroupResponse {
+	SessionId   int64  `json:"sessionId"`
+	Name        string `json:"name"`
+	Avatar      string `json:"avatar"`
+	MemberCount int64  `json:"memberCount"`
+}
+
+type InviteGroupMembersRequest {
+	SessionId int64   `path:"sessionId"`
+	MemberIds []int64 `json:"memberIds" validate:"required,min=1,max=100" msg:"required=被邀请成员不能为空;min=被邀请成员不能为空;max=单次最多邀请100名成员"`
+}
+
+type InviteGroupMembersResponse {
+	AddedCount int64 `json:"addedCount"`
+}
+
+type KickGroupMemberRequest {
+	SessionId int64 `path:"sessionId"`
+	MemberId  int64 `path:"memberId"`
+}
+
+type LeaveGroupRequest {
+	SessionId int64 `path:"sessionId"`
+}
+
+type GroupMemberPageRequest {
+	SessionId int64 `path:"sessionId"`
+	PageNum   int32 `form:"pageNum,default=1" validate:"gte=1"`
+	PageSize  int32 `form:"pageSize,default=20" validate:"gte=1,lte=100"`
+}
+
+type GroupMemberItem {
+	UserId     int64  `json:"userId"`
+	Nickname   string `json:"nickname"`
+	Avatar     string `json:"avatar"`
+	Role       int64  `json:"role"`
+	JoinedTime string `json:"joinedTime"`
+}
+
+type GroupMemberPageResponse {
+	List        []GroupMemberItem `json:"list"`
+	Total       int64             `json:"total"`
+	PageSize    int64             `json:"pageSize"`
+	PageNum     int64             `json:"pageNum"`
+	Pages       int64             `json:"pages"`
+	HasNext     bool              `json:"hasNext"`
+	HasPrevious bool              `json:"hasPrevious"`
+}
+
+type JoinedGroupPageRequest {
+	PageNum  int32 `form:"pageNum,default=1" validate:"gte=1"`
+	PageSize int32 `form:"pageSize,default=20" validate:"gte=1,lte=100"`
+}
+
+type JoinedGroupItem {
+	SessionId  int64  `json:"sessionId"`
+	Name       string `json:"name"`
+	Avatar     string `json:"avatar"`
+	Role       int64  `json:"role"`
+	JoinedTime string `json:"joinedTime"`
+}
+
+type JoinedGroupPageResponse {
+	List        []JoinedGroupItem `json:"list"`
+	Total       int64             `json:"total"`
+	PageSize    int64             `json:"pageSize"`
+	PageNum     int64             `json:"pageNum"`
+	Pages       int64             `json:"pages"`
+	HasNext     bool              `json:"hasNext"`
+	HasPrevious bool              `json:"hasPrevious"`
+}
+
+type GroupMemberCountRequest {
+	SessionId int64 `path:"sessionId"`
+}
+
+type GroupMemberCountResponse {
+	MemberCount int64 `json:"memberCount"`
+}
+
+@server (
+	prefix: /api/user
+	group:  user
+)
+service user-api {
+	@handler ping
+	get /ping returns (PingResponse)
+
+	@handler sendCaptcha
+	get /sendCaptcha (SendCaptchaReq) returns (string)
+
+	@handler register
+	post /register (UserRegisterRequest) returns (LoginResponse)
+
+	@handler loginCode
+	post /loginCode (LoginCodeRequest) returns (LoginResponse)
+
+	@handler loginPassword
+	post /loginPassword (LoginPasswordRequest) returns (LoginResponse)
+
+	@handler logout
+	post /logout (LogoutRequest) returns (LogoutResponse)
+
+	@handler getUserInfo
+	get /getUserInfo (UserIdRequest) returns (UserInfoResponse)
+
+	@handler updatePassword
+	post /updatePassword (UpdatePasswordRequest) returns (string)
+
+	@handler refreshToken
+	post /auth/refresh (RefreshTokenRequest) returns (TokenPairResponse)
+}
+
+@server (
+	prefix:     /api/user
+	group:      user
+	middleware: AccessAuth
+)
+service user-api {
+	@handler searchUser
+	get /search (SearchUserRequest) returns (SearchUserResponse)
+
+	@handler getUploadUrl
+	get /uploadUrl (GetUploadUrlRequest) returns (UploadUrlResponse)
+
+	@handler updateAvatar
+	post /avatar (UpdateAvatarRequest) returns (UpdateAvatarResponse)
+
+	@handler getUserBalance
+	get /balance returns (GetUserBalanceResponse)
+
+	@handler getBalanceDetail
+	get /balance/details (GetBalanceDetailRequest) returns (GetBalanceDetailResponse)
+
+	@handler getFriends
+	get /friends (FriendPageRequest) returns (FriendPageResponse)
+
+	@handler getFriendDetail
+	get /friends/:friendId (FriendDetailRequest) returns (FriendItem)
+
+	@handler deleteFriend
+	delete /friends/:friendId (FriendOperationRequest) returns (OperationResponse)
+
+	@handler getFriendApplications
+	get /friend-applications (FriendApplicationPageRequest) returns (FriendApplicationPageResponse)
+
+	@handler getUnreadFriendApplicationCount
+	get /friend-applications/unread-count returns (UnreadFriendApplicationCountResponse)
+
+	@handler sendFriendApplication
+	post /friend-applications (SendFriendApplicationRequest) returns (SendFriendApplicationResponse)
+
+	@handler rejectFriendApplication
+	post /friend-applications/:applyFriendId/reject (FriendApplicationOperationRequest) returns (OperationResponse)
+
+	@handler acceptFriendApplication
+	post /friend-applications/:applyFriendId/accept (FriendApplicationOperationRequest) returns (AcceptFriendApplicationResponse)
+
+	@handler markFriendApplicationsRead
+	post /friend-applications/read returns (MarkFriendApplicationsReadResponse)
+
+	@handler blockFriend
+	post /friends/:friendId/block (FriendOperationRequest) returns (OperationResponse)
+
+	@handler unblockFriend
+	post /friends/:friendId/unblock (FriendOperationRequest) returns (OperationResponse)
+}
+
+@server (
+	prefix:     /api/user
+	group:      group
+	middleware: AccessAuth
+)
+service user-api {
+	@handler createGroup
+	post /groups (CreateGroupRequest) returns (CreateGroupResponse)
+
+	@handler inviteGroupMembers
+	post /groups/:sessionId/members (InviteGroupMembersRequest) returns (InviteGroupMembersResponse)
+
+	@handler kickGroupMember
+	delete /groups/:sessionId/members/:memberId (KickGroupMemberRequest) returns (OperationResponse)
+
+	@handler leaveGroup
+	post /groups/:sessionId/leave (LeaveGroupRequest) returns (OperationResponse)
+
+	@handler getGroupMembers
+	get /groups/:sessionId/members (GroupMemberPageRequest) returns (GroupMemberPageResponse)
+
+	@handler getJoinedGroups
+	get /groups (JoinedGroupPageRequest) returns (JoinedGroupPageResponse)
+
+	@handler getGroupMemberCount
+	get /groups/:sessionId/member-count (GroupMemberCountRequest) returns (GroupMemberCountResponse)
+}
+

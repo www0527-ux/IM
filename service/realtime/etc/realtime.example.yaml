@@ -1,0 +1,18 @@
+ListenOn: 0.0.0.0:9101
+
+Redis:
+  Host: 127.0.0.1:6379
+  Pass: ""
+  Type: node
+
+Auth:
+  Issuer: infinitechat-user-api
+  AccessSecret: REPLACE_WITH_THE_SAME_SECRET_AS_USER_API
+  AccessExpire: 900
+  RefreshExpire: 604800
+
+UserRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: user.rpc
