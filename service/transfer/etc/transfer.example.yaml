@@ -1,0 +1,22 @@
+Name: message-transfer
+Mode: dev
+
+DataSource: root:YOUR_MYSQL_PASSWORD@tcp(127.0.0.1:3306)/infiniteChat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+
+Redis:
+  Host: 127.0.0.1:6379
+  Pass: ""
+  Type: node
+
+Sequence:
+  BlockSize: 100
+  IdempotencyTTLSeconds: 604800
+  MessageCacheTTLSeconds: 86400
+  RefillLockTTLSeconds: 10
+
+Kafka:
+  Brokers:
+    - 127.0.0.1:9092
+  AcceptedTopic: chat-message-accepted-topic
+  AcceptedGroup: message-transfer-group
+  SequencedTopic: chat-message-sequenced-topic

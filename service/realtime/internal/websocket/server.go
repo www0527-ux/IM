@@ -1,14 +1,13 @@
 package websocket
 
 import (
-	"context"
 	"errors"
 	"log"
 	"net/http"
 	"strings"
 
 	"infinitechatgo/common/auth"
-	"infinitechatgo/service/user/rpc/userrpc"
+	"infinitechatgo/service/realtime/internal/svc"
 
 	ws "github.com/gorilla/websocket"
 )
@@ -23,21 +22,11 @@ var upgrader = ws.Upgrader{
 	},
 }
 
-type AccessAuthenticator interface {
-	AuthenticateAccessToken(
-		ctx context.Context,
-		accessToken string,
-	) (auth.Identity, error)
-}
-
 func StartServer(
-	addr string, //realtime监听端口
-	authenticator AccessAuthenticator,
-	userRPC userrpc.UserRpc,
+	addr string,
+	manager *Manager,
+	svcCtx *svc.ServiceContext,
 ) error {
-	
-	manager := newManager()
-	//创建http路由器(multiplexer)
 	mux := http.NewServeMux()
 	mux.HandleFunc(
 		wsPath,
@@ -46,8 +35,7 @@ func StartServer(
 				w,
 				r,
 				manager,
-				authenticator,
-				userRPC,
+				svcCtx,
 			)
 		},
 	)
@@ -65,12 +53,20 @@ func handleConnection(
 	w http.ResponseWriter,
 	r *http.Request,
 	manager *Manager,
-	authenticator AccessAuthenticator,
-	userRPC userrpc.UserRpc,
+	svcCtx *svc.ServiceContext,
 ) {
 	accessToken, ok := bearerToken(
 		r.Header.Get("Authorization"),
 	)
+	// Browsers cannot attach an Authorization header when constructing a
+	// WebSocket. Keep the header as the preferred production path and allow a
+	// query parameter for the local web client used during development.
+	if !ok {
+		accessToken = strings.TrimSpace(
+			r.URL.Query().Get("access_token"),
+		)
+		ok = accessToken != ""
+	}
 	if !ok {
 		http.Error(
 			w,
@@ -80,10 +76,12 @@ func handleConnection(
 		return
 	}
 
-	identity, err := authenticator.AuthenticateAccessToken(
-		r.Context(),
-		accessToken,
-	)
+	identity, err :=
+		svcCtx.Authenticator.AuthenticateAccessToken(
+			r.Context(),
+			accessToken,
+		)
+
 	if errors.Is(err, auth.ErrInvalidAccessToken) {
 		http.Error(
 			w,
@@ -92,6 +90,7 @@ func handleConnection(
 		)
 		return
 	}
+
 	if err != nil {
 		log.Printf(
 			"authenticate websocket failed: %v",
@@ -119,6 +118,7 @@ func handleConnection(
 		identity.LoginSessionID,
 		conn,
 	)
+
 	manager.add(client)
 	defer manager.remove(client)
 
@@ -130,20 +130,21 @@ func handleConnection(
 	)
 
 	go client.writeLoop()
+
 	client.readLoop(
 		func(sender *Client, message []byte) {
 			handleMessage(
-				manager,
 				sender,
 				message,
-				userRPC,
+				svcCtx,
 			)
 		},
 	)
 }
-//读取Token
+
 func bearerToken(header string) (string, bool) {
 	fields := strings.Fields(header)
+
 	if len(fields) != 2 ||
 		!strings.EqualFold(fields[0], "Bearer") ||
 		fields[1] == "" {

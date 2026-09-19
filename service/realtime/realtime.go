@@ -2,14 +2,15 @@ package main
 
 import (
 	"flag"
-	"github.com/zeromicro/go-zero/core/conf"
-	"github.com/zeromicro/go-zero/core/stores/redis"
-	"github.com/zeromicro/go-zero/zrpc"
-	"infinitechatgo/common/auth"
-	"infinitechatgo/service/realtime/internal/config"
-	realtimews "infinitechatgo/service/realtime/internal/websocket"
-	"infinitechatgo/service/user/rpc/userrpc"
 	"log"
+
+	"infinitechatgo/service/realtime/internal/config"
+	"infinitechatgo/service/realtime/internal/consumer"
+	"infinitechatgo/service/realtime/internal/svc"
+	realtimews "infinitechatgo/service/realtime/internal/websocket"
+
+	"github.com/zeromicro/go-queue/kq"
+	"github.com/zeromicro/go-zero/core/conf"
 )
 
 var configFile = flag.String(
@@ -22,20 +23,65 @@ func main() {
 	flag.Parse()
 
 	var c config.Config
-	conf.MustLoad(*configFile, &c, conf.UseEnv())
-	//准备依赖
-	rds := redis.MustNewRedis(c.Redis)
-	authenticator := auth.NewAuthenticator(rds, c.Auth)
-	userRPC := userrpc.NewUserRpc(
-		zrpc.MustNewClient(c.UserRpc),//获得etcd的连接
+	conf.MustLoad(
+		*configFile,
+		&c,
+		conf.UseEnv(),
 	)
 
-	
+	svcCtx, err := svc.NewServiceContext(c)
+	if err != nil {
+		log.Fatalf(
+			"initialize realtime service: %v",
+			err,
+		)
+	}
+
+	defer func() {
+		if err := svcCtx.Close(); err != nil {
+			log.Printf(
+				"close realtime service: %v",
+				err,
+			)
+		}
+	}()
+
+	manager := realtimews.NewManager()
+	pushConsumer := consumer.NewMessagePushConsumer(
+		manager,
+		svcCtx.UserRPC,
+	)
+	pushQueue := kq.MustNewQueue(
+		kq.KqConf{
+			ServiceConf: c.ServiceConf,
+			Brokers:     c.Kafka.Brokers,
+			Group:       c.Kafka.PushGroup,
+			Topic:       c.Kafka.SequencedTopic,
+			Offset:      "first",
+			Conns:       1,
+			Consumers:   1,
+			Processors:  1,
+			ForceCommit: false,
+		},
+		pushConsumer,
+	)
+	go pushQueue.Start()
+	defer pushQueue.Stop()
+
+	log.Printf(
+		"realtime push consumer started: topic=%s group=%s",
+		c.Kafka.SequencedTopic,
+		c.Kafka.PushGroup,
+	)
+
 	if err := realtimews.StartServer(
 		c.ListenOn,
-		authenticator,
-		userRPC,
+		manager,
+		svcCtx,
 	); err != nil {
-		log.Fatal(err)
+		log.Printf(
+			"realtime server stopped: %v",
+			err,
+		)
 	}
 }

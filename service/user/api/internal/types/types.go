@@ -4,15 +4,15 @@
 package types
 
 type AcceptFriendApplicationResponse struct {
-	FriendId  int64 `json:"friendId"`
-	SessionId int64 `json:"sessionId"`
+	FriendId  int64 `json:"friendId,string"`
+	SessionId int64 `json:"sessionId,string"`
 }
 
 type BalanceLogItem struct {
-	BalanceLogId int64  `json:"balanceLogId"`
+	BalanceLogId int64  `json:"balanceLogId,string"`
 	Amount       int64  `json:"amount"`
 	Type         int64  `json:"type"`
-	RelatedId    int64  `json:"relatedId"`
+	RelatedId    int64  `json:"relatedId,string"`
 	CreatedTime  string `json:"createdTime"`
 }
 
@@ -23,15 +23,15 @@ type CreateGroupRequest struct {
 }
 
 type CreateGroupResponse struct {
-	SessionId   int64  `json:"sessionId"`
+	SessionId   int64  `json:"sessionId,string"`
 	Name        string `json:"name"`
 	Avatar      string `json:"avatar"`
 	MemberCount int64  `json:"memberCount"`
 }
 
 type FriendApplicationItem struct {
-	ApplyFriendId int64  `json:"applyFriendId"`
-	UserId        int64  `json:"userId"`
+	ApplyFriendId int64  `json:"applyFriendId,string"`
+	UserId        int64  `json:"userId,string"`
 	Nickname      string `json:"nickname"`
 	Avatar        string `json:"avatar"`
 	Message       string `json:"message"`
@@ -64,13 +64,13 @@ type FriendDetailRequest struct {
 }
 
 type FriendItem struct {
-	UserId      int64  `json:"userId"`
+	UserId      int64  `json:"userId,string"`
 	Nickname    string `json:"nickname"`
 	Avatar      string `json:"avatar"`
 	Description string `json:"description"`
 	Gender      int64  `json:"gender"`
 	Status      int64  `json:"status"`
-	SessionId   int64  `json:"sessionId"`
+	SessionId   int64  `json:"sessionId,string"`
 }
 
 type FriendOperationRequest struct {
@@ -125,7 +125,7 @@ type GroupMemberCountResponse struct {
 }
 
 type GroupMemberItem struct {
-	UserId     int64  `json:"userId"`
+	UserId     int64  `json:"userId,string"`
 	Nickname   string `json:"nickname"`
 	Avatar     string `json:"avatar"`
 	Role       int64  `json:"role"`
@@ -158,7 +158,7 @@ type InviteGroupMembersResponse struct {
 }
 
 type JoinedGroupItem struct {
-	SessionId  int64  `json:"sessionId"`
+	SessionId  int64  `json:"sessionId,string"`
 	Name       string `json:"name"`
 	Avatar     string `json:"avatar"`
 	Role       int64  `json:"role"`
@@ -200,7 +200,7 @@ type LoginPasswordRequest struct {
 }
 
 type LoginResponse struct {
-	UserId       int64  `json:"userId"`
+	UserId       int64  `json:"userId,string"`
 	Account      string `json:"account"`
 	Nickname     string `json:"nickname"`
 	Avatar       string `json:"avatar"`
@@ -240,7 +240,7 @@ type SearchUserRequest struct {
 }
 
 type SearchUserResponse struct {
-	UserId      int64  `json:"userId"`
+	UserId      int64  `json:"userId,string"`
 	Nickname    string `json:"nickname"`
 	Avatar      string `json:"avatar"`
 	Description string `json:"description"`
@@ -252,12 +252,12 @@ type SendCaptchaReq struct {
 }
 
 type SendFriendApplicationRequest struct {
-	ReceiverId int64  `json:"receiverId" validate:"required" msg:"接收者用户ID不能为空"`
+	ReceiverId int64  `json:"receiverId,string" validate:"required" msg:"接收者用户ID不能为空"`
 	Message    string `json:"message,optional" validate:"max=255" msg:"max=申请信息不能超过255个字符"`
 }
 
 type SendFriendApplicationResponse struct {
-	ApplyFriendId int64 `json:"applyFriendId"`
+	ApplyFriendId int64 `json:"applyFriendId,string"`
 	Status        int64 `json:"status"`
 }
 
@@ -295,7 +295,7 @@ type UserIdRequest struct {
 }
 
 type UserInfoResponse struct {
-	UserId      int64  `json:"userId"`
+	UserId      int64  `json:"userId,string"`
 	Nickname    string `json:"nickname"`
 	Avatar      string `json:"avatar"`
 	Description string `json:"description"`

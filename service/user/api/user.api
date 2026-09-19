@@ -52,7 +52,7 @@ type TokenPairResponse {
 }
 
 type UserInfoResponse {
-	UserId      int64  `json:"userId"`
+	UserId      int64  `json:"userId,string"`
 	Nickname    string `json:"nickname"`
 	Avatar      string `json:"avatar"`
 	Description string `json:"description"`
@@ -69,7 +69,7 @@ type UserRegisterRequest {
 }
 
 type LoginResponse {
-	UserId       int64  `json:"userId"`
+	UserId       int64  `json:"userId,string"`
 	Account      string `json:"account"`
 	Nickname     string `json:"nickname"`
 	Avatar       string `json:"avatar"`
@@ -85,7 +85,7 @@ type SearchUserRequest {
 }
 
 type SearchUserResponse {
-	UserId      int64  `json:"userId"`
+	UserId      int64  `json:"userId,string"`
 	Nickname    string `json:"nickname"`
 	Avatar      string `json:"avatar"`
 	Description string `json:"description"`
@@ -119,10 +119,10 @@ type GetBalanceDetailRequest {
 }
 
 type BalanceLogItem {
-	BalanceLogId int64  `json:"balanceLogId"`
+	BalanceLogId int64  `json:"balanceLogId,string"`
 	Amount       int64  `json:"amount"`
 	Type         int64  `json:"type"`
-	RelatedId    int64  `json:"relatedId"`
+	RelatedId    int64  `json:"relatedId,string"`
 	CreatedTime  string `json:"createdTime"`
 }
 
@@ -143,13 +143,13 @@ type FriendPageRequest {
 }
 
 type FriendItem {
-	UserId      int64  `json:"userId"`
+	UserId      int64  `json:"userId,string"`
 	Nickname    string `json:"nickname"`
 	Avatar      string `json:"avatar"`
 	Description string `json:"description"`
 	Gender      int64  `json:"gender"`
 	Status      int64  `json:"status"`
-	SessionId   int64  `json:"sessionId"`
+	SessionId   int64  `json:"sessionId,string"`
 }
 
 type FriendPageResponse {
@@ -172,8 +172,8 @@ type FriendApplicationPageRequest {
 }
 
 type FriendApplicationItem {
-	ApplyFriendId int64  `json:"applyFriendId"`
-	UserId        int64  `json:"userId"`
+	ApplyFriendId int64  `json:"applyFriendId,string"`
+	UserId        int64  `json:"userId,string"`
 	Nickname      string `json:"nickname"`
 	Avatar        string `json:"avatar"`
 	Message       string `json:"message"`
@@ -197,12 +197,12 @@ type UnreadFriendApplicationCountResponse {
 }
 
 type SendFriendApplicationRequest {
-	ReceiverId int64  `json:"receiverId" validate:"required" msg:"接收者用户ID不能为空"`
+	ReceiverId int64  `json:"receiverId,string" validate:"required" msg:"接收者用户ID不能为空"`
 	Message    string `json:"message,optional" validate:"max=255" msg:"max=申请信息不能超过255个字符"`
 }
 
 type SendFriendApplicationResponse {
-	ApplyFriendId int64 `json:"applyFriendId"`
+	ApplyFriendId int64 `json:"applyFriendId,string"`
 	Status        int64 `json:"status"`
 }
 
@@ -215,8 +215,8 @@ type FriendApplicationOperationRequest {
 }
 
 type AcceptFriendApplicationResponse {
-	FriendId  int64 `json:"friendId"`
-	SessionId int64 `json:"sessionId"`
+	FriendId  int64 `json:"friendId,string"`
+	SessionId int64 `json:"sessionId,string"`
 }
 
 type OperationResponse {
@@ -234,7 +234,7 @@ type CreateGroupRequest {
 }
 
 type CreateGroupResponse {
-	SessionId   int64  `json:"sessionId"`
+	SessionId   int64  `json:"sessionId,string"`
 	Name        string `json:"name"`
 	Avatar      string `json:"avatar"`
 	MemberCount int64  `json:"memberCount"`
@@ -265,7 +265,7 @@ type GroupMemberPageRequest {
 }
 
 type GroupMemberItem {
-	UserId     int64  `json:"userId"`
+	UserId     int64  `json:"userId,string"`
 	Nickname   string `json:"nickname"`
 	Avatar     string `json:"avatar"`
 	Role       int64  `json:"role"`
@@ -288,7 +288,7 @@ type JoinedGroupPageRequest {
 }
 
 type JoinedGroupItem {
-	SessionId  int64  `json:"sessionId"`
+	SessionId  int64  `json:"sessionId,string"`
 	Name       string `json:"name"`
 	Avatar     string `json:"avatar"`
 	Role       int64  `json:"role"`

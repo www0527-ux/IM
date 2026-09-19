@@ -24,4 +24,6 @@ temp/
 service/user/api/etc/user-api.yaml
 service/user/rpc/etc/user.yaml
 service/realtime/etc/realtime.yaml
+service/offline/etc/offline.yaml
+service/transfer/etc/transfer.yaml
 

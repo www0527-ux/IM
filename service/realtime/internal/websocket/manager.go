@@ -1,77 +1,72 @@
 package websocket
 
-import (
-	"sync"
-)
+import "sync"
 
-// 连接管理器
+// Manager keeps one active WebSocket per login session while allowing one
+// user to be online from multiple sessions/devices.
 type Manager struct {
 	mu      sync.RWMutex
-	clients map[int64]map[*Client]struct{}
+	clients map[int64]map[string]*Client
 }
-//初始化连接管理器(userID->Client)
-func newManager() *Manager {
+
+func NewManager() *Manager {
 	return &Manager{
-		clients: make(
-			map[int64]map[*Client]struct{},
-		),
+		clients: make(map[int64]map[string]*Client),
 	}
 }
 
 func (m *Manager) add(client *Client) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 	userClients := m.clients[client.userID]
 	if userClients == nil {
-		//创建新的内层map
-		userClients = make(map[*Client]struct{})
+		userClients = make(map[string]*Client)
 		m.clients[client.userID] = userClients
 	}
-	//共享底层，类型为空结构体
-	userClients[client] = struct{}{}
+	previous := userClients[client.loginSessionID]
+	userClients[client.loginSessionID] = client
+	m.mu.Unlock()
+
+	// Closing the previous connection outside the lock avoids blocking manager
+	// operations on network cleanup. Its deferred remove cannot delete the new
+	// connection because remove checks pointer identity.
+	if previous != nil && previous != client {
+		previous.close()
+	}
 }
 
-// 去掉连接
 func (m *Manager) remove(client *Client) {
-	//写操作使用写锁
 	m.mu.Lock()
-
 	userClients := m.clients[client.userID]
 	if userClients != nil {
-		delete(userClients, client)
-
+		if current := userClients[client.loginSessionID]; current == client {
+			delete(userClients, client.loginSessionID)
+		}
 		if len(userClients) == 0 {
 			delete(m.clients, client.userID)
 		}
 	}
-
 	m.mu.Unlock()
 
 	client.close()
 }
 
-// RW锁确保了多读者时依旧可以持有RLock
-func (m *Manager) sendToUser(
-	userID int64,
-	message []byte,
-) int {
-	//统一转发给在线的用户
+// SendToUser queues the payload for every active login session of a user.
+// Its result is the number of local connection queues that accepted it, not a
+// guarantee that clients received or processed the payload.
+func (m *Manager) SendToUser(userID int64, payload []byte) int {
 	m.mu.RLock()
 	userClients := m.clients[userID]
-	clients := make(
-		[]*Client,
-		0,
-		len(userClients),
-	)
-	for client := range userClients {
+	clients := make([]*Client, 0, len(userClients))
+	for _, client := range userClients {
 		clients = append(clients, client)
 	}
 	m.mu.RUnlock()
-	sendCount := 0
+
+	queued := 0
 	for _, client := range clients {
-		if client.sendMessage(message) {
-			sendCount++
+		if client.sendMessage(payload) {
+			queued++
 		}
 	}
-	return sendCount
+	return queued
 }

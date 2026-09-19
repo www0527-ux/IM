@@ -738,3 +738,105 @@ c.conn.SetPongHandler(func(string) error {
 		)
 	})
 	让readMessage识别pong控制帧
+
+客户端无法确定事务究竟有没有提交。事务保证了“要么全有、要么全无”，但客户端不知道是哪一种。因此即使使用事务，关键业务仍然最好具备幂等性或能够查询最终状态。
+
+回滚不能保证安
+
+业务错误由 Logic 层提前识别；基础设施错误向上返回并包装。事务保证多个数据库操作整体提交或回滚，但提交结果仍可能因网络故障而不确定。因此无论事务还是非事务，凡是可能被重试的重要写操作，都应该通过唯一索引、状态机、请求 ID 等方式实现业务幂等。
+
+Partition 是 Topic 的逻辑有序分片；为了容灾，一个 Partition 可以有多个物理 Replica，分布在不同 Broker 上。其中一个 Replica 是 Leader，负责主要读写，其余 Replica 是 Follower，负责复制 Leader 数据。
+
+突破单日志的串行瓶颈
+单 Partition 必须维护一个总顺序；多个 Partition 把全局顺序拆成多个局部顺序，可以并行写入和处理。
+支持水平扩展
+不同 Partition 可以把 Leader 分布在不同 Broker 上，从而同时利用多台机器的 CPU、磁盘和网络能力。
+提高 Consumer 并行度
+Consumer Group 以 Partition 为最小并行单位，Partition 越多，组内就可以有更多 Consumer 同时工作。
+
+replicate     动词：复制
+replica       名词：副本
+replication   名词：复制这个过程
+
+ISR = In-Sync Replicas 当前仍然与 Leader 保持足够同步的 Replica 集合。
+Kafka 的 Follower Replica 通过向 Leader
+
+Replica 发送 Fetch 请求，主动拉取 Leader 新追加的日志，并追加到自己的本地日志中，从而完成 Partition 的副本复制。
+
+HW = High Watermark 高水位
+
+HW 取决于 “ISR” 中所有副本都已经复制到的位置，因此可以近似看成 ISR 中各 Replica LEO 的最小值。
+
+Kafka 当前认为已经被 ISR 可靠复制、可以作为已提交日志看待的边界。
+
+Kafka 当前认为“已经足够安全，可以暴露给 Consumer”的日志边界。
+
+position fetch
+committed offset
+
+LEO = Log End Offset 每个副本复制到哪里了
+
+ack (0,1,all/-1)
+all:要求ISR里同步的副本都确认复制之后才返回成功
+如果isr中的relica数量少于min.insync.replicas = 2，就发送失败的ack，不写入
+
+Controller 负责 Kafka 集群的元数据与 Partition Leader 管理。当某个 Broker 或 Partition Leader 故障时，Controller 根据当前副本状态选择新的 Leader，并更新集群元数据。现代 Kafka 使用 KRaft Controller Quorum，通过多个 Controller 节点共同维护一致的控制面状态，避免单个 Controller 成为单点故障。
+
+Group Coordinator Kafka 中专门负责管理某个 Consumer Group 状态的 Broker 角色。
+
+有 key
+→ 通常强调路由稳定、局部顺序
+
+无 key
+→ 通常强调负载分散、吞吐量
+
+在 Partition 数量和分区算法保持不变的情况下，相同 key 会稳定映射到相同 Partition，否则需要注意依赖陷阱
+
+Producer 发送消息前，需要通过 Partitioner 决定目标 Partition。带 key 的消息通常根据 key 进行稳定映射，使相同 key 在分区数量和算法不变时进入同一个 Partition，从而利用 Partition 内的顺序性；没有 key 时，Producer 通常以提高吞吐和负载均衡为目标把消息分散到多个 Partition。也可以显式指定 Partition，但业务代码通常不应过度依赖具体 Partition 编号。
+
+type ChatMessage struct {
+	MessageID int64 `json:"messageId,string"`
+
+	ClientMessageID string `json:"clientMessageId"`//由客户端在发送前生成
+		客户端把 ACK 对应到本地消息气泡。
+		网络超时后，客户端使用相同 ID 重试。
+		-SSA
+		服务端识别重复业务请求。
+		消息发送前还没有服务端 ID 时，客户端也能标识它。
+
+	SessionID   int64       `json:"sessionId,string"`
+	SessionType SessionType `json:"sessionType"`
+
+	SenderID   int64  `json:"senderId,string"`
+	ReceiverID *int64 `json:"receiverId,string,omitempty"`
+
+	MessageType MessageType `json:"messageType"`
+	Body        MessageBody `json:"body"`
+
+	CreatedAt int64 `json:"createdAt"`
+}
+
+落库消费者写 MySQL 成功
+        ↓
+发送 ChatMessagePersistedEvent 到 Kafka
+        ↓
+realtime 消费该事件
+        ├─ 给发送设备发送 stored ACK
+        └─ 给接收设备发送 message.new
+
+Time to live
+created, err := r.rds.SetnxExCtx(
+		ctx,
+		key,
+		string(value),
+		idempotencyTTLSeconds,
+	)
+
+Topic：消息进入哪一类数据流
+Key：消息进入 Topic 中的哪个 Partition
+
+flag.String(
+    "f",                  // 参数名称
+    "etc/offline.yaml",   // 默认值
+    "the config file",    // 帮助说明
+)
