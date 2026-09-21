@@ -26,4 +26,5 @@ service/user/rpc/etc/user.yaml
 service/realtime/etc/realtime.yaml
 service/offline/etc/offline.yaml
 service/transfer/etc/transfer.yaml
+service/redpacket/api/etc/redpacket-api.yaml
 

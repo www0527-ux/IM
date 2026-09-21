@@ -10,7 +10,6 @@ import (
 
 	"infinitechatgo/common/auth"
 	"infinitechatgo/common/common"
-	commonutils "infinitechatgo/common/utils"
 	"infinitechatgo/service/user/api/internal/svc"
 	"infinitechatgo/service/user/api/internal/types"
 
@@ -45,7 +44,7 @@ func (l *GetUploadUrlLogic) GetUploadUrl(req *types.GetUploadUrlRequest) (resp *
 	if !ok {
 		return nil, common.NotLoginError
 	}
-	objectID, err := commonutils.NextID()
+	objectID, err := l.svcCtx.IDGenerator.NextID()
 	if err != nil {
 		return nil, common.WrapError(
 			common.SystemError,

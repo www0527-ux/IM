@@ -12,7 +12,6 @@ import (
 	"infinitechatgo/common/auth"
 	"infinitechatgo/common/common"
 	"infinitechatgo/common/txctx"
-	commonutils "infinitechatgo/common/utils"
 	"infinitechatgo/service/user/api/internal/svc"
 	"infinitechatgo/service/user/api/internal/types"
 	"infinitechatgo/service/user/api/internal/types/constants"
@@ -161,7 +160,7 @@ func (l *AcceptFriendApplicationLogic) AcceptFriendApplication(req *types.Friend
 			}
 
 			//雪花算法设置sessionid
-			candidateSessionID, idErr := commonutils.NextID()
+			candidateSessionID, idErr := l.svcCtx.IDGenerator.NextID()
 			if idErr != nil {
 				return common.WrapError(
 					common.SystemError,

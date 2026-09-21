@@ -47,6 +47,7 @@ type MessageAck struct {
 
 	ClientMessageID string `json:"clientMessageId"`
 	MessageID       int64  `json:"messageId,string"`
+	Seq             int64  `json:"seq,string,omitempty"`
 
 	Status MessageAckStatus `json:"status"`
 
@@ -88,11 +89,13 @@ func NewAcceptedAck(
 func NewStoredAck(
 	clientMessageID string,
 	messageID int64,
+	seq int64,
 ) MessageAck {
 	return MessageAck{
 		EventType:       EventTypeMessageAck,
 		ClientMessageID: clientMessageID,
 		MessageID:       messageID,
+		Seq:             seq,
 		Status:          MessageAckStatusStored,
 		ServerTime:      time.Now().UnixMilli(),
 	}

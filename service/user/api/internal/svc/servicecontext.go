@@ -6,10 +6,13 @@ package svc
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/minio/minio-go/v7"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest"
+	"infinitechatgo/common/idgen"
 	"infinitechatgo/service/user/api/internal/config"
 	userMiddleware "infinitechatgo/service/user/api/internal/middleware"
 	userService "infinitechatgo/service/user/api/internal/service"
@@ -21,13 +24,13 @@ import (
 	"infinitechatgo/service/user/model/user"
 	userBalanceModel "infinitechatgo/service/user/model/user_balance"
 	userSessionModel "infinitechatgo/service/user/model/user_session"
-	"time"
 )
 
 type ServiceContext struct {
 	Config           config.Config
 	SqlConn          sqlx.SqlConn
 	Redis            *redis.Redis
+	IDGenerator      *idgen.Generator
 	UserModel        user.UserModel
 	UserBalanceModel userBalanceModel.UserBalanceModel
 	TokenService     *userService.TokenService
@@ -43,6 +46,7 @@ type ServiceContext struct {
 func NewServiceContext(c config.Config) *ServiceContext {
 	conn := sqlx.NewMysql(c.DataSource)
 	rds := redis.MustNewRedis(c.Redis)
+	idGenerator := idgen.MustNew(c.Snowflake)
 	userModel := user.NewUserModel(conn, c.Cache)
 	userBalance := userBalanceModel.NewUserBalanceModel(conn, c.Cache)
 	tokenService := userService.NewTokenService(
@@ -91,6 +95,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:           c,
 		SqlConn:          conn,
 		Redis:            rds,
+		IDGenerator:      idGenerator,
 		UserModel:        userModel,
 		UserBalanceModel: userBalance,
 		TokenService:     tokenService,

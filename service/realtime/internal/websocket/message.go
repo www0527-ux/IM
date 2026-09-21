@@ -9,6 +9,7 @@ import (
 	"time"
 
 	messageevent "infinitechatgo/common/model/event"
+	messageapplication "infinitechatgo/service/message/application"
 	"infinitechatgo/service/realtime/internal/messageid"
 	"infinitechatgo/service/realtime/internal/protocol"
 	"infinitechatgo/service/realtime/internal/svc"
@@ -127,6 +128,65 @@ func handleMessage(
 				request.ClientMessageID,
 				"message_identity_unavailable",
 				"消息身份服务暂时不可用",
+			),
+		)
+		return
+	}
+
+	if svcCtx.UsesOutboxPipeline() {
+		writeCtx, cancelWrite := context.WithTimeout(
+			context.Background(),
+			publishTimeout,
+		)
+		result, writeErr := svcCtx.MessageWriter.Send(
+			writeCtx,
+			messageapplication.Command{
+				Source: messageapplication.SourceRealtime,
+				Message: protocol.BuildChatMessage(
+					request,
+					sender.userID,
+					0,
+					0,
+				),
+				Fingerprint: fingerprint,
+			},
+		)
+		cancelWrite()
+
+		if writeErr != nil {
+			switch {
+			case errors.Is(writeErr, messageapplication.ErrIdempotencyConflict),
+				errors.Is(writeErr, messageapplication.ErrInvalidCommand):
+				sendJSON(
+					sender,
+					protocol.NewRejectedError(
+						request.ClientMessageID,
+						"idempotency_conflict",
+						"同一个clientMessageId不能用于不同的消息内容",
+					),
+				)
+			default:
+				// TODO(user): map the persistent writer's retryable and unknown
+				// COMMIT errors to separate protocol responses.
+				log.Printf("write message through outbox pipeline failed: %v", writeErr)
+				sendJSON(
+					sender,
+					protocol.NewUnavailableError(
+						request.ClientMessageID,
+						"message_write_unavailable",
+						"消息持久化服务尚未就绪或暂时不可用",
+					),
+				)
+			}
+			return
+		}
+
+		sendJSON(
+			sender,
+			protocol.NewStoredAck(
+				request.ClientMessageID,
+				result.Message.MessageID,
+				result.Message.Seq,
 			),
 		)
 		return

@@ -47,16 +47,21 @@ func main() {
 	}()
 
 	manager := realtimews.NewManager()
-	pushConsumer := consumer.NewMessagePushConsumer(
-		manager,
-		svcCtx.UserRPC,
-	)
+	pushTopic := c.Kafka.SequencedTopic
+	pushConsumer := consumer.NewMessagePushConsumer(manager, svcCtx.UserRPC)
+	if svcCtx.UsesOutboxPipeline() {
+		pushTopic = c.Kafka.PersistedTopic
+		pushConsumer = consumer.NewPersistedMessagePushConsumer(
+			manager,
+			svcCtx.UserRPC,
+		)
+	}
 	pushQueue := kq.MustNewQueue(
 		kq.KqConf{
 			ServiceConf: c.ServiceConf,
 			Brokers:     c.Kafka.Brokers,
 			Group:       c.Kafka.PushGroup,
-			Topic:       c.Kafka.SequencedTopic,
+			Topic:       pushTopic,
 			Offset:      "first",
 			Conns:       1,
 			Consumers:   1,
@@ -70,9 +75,59 @@ func main() {
 
 	log.Printf(
 		"realtime push consumer started: topic=%s group=%s",
-		c.Kafka.SequencedTopic,
+		pushTopic,
 		c.Kafka.PushGroup,
 	)
+
+	if svcCtx.UsesOutboxPipeline() {
+		writerQueue := kq.MustNewQueue(
+			kq.KqConf{
+				ServiceConf: c.ServiceConf,
+				Brokers:     c.Kafka.Brokers,
+				Group:       c.Kafka.MessageWriterGroup,
+				Topic:       c.Kafka.CreateRequestedTopic,
+				Offset:      "first",
+				Conns:       1,
+				Consumers:   1,
+				Processors:  1,
+				ForceCommit: false,
+			},
+			consumer.NewMessageWriterConsumer(svcCtx.MessageWriter),
+		)
+		go writerQueue.Start()
+		defer writerQueue.Stop()
+
+		cacheConsumer, err := consumer.NewMessageCacheConsumer(
+			svcCtx.Redis,
+			c.MessagePipeline.ContentCacheTTLSeconds,
+			c.MessagePipeline.IdempotencyCacheTTLSeconds,
+		)
+		if err != nil {
+			log.Fatalf("initialize message cache consumer: %v", err)
+		}
+		cacheQueue := kq.MustNewQueue(
+			kq.KqConf{
+				ServiceConf: c.ServiceConf,
+				Brokers:     c.Kafka.Brokers,
+				Group:       c.Kafka.MessageCacheGroup,
+				Topic:       c.Kafka.PersistedTopic,
+				Offset:      "first",
+				Conns:       1,
+				Consumers:   1,
+				Processors:  1,
+				ForceCommit: false,
+			},
+			cacheConsumer,
+		)
+		go cacheQueue.Start()
+		defer cacheQueue.Stop()
+
+		log.Printf(
+			"outbox message consumers started: createTopic=%s persistedTopic=%s",
+			c.Kafka.CreateRequestedTopic,
+			c.Kafka.PersistedTopic,
+		)
+	}
 
 	if err := realtimews.StartServer(
 		c.ListenOn,

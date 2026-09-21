@@ -3,6 +3,10 @@ Mode: dev
 Host: 0.0.0.0
 Port: 8105
 
+# Change to outbox only after the new MessageWriteService transaction is ready.
+MessagePipeline:
+  Mode: legacy
+
 DataSource: root:YOUR_MYSQL_PASSWORD@tcp(127.0.0.1:3306)/infiniteChat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
 
 Redis:

@@ -120,6 +120,12 @@ func toMessageModel(chatMessage messageevent.ChatMessage) *message.Message {
 			Valid: true,
 		}
 	}
+	if chatMessage.Body.RedPacketID != nil {
+		data.RedPacketId = sql.NullInt64{
+			Int64: *chatMessage.Body.RedPacketID,
+			Valid: true,
+		}
+	}
 
 	return data
 }

@@ -27,8 +27,10 @@ services:
       - ./sql/conversation_sequence.sql:/docker-entrypoint-initdb.d/29-conversation-sequence.sql:ro
       - ./sql/message.sql:/docker-entrypoint-initdb.d/30-message.sql:ro
       - ./sql/system_notification.sql:/docker-entrypoint-initdb.d/31-system-notification.sql:ro
-      - ./sql/red_pocket.sql:/docker-entrypoint-initdb.d/40-red-packet.sql:ro
+      - ./sql/red_packet.sql:/docker-entrypoint-initdb.d/40-red-packet.sql:ro
       - ./sql/red_packet_receive.sql:/docker-entrypoint-initdb.d/41-red-packet-receive.sql:ro
+      - ./sql/red_packet_share.sql:/docker-entrypoint-initdb.d/42-red-packet-share.sql:ro
+      - ./sql/outbox_event.sql:/docker-entrypoint-initdb.d/43-outbox-event.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 5s
@@ -113,7 +115,7 @@ services:
     command:
       - |
         set -e
-        for topic in chat-message-accepted-topic chat-message-sequenced-topic
+        for topic in chat-message-accepted-topic chat-message-sequenced-topic message-create-requested-topic message-persisted-topic redpacket-cache-build-topic
         do
           /opt/kafka/bin/kafka-topics.sh \
             --bootstrap-server kafka:29092 \

@@ -2,11 +2,17 @@ package event
 
 // 设置message传递的dto
 const (
-	//realtime 已经校验消息，并准备将它交给落库消费者。
+	// ChatMessageCreateRequestedEventType asks the message domain to persist a
+	// server-authenticated message. Red packet transactions publish this event
+	// through Outbox; it is not proof that the message row already exists.
+	ChatMessageCreateRequestedEventType = "chat.message.create_requested"
+	// Deprecated: kept only while the legacy pipeline is available as a
+	// migration fallback.
 	ChatMessageAcceptedEventType = "chat.message.accepted"
-	// MessageTransfer 已经为消息分配了会话内 Seq，可以交给落库和推送消费者。
+	// Deprecated: target architecture assigns Seq in the message transaction.
 	ChatMessageSequencedEventType = "chat.message.sequenced"
-	//落库消费者已经将消息写入 MySQL，可以进行在线推送。
+	// ChatMessagePersistedEventType is emitted only after message, Seq and its
+	// Outbox row have committed in one MySQL transaction.
 	ChatMessagePersistedEventType = "chat.message.persisted"
 
 	ChatMessageEventVersion = 1
@@ -34,6 +40,9 @@ type MessageBody struct {
 	Content string `json:"content"`
 
 	ReplyID *int64 `json:"replyId,string,omitempty"`
+
+	RedPacketID          *int64 `json:"redPacketId,string,omitempty"`
+	RedPacketWrapperText string `json:"redPacketWrapperText,omitempty"`
 	//也就是messageId
 }
 
@@ -63,6 +72,15 @@ type ChatMessageAcceptedEvent struct {
 	Message ChatMessage `json:"message"`
 }
 
+type ChatMessageCreateRequestedEvent struct {
+	EventID   int64  `json:"eventId,string"`
+	EventType string `json:"eventType"`
+	Version   int    `json:"version"`
+
+	Message     ChatMessage `json:"message"`
+	Fingerprint string      `json:"fingerprint"`
+}
+
 type ChatMessageSequencedEvent struct {
 	EventType string `json:"eventType"`
 	Version   int    `json:"version"`
@@ -71,12 +89,28 @@ type ChatMessageSequencedEvent struct {
 }
 
 type ChatMessagePersistedEvent struct {
+	EventID   int64  `json:"eventId,string,omitempty"`
 	EventType string `json:"eventType"`
 	Version   int    `json:"version"`
 
-	Message ChatMessage `json:"message"`
+	Message     ChatMessage `json:"message"`
+	Fingerprint string      `json:"fingerprint,omitempty"`
 
 	PersistedAt int64 `json:"persistedAt"`
+}
+
+func NewChatMessageCreateRequestedEvent(
+	eventID int64,
+	message ChatMessage,
+	fingerprint string,
+) ChatMessageCreateRequestedEvent {
+	return ChatMessageCreateRequestedEvent{
+		EventID:     eventID,
+		EventType:   ChatMessageCreateRequestedEventType,
+		Version:     ChatMessageEventVersion,
+		Message:     message,
+		Fingerprint: fingerprint,
+	}
 }
 
 func NewChatMessageAcceptedEvent(
@@ -107,6 +141,22 @@ func NewChatMessagePersistedEvent(
 		EventType:   ChatMessagePersistedEventType,
 		Version:     ChatMessageEventVersion,
 		Message:     message,
+		PersistedAt: persistedAt,
+	}
+}
+
+func NewChatMessagePersistedEventWithIdentity(
+	eventID int64,
+	message ChatMessage,
+	fingerprint string,
+	persistedAt int64,
+) ChatMessagePersistedEvent {
+	return ChatMessagePersistedEvent{
+		EventID:     eventID,
+		EventType:   ChatMessagePersistedEventType,
+		Version:     ChatMessageEventVersion,
+		Message:     message,
+		Fingerprint: fingerprint,
 		PersistedAt: persistedAt,
 	}
 }

@@ -11,7 +11,6 @@ import (
 
 	"infinitechatgo/common/auth"
 	"infinitechatgo/common/common"
-	commonutils "infinitechatgo/common/utils"
 	"infinitechatgo/service/user/api/internal/svc"
 	"infinitechatgo/service/user/api/internal/types"
 	"infinitechatgo/service/user/api/internal/types/constants"
@@ -116,7 +115,7 @@ func (l *SendFriendApplicationLogic) SendFriendApplication(req *types.SendFriend
 		return nil, common.WrapError(common.SystemError, err)
 	}
 
-	applicationId, err := commonutils.NextID()
+	applicationId, err := l.svcCtx.IDGenerator.NextID()
 	if err != nil {
 		return nil, common.WrapError(common.SystemError, err)
 	}

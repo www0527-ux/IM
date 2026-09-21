@@ -1,6 +1,8 @@
 package config
 
 import (
+	"strings"
+
 	"infinitechatgo/common/auth"
 
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -19,12 +21,21 @@ type SyncConfig struct {
 	MaxConversations int `json:",default=50"`
 }
 
+type MessagePipelineConfig struct {
+	Mode string
+}
+
+func (c MessagePipelineConfig) UsesOutbox() bool {
+	return strings.EqualFold(strings.TrimSpace(c.Mode), "outbox")
+}
+
 type Config struct {
 	rest.RestConf
 
-	DataSource string
-	Redis      redis.RedisConf
-	Auth       auth.Config
-	Kafka      KafkaConfig
-	Sync       SyncConfig
+	DataSource      string
+	Redis           redis.RedisConf
+	Auth            auth.Config
+	Kafka           KafkaConfig
+	Sync            SyncConfig
+	MessagePipeline MessagePipelineConfig
 }

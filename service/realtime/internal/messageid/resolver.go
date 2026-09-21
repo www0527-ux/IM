@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	commonutils "infinitechatgo/common/utils"
+	"infinitechatgo/common/idgen"
 
 	"github.com/zeromicro/go-zero/core/stores/redis"
 )
@@ -27,11 +27,18 @@ type Identity struct {
 }
 
 type Resolver struct {
-	rds *redis.Redis
+	rds       *redis.Redis
+	generator *idgen.Generator
 }
 
-func NewResolver(rds *redis.Redis) *Resolver {
-	return &Resolver{rds: rds}
+func NewResolver(
+	rds *redis.Redis,
+	generator *idgen.Generator,
+) *Resolver {
+	return &Resolver{
+		rds:       rds,
+		generator: generator,
+	}
 }
 
 func (r *Resolver) GetOrCreate(
@@ -44,7 +51,7 @@ func (r *Resolver) GetOrCreate(
 		return Identity{}, fmt.Errorf("message fingerprint cannot be empty")
 	}
 
-	messageID, err := commonutils.NextID()
+	messageID, err := r.generator.NextID()
 	if err != nil {
 		return Identity{}, fmt.Errorf("generate message id: %w", err)
 	}

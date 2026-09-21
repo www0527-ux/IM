@@ -14,6 +14,9 @@ Redis:
   Pass: ""
   Type: node
 
+Snowflake:
+  NodeID: 1
+
 Log:
   Mode: console
   Level: info
@@ -39,4 +42,3 @@ Minio:
   SecretKey: YOUR_MINIO_SECRET_KEY
   UseSSL: false
   Bucket: infinitechat
-

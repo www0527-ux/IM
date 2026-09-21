@@ -20,6 +20,7 @@ type (
 		InsertIdempotently(ctx context.Context, data *Message) (*Message, bool, error)
 		MaxSeq(ctx context.Context, sessionID int64) (int64, error)
 		FindBySessionSeqs(ctx context.Context, sessionID int64, seqs []int64) ([]*Message, error)
+		FindBySessionSeqRange(ctx context.Context, sessionID, afterSeq, throughSeq int64) ([]*Message, error)
 		withSession(session sqlx.Session) MessageModel
 	}
 
@@ -37,6 +38,34 @@ func NewMessageModel(conn sqlx.SqlConn) MessageModel {
 	return &customMessageModel{
 		defaultMessageModel: newMessageModel(conn),
 	}
+}
+
+func (m *customMessageModel) FindBySessionSeqRange(
+	ctx context.Context,
+	sessionID int64,
+	afterSeq int64,
+	throughSeq int64,
+) ([]*Message, error) {
+	if throughSeq <= afterSeq {
+		return []*Message{}, nil
+	}
+	query := fmt.Sprintf(
+		"SELECT %s FROM %s WHERE session_id = ? AND seq > ? AND seq <= ? ORDER BY seq ASC",
+		messageRows,
+		m.table,
+	)
+	var messages []*Message
+	if err := m.conn.QueryRowsCtx(
+		ctx,
+		&messages,
+		query,
+		sessionID,
+		afterSeq,
+		throughSeq,
+	); err != nil {
+		return nil, err
+	}
+	return messages, nil
 }
 
 func (m *customMessageModel) withSession(session sqlx.Session) MessageModel {
@@ -141,6 +170,8 @@ func sameMessage(left, right *Message) bool {
 		left.Seq == right.Seq &&
 		left.SessionType == right.SessionType &&
 		left.MessageType == right.MessageType &&
+		left.RedPacketId.Valid == right.RedPacketId.Valid &&
+		(!left.RedPacketId.Valid || left.RedPacketId.Int64 == right.RedPacketId.Int64) &&
 		left.Content == right.Content &&
 		left.ReplyId.Valid == right.ReplyId.Valid &&
 		(!left.ReplyId.Valid || left.ReplyId.Int64 == right.ReplyId.Int64) &&

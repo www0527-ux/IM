@@ -44,14 +44,14 @@ func (l *RegisterLogic) Register(req *types.UserRegisterRequest) (resp *types.Lo
 	var captchaKey string
 	var isEmail bool
 	switch {
-		case constants.EmailRegex.MatchString(account):
-			account = strings.ToLower(account)
-			captchaKey = constants.LoginCodeEmailPrefix + account
-			isEmail = true
-		case constants.PhoneRegex.MatchString(account):
-			captchaKey = constants.LoginCodePhonePrefix + account
-		default:
-			return nil, common.PhoneEmailError
+	case constants.EmailRegex.MatchString(account):
+		account = strings.ToLower(account)
+		captchaKey = constants.LoginCodeEmailPrefix + account
+		isEmail = true
+	case constants.PhoneRegex.MatchString(account):
+		captchaKey = constants.LoginCodePhonePrefix + account
+	default:
+		return nil, common.PhoneEmailError
 	}
 	if req.Password != req.ConfirmPassword {
 		return nil, common.PasswordMatchError
@@ -88,22 +88,22 @@ func (l *RegisterLogic) Register(req *types.UserRegisterRequest) (resp *types.Lo
 		)
 	}
 	switch {
-		case findErr == nil:
-			// 查到了用户，说明账号已经被注册。
-			return nil, common.UserAlreadyExists
+	case findErr == nil:
+		// 查到了用户，说明账号已经被注册。
+		return nil, common.UserAlreadyExists
 
-		case errors.Is(findErr, userModel.ErrNotFound):
-			// 没查到用户，对注册来说是正常结果，继续执行。
+	case errors.Is(findErr, userModel.ErrNotFound):
+		// 没查到用户，对注册来说是正常结果，继续执行。
 
-		default:
-			// 既不是“找到用户”，也不是“没有用户”，
-			// 说明MySQL、缓存或网络出现异常。
-			return nil, common.WrapError(
-				common.SystemError,
-				findErr,
-			)
+	default:
+		// 既不是“找到用户”，也不是“没有用户”，
+		// 说明MySQL、缓存或网络出现异常。
+		return nil, common.WrapError(
+			common.SystemError,
+			findErr,
+		)
 	}
-	userID, err := commonutils.NextID()
+	userID, err := l.svcCtx.IDGenerator.NextID()
 	if err != nil {
 		return nil, common.WrapError(
 			common.SystemError,
@@ -199,7 +199,7 @@ func (l *RegisterLogic) Register(req *types.UserRegisterRequest) (resp *types.Lo
 		)
 	}
 	//签发token
-	tokenPair,err:=l.svcCtx.TokenService.Issue(
+	tokenPair, err := l.svcCtx.TokenService.Issue(
 		l.ctx,
 		newUser.UserId,
 	)
@@ -211,14 +211,14 @@ func (l *RegisterLogic) Register(req *types.UserRegisterRequest) (resp *types.Lo
 	}
 
 	return &types.LoginResponse{
-		UserId:      newUser.UserId,
-		Account:     account,
-		Nickname:    newUser.Nickname,
-		Avatar:      newUser.Avatar.String,
-		Gender:      int32(newUser.Gender),
-		Description: newUser.Description.String,
-		Token: tokenPair.AccessToken,
+		UserId:       newUser.UserId,
+		Account:      account,
+		Nickname:     newUser.Nickname,
+		Avatar:       newUser.Avatar.String,
+		Gender:       int32(newUser.Gender),
+		Description:  newUser.Description.String,
+		Token:        tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
-		WsServerUri: "",
+		WsServerUri:  "",
 	}, nil
 }

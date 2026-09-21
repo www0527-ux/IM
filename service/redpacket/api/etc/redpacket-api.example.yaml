@@ -1,0 +1,36 @@
+Name: redpacket-api
+Host: 0.0.0.0
+Port: 8103
+
+DataSource: root:YOUR_MYSQL_PASSWORD@tcp(127.0.0.1:3306)/infiniteChat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+
+Redis:
+  Host: 127.0.0.1:6379
+  Pass: ""
+  Type: node
+
+Snowflake:
+  NodeID: 3
+
+Auth:
+  Issuer: infinitechat-user-api
+  AccessSecret: REPLACE_WITH_THE_SAME_SECRET_AS_USER_API
+  AccessExpire: 900
+  RefreshExpire: 604800
+
+UserRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: user.rpc
+
+Kafka:
+  Brokers:
+    - 127.0.0.1:9092
+  MessageCreateRequestedTopic: message-create-requested-topic
+  CacheBuildTopic: redpacket-cache-build-topic
+
+Log:
+  Mode: console
+  Level: info
+  Stat: false

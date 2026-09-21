@@ -32,31 +32,6 @@ func main() {
 	)
 	svcCtx := svc.NewServiceContext(c)
 
-	messageConsumer :=
-		consumer.NewMessageStoreConsumer(svcCtx)
-
-	queue := kq.MustNewQueue(
-		kq.KqConf{
-			ServiceConf: c.ServiceConf,
-			Brokers:     c.Kafka.Brokers,
-			Group:       c.Kafka.StoreGroup,
-			Topic:       c.Kafka.SequencedTopic,
-
-			Offset:     "first",
-			Conns:      1,
-			Consumers:  1,
-			Processors: 1,
-
-			ForceCommit: false,
-		},
-		messageConsumer,
-	)
-	log.Printf(
-		"offline consumer started: topic=%s group=%s",
-		c.Kafka.SequencedTopic,
-		c.Kafka.StoreGroup,
-	)
-
 	server := rest.MustNewServer(c.RestConf)
 	server.Use(middleware.RecoverMiddleware)
 	httpapi.RegisterRoutes(server, svcCtx)
@@ -67,7 +42,31 @@ func main() {
 	)
 
 	serviceGroup := service.NewServiceGroup()
-	serviceGroup.Add(queue)
+	if !c.MessagePipeline.UsesOutbox() {
+		messageConsumer := consumer.NewMessageStoreConsumer(svcCtx)
+		queue := kq.MustNewQueue(
+			kq.KqConf{
+				ServiceConf: c.ServiceConf,
+				Brokers:     c.Kafka.Brokers,
+				Group:       c.Kafka.StoreGroup,
+				Topic:       c.Kafka.SequencedTopic,
+				Offset:      "first",
+				Conns:       1,
+				Consumers:   1,
+				Processors:  1,
+				ForceCommit: false,
+			},
+			messageConsumer,
+		)
+		serviceGroup.Add(queue)
+		log.Printf(
+			"legacy offline store consumer started: topic=%s group=%s",
+			c.Kafka.SequencedTopic,
+			c.Kafka.StoreGroup,
+		)
+	} else {
+		log.Printf("offline service running read-only in outbox message pipeline")
+	}
 	serviceGroup.Add(server)
 	serviceGroup.Start()
 }

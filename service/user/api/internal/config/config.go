@@ -5,6 +5,7 @@ package config
 
 import (
 	"infinitechatgo/common/auth"
+	"infinitechatgo/common/idgen"
 
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -33,5 +34,6 @@ type Config struct {
 	Redis      redis.RedisConf
 	Email      EmailConf
 	Auth       auth.Config
+	Snowflake  idgen.Config
 	Minio      MinioConf
 }

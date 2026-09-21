@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"reflect"
 	"testing"
 	"time"
 
@@ -22,23 +21,26 @@ func (f fakeCache) MgetCtx(_ context.Context, _ ...string) ([]string, error) {
 }
 
 type fakeMessageStore struct {
-	maxSeq        int64
-	messages      map[int64]*message.Message
-	requestedSeqs []int64
+	maxSeq           int64
+	messages         map[int64]*message.Message
+	requestedAfter   int64
+	requestedThrough int64
 }
 
 func (f *fakeMessageStore) MaxSeq(context.Context, int64) (int64, error) {
 	return f.maxSeq, nil
 }
 
-func (f *fakeMessageStore) FindBySessionSeqs(
+func (f *fakeMessageStore) FindBySessionSeqRange(
 	_ context.Context,
 	_ int64,
-	seqs []int64,
+	afterSeq int64,
+	throughSeq int64,
 ) ([]*message.Message, error) {
-	f.requestedSeqs = append([]int64(nil), seqs...)
-	rows := make([]*message.Message, 0, len(seqs))
-	for _, seq := range seqs {
+	f.requestedAfter = afterSeq
+	f.requestedThrough = throughSeq
+	rows := make([]*message.Message, 0, int(throughSeq-afterSeq))
+	for seq := afterSeq + 1; seq <= throughSeq; seq++ {
 		if row := f.messages[seq]; row != nil {
 			rows = append(rows, row)
 		}
@@ -71,7 +73,7 @@ func TestReaderSyncMergesCacheAndDatabaseAndSkipsSeqHole(t *testing.T) {
 		CreatedAt:       1_700_000_000_000,
 	}
 	payload, err := json.Marshal(
-		messageevent.NewChatMessageSequencedEvent(cachedMessage),
+		messageevent.NewChatMessagePersistedEvent(cachedMessage, cachedMessage.CreatedAt),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -102,8 +104,12 @@ func TestReaderSyncMergesCacheAndDatabaseAndSkipsSeqHole(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(store.requestedSeqs, []int64{2, 3}) {
-		t.Fatalf("database fallback seqs = %v, want [2 3]", store.requestedSeqs)
+	if store.requestedAfter != 0 || store.requestedThrough != 3 {
+		t.Fatalf(
+			"database fallback range = (%d, %d], want (0, 3]",
+			store.requestedAfter,
+			store.requestedThrough,
+		)
 	}
 	if result.NextSeq != 3 || result.ServerMaxSeq != 3 || result.HasMore {
 		t.Fatalf("unexpected cursor result: %+v", result)
@@ -129,8 +135,12 @@ func TestReaderSyncFallsBackWhenCacheIsUnavailable(t *testing.T) {
 	if _, err := reader.Sync(context.Background(), 1, 2, 0, 2); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(store.requestedSeqs, []int64{1, 2}) {
-		t.Fatalf("database fallback seqs = %v, want [1 2]", store.requestedSeqs)
+	if store.requestedAfter != 0 || store.requestedThrough != 2 {
+		t.Fatalf(
+			"database fallback range = (%d, %d], want (0, 2]",
+			store.requestedAfter,
+			store.requestedThrough,
+		)
 	}
 }
 

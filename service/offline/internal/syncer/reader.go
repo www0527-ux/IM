@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"sort"
 
+	"infinitechatgo/common/messagecache"
 	messageevent "infinitechatgo/common/model/event"
 	"infinitechatgo/service/offline/model/message"
 )
@@ -19,7 +20,7 @@ type Cache interface {
 
 type MessageStore interface {
 	MaxSeq(ctx context.Context, sessionID int64) (int64, error)
-	FindBySessionSeqs(ctx context.Context, sessionID int64, seqs []int64) ([]*message.Message, error)
+	FindBySessionSeqRange(ctx context.Context, sessionID, afterSeq, throughSeq int64) ([]*message.Message, error)
 }
 
 type SessionAccessStore interface {
@@ -113,12 +114,22 @@ func (r *Reader) Sync(
 		}
 	}
 
-	rows, err := r.messages.FindBySessionSeqs(ctx, sessionID, missingSeqs)
-	if err != nil {
-		return Result{}, fmt.Errorf("load messages from database: %w", err)
-	}
-	for _, row := range rows {
-		bySeq[row.Seq] = modelToChatMessage(row)
+	if len(missingSeqs) > 0 {
+		rows, err := r.messages.FindBySessionSeqRange(
+			ctx,
+			sessionID,
+			afterSeq,
+			endSeq,
+		)
+		if err != nil {
+			return Result{}, fmt.Errorf("load messages from database: %w", err)
+		}
+		for _, row := range rows {
+			if _, cached := bySeq[row.Seq]; cached {
+				continue
+			}
+			bySeq[row.Seq] = modelToChatMessage(row)
+		}
 	}
 
 	seqs := make([]int64, 0, len(bySeq))
@@ -140,11 +151,16 @@ func decodeCachedMessage(
 	if payload == "" {
 		return messageevent.ChatMessage{}, false
 	}
-	var event messageevent.ChatMessageSequencedEvent
+	var event struct {
+		EventType string                   `json:"eventType"`
+		Version   int                      `json:"version"`
+		Message   messageevent.ChatMessage `json:"message"`
+	}
 	if err := json.Unmarshal([]byte(payload), &event); err != nil {
 		return messageevent.ChatMessage{}, false
 	}
-	if event.EventType != messageevent.ChatMessageSequencedEventType ||
+	if (event.EventType != messageevent.ChatMessageSequencedEventType &&
+		event.EventType != messageevent.ChatMessagePersistedEventType) ||
 		event.Version != messageevent.ChatMessageEventVersion ||
 		event.Message.SessionID != sessionID ||
 		event.Message.Seq != seq {
@@ -171,9 +187,14 @@ func modelToChatMessage(row *message.Message) messageevent.ChatMessage {
 		replyID := row.ReplyId.Int64
 		chatMessage.Body.ReplyID = &replyID
 	}
+	if row.RedPacketId.Valid {
+		redPacketID := row.RedPacketId.Int64
+		chatMessage.Body.RedPacketID = &redPacketID
+		chatMessage.Body.RedPacketWrapperText = row.Content
+	}
 	return chatMessage
 }
 
 func messageCacheKey(sessionID, seq int64) string {
-	return fmt.Sprintf("im:message-cache:{%d}:%d", sessionID, seq)
+	return messagecache.ContentKey(sessionID, seq)
 }

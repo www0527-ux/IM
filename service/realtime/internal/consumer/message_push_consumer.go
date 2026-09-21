@@ -32,6 +32,7 @@ type groupMemberProvider interface {
 type MessagePushConsumer struct {
 	manager      messageSender
 	groupMembers groupMemberProvider
+	expectedType string
 }
 
 func NewMessagePushConsumer(
@@ -41,6 +42,18 @@ func NewMessagePushConsumer(
 	return &MessagePushConsumer{
 		manager:      manager,
 		groupMembers: groupMembers,
+		expectedType: messageevent.ChatMessageSequencedEventType,
+	}
+}
+
+func NewPersistedMessagePushConsumer(
+	manager *realtimews.Manager,
+	groupMembers userrpc.UserRpc,
+) *MessagePushConsumer {
+	return &MessagePushConsumer{
+		manager:      manager,
+		groupMembers: groupMembers,
+		expectedType: messageevent.ChatMessagePersistedEventType,
 	}
 }
 
@@ -49,12 +62,20 @@ func (c *MessagePushConsumer) Consume(
 	key string,
 	value string,
 ) error {
-	var event messageevent.ChatMessageSequencedEvent
+	var event struct {
+		EventType string                   `json:"eventType"`
+		Version   int                      `json:"version"`
+		Message   messageevent.ChatMessage `json:"message"`
+	}
 	if err := json.Unmarshal([]byte(value), &event); err != nil {
-		log.Printf("discard invalid sequenced event: key=%s, err=%v", key, err)
+		log.Printf("discard invalid message event: key=%s, err=%v", key, err)
 		return nil
 	}
-	if event.EventType != messageevent.ChatMessageSequencedEventType {
+	expectedType := c.expectedType
+	if expectedType == "" {
+		expectedType = messageevent.ChatMessageSequencedEventType
+	}
+	if event.EventType != expectedType {
 		log.Printf("discard unexpected push event type: key=%s, type=%s", key, event.EventType)
 		return nil
 	}

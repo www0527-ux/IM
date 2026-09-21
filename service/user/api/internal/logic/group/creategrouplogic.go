@@ -13,7 +13,6 @@ import (
 	"infinitechatgo/common/auth"
 	"infinitechatgo/common/common"
 	"infinitechatgo/common/txctx"
-	commonutils "infinitechatgo/common/utils"
 	"infinitechatgo/service/user/api/internal/svc"
 	"infinitechatgo/service/user/api/internal/types"
 	"infinitechatgo/service/user/api/internal/types/constants"
@@ -78,7 +77,7 @@ func (l *CreateGroupLogic) CreateGroup(
 		groupName = defaultGroupName
 	}
 
-	sessionId, err := commonutils.NextID()
+	sessionId, err := l.svcCtx.IDGenerator.NextID()
 	if err != nil {
 		return nil, common.WrapError(common.SystemError, err)
 	}
