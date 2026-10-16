@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	sendQueueSize = 256
+	sendQueueSize    = 256
+	receiveQueueSize = 16
 
 	// 单条WebSocket消息最大64KB。
 	maxMessageSize int64 = 64 << 10
@@ -59,13 +60,33 @@ func (c *Client) readLoop(
 	onMessage func(*Client, []byte),
 ) {
 	defer c.close()
+	// Keep reading control frames while a business request waits for RPC/MySQL.
+	// The worker preserves per-connection order. A full queue closes the
+	// connection instead of blocking heartbeat reads; unacknowledged sends can
+	// be retried with their original clientMessageID.
+	requests := make(chan []byte, receiveQueueSize)
+	go func() {
+		for {
+			select {
+			case <-c.done:
+				return
+			case message := <-requests:
+				select {
+				case <-c.done:
+					return
+				default:
+				}
+				onMessage(c, message)
+			}
+		}
+	}()
 	//限制客户端发送的消息内存大小
 	c.conn.SetReadLimit(maxMessageSize)
 
 	//设置第一次读取期限
-	if err:=c.conn.SetReadDeadline(
+	if err := c.conn.SetReadDeadline(
 		time.Now().Add(pongWait),
-	);err!=nil{
+	); err != nil {
 		log.Printf(
 			"set initial read deadline failed:%v",
 			err,
@@ -88,7 +109,14 @@ func (c *Client) readLoop(
 			continue
 		}
 		log.Printf("received:%s", string(message))
-		onMessage(c, message)
+		select {
+		case requests <- message:
+		case <-c.done:
+			return
+		default:
+			log.Printf("receive queue is full; closing connection")
+			return
+		}
 	}
 }
 func (c *Client) sendMessage(message []byte) bool {
@@ -110,16 +138,16 @@ func (c *Client) sendMessage(message []byte) bool {
 
 // 使用管道连接此循环，达到流量控制并发消息的功能
 func (c *Client) writeLoop() {
-	ticker:=time.NewTicker(pingPeriod)
+	ticker := time.NewTicker(pingPeriod)
 	defer ticker.Stop()
 	defer c.close()
 
 	for {
 		select {
 		case message := <-c.send:
-			if err:=c.conn.SetWriteDeadline(
+			if err := c.conn.SetWriteDeadline(
 				time.Now().Add(writeWait),
-			);err!=nil{
+			); err != nil {
 				log.Printf(
 					"set write deadline failed:%v",
 					err,
@@ -138,9 +166,9 @@ func (c *Client) writeLoop() {
 				return
 			}
 		case <-ticker.C:
-			if err:=c.conn.SetWriteDeadline(
+			if err := c.conn.SetWriteDeadline(
 				time.Now().Add(writeWait),
-			);err!=nil{
+			); err != nil {
 				log.Printf(
 					"set ping deadline failed: %v",
 					err,

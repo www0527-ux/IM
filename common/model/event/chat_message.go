@@ -6,11 +6,6 @@ const (
 	// server-authenticated message. Red packet transactions publish this event
 	// through Outbox; it is not proof that the message row already exists.
 	ChatMessageCreateRequestedEventType = "chat.message.create_requested"
-	// Deprecated: kept only while the legacy pipeline is available as a
-	// migration fallback.
-	ChatMessageAcceptedEventType = "chat.message.accepted"
-	// Deprecated: target architecture assigns Seq in the message transaction.
-	ChatMessageSequencedEventType = "chat.message.sequenced"
 	// ChatMessagePersistedEventType is emitted only after message, Seq and its
 	// Outbox row have committed in one MySQL transaction.
 	ChatMessagePersistedEventType = "chat.message.persisted"
@@ -65,13 +60,6 @@ type ChatMessage struct {
 	CreatedAt int64 `json:"createdAt"`
 }
 
-type ChatMessageAcceptedEvent struct {
-	EventType string `json:"eventType"`
-	Version   int    `json:"version"`
-
-	Message ChatMessage `json:"message"`
-}
-
 type ChatMessageCreateRequestedEvent struct {
 	EventID   int64  `json:"eventId,string"`
 	EventType string `json:"eventType"`
@@ -79,13 +67,6 @@ type ChatMessageCreateRequestedEvent struct {
 
 	Message     ChatMessage `json:"message"`
 	Fingerprint string      `json:"fingerprint"`
-}
-
-type ChatMessageSequencedEvent struct {
-	EventType string `json:"eventType"`
-	Version   int    `json:"version"`
-
-	Message ChatMessage `json:"message"`
 }
 
 type ChatMessagePersistedEvent struct {
@@ -110,26 +91,6 @@ func NewChatMessageCreateRequestedEvent(
 		Version:     ChatMessageEventVersion,
 		Message:     message,
 		Fingerprint: fingerprint,
-	}
-}
-
-func NewChatMessageAcceptedEvent(
-	message ChatMessage,
-) ChatMessageAcceptedEvent {
-	return ChatMessageAcceptedEvent{
-		EventType: ChatMessageAcceptedEventType,
-		Version:   ChatMessageEventVersion,
-		Message:   message,
-	}
-}
-
-func NewChatMessageSequencedEvent(
-	message ChatMessage,
-) ChatMessageSequencedEvent {
-	return ChatMessageSequencedEvent{
-		EventType: ChatMessageSequencedEventType,
-		Version:   ChatMessageEventVersion,
-		Message:   message,
 	}
 }
 

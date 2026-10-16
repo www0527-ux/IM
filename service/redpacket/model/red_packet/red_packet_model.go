@@ -3,12 +3,12 @@ package red_packet
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"fmt"
+
+	"infinitechatgo/common/txctx"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
-
-var ErrInsertTxNotImplemented = errors.New("red packet InsertTx is not implemented")
 
 var _ RedPacketModel = (*customRedPacketModel)(nil)
 
@@ -36,12 +36,31 @@ func NewRedPacketModel(conn sqlx.SqlConn) RedPacketModel {
 }
 
 func (m *customRedPacketModel) InsertTx(
-	context.Context,
-	*RedPacket,
+	ctx context.Context,
+	data *RedPacket,
 ) (sql.Result, error) {
-	// TODO(user): implement the transaction-bound insert after reviewing the
-	// generated column order in red_packet_model_gen.go.
-	return nil, ErrInsertTxNotImplemented
+	if data == nil || data.RedPacketId <= 0 || data.MessageId <= 0 ||
+		data.SenderId <= 0 || data.SessionId <= 0 || data.ClientMessageId == "" ||
+		data.TotalAmount <= 0 || data.TotalCount <= 0 || data.ExpireAt.IsZero() {
+		return nil, fmt.Errorf("insert red packet: invalid data")
+	}
+	conn, err := txctx.SessionConn(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("insert red packet: %w", err)
+	}
+	result, err := conn.ExecCtx(ctx, `INSERT INTO red_packet
+		(red_packet_id, message_id, sender_id, receiver_id, client_message_id,
+		 session_id, session_type, red_packet_type, wrapper_text, total_amount,
+		 total_count, received_amount, received_count, status, version, expire_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		data.RedPacketId, data.MessageId, data.SenderId, data.ReceiverId,
+		data.ClientMessageId, data.SessionId, data.SessionType, data.RedPacketType,
+		data.WrapperText, data.TotalAmount, data.TotalCount, data.ReceivedAmount,
+		data.ReceivedCount, data.Status, data.Version, data.ExpireAt)
+	if err != nil {
+		return nil, fmt.Errorf("insert red packet %d: %w", data.RedPacketId, err)
+	}
+	return result, nil
 }
 
 func (m *customRedPacketModel) withSession(session sqlx.Session) RedPacketModel {

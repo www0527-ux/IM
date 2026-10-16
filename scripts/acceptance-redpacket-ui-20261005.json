@@ -1,0 +1,11 @@
+{
+  "result": "PASS",
+  "builtFrontend": true,
+  "outcomes": [
+    "group send, receiver claim, sender claim, own amount and refresh show completion",
+    "reload recovers packet card and prior claim",
+    "lucky packet: lost send response, saved request on reopen, retry returns original IDs",
+    "single packet: sender cannot claim, receiver can claim"
+  ],
+  "browserErrors": []
+}

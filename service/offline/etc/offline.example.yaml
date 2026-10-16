@@ -1,13 +1,12 @@
-Name: offline-message-store
+Name: offline-sync
 Mode: dev
 Host: 0.0.0.0
 Port: 8105
 
-# Change to outbox only after the new MessageWriteService transaction is ready.
-MessagePipeline:
-  Mode: legacy
-
 DataSource: root:YOUR_MYSQL_PASSWORD@tcp(127.0.0.1:3306)/infiniteChat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+MySQLPool:
+  MaxOpenConns: 16
+  MaxIdleConns: 8
 
 Redis:
   Host: 127.0.0.1:6379
@@ -24,9 +23,3 @@ Sync:
   DefaultLimit: 100
   MaxLimit: 200
   MaxConversations: 50
-
-Kafka:
-  Brokers:
-    - 127.0.0.1:9092
-  SequencedTopic: chat-message-sequenced-topic
-  StoreGroup: message-store-consumer-group

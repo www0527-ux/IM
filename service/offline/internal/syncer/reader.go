@@ -151,22 +151,16 @@ func decodeCachedMessage(
 	if payload == "" {
 		return messageevent.ChatMessage{}, false
 	}
-	var event struct {
-		EventType string                   `json:"eventType"`
-		Version   int                      `json:"version"`
-		Message   messageevent.ChatMessage `json:"message"`
-	}
-	if err := json.Unmarshal([]byte(payload), &event); err != nil {
+	var message messageevent.ChatMessage
+	if err := json.Unmarshal([]byte(payload), &message); err != nil {
 		return messageevent.ChatMessage{}, false
 	}
-	if (event.EventType != messageevent.ChatMessageSequencedEventType &&
-		event.EventType != messageevent.ChatMessagePersistedEventType) ||
-		event.Version != messageevent.ChatMessageEventVersion ||
-		event.Message.SessionID != sessionID ||
-		event.Message.Seq != seq {
+	if message.MessageID <= 0 || message.SenderID <= 0 ||
+		message.ClientMessageID == "" || message.SessionID != sessionID ||
+		message.Seq != seq {
 		return messageevent.ChatMessage{}, false
 	}
-	return event.Message, true
+	return message, true
 }
 
 func modelToChatMessage(row *message.Message) messageevent.ChatMessage {

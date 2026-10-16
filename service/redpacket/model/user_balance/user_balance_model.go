@@ -2,12 +2,12 @@ package user_balance
 
 import (
 	"context"
-	"errors"
+	"fmt"
+
+	"infinitechatgo/common/txctx"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
-
-var ErrDebitIfEnoughTxNotImplemented = errors.New("user balance DebitIfEnoughTx is not implemented")
 
 var _ UserBalanceModel = (*customUserBalanceModel)(nil)
 
@@ -35,12 +35,28 @@ func NewUserBalanceModel(conn sqlx.SqlConn) UserBalanceModel {
 }
 
 func (m *customUserBalanceModel) DebitIfEnoughTx(
-	context.Context,
-	int64,
-	int64,
+	ctx context.Context,
+	userID int64,
+	amount int64,
 ) (bool, error) {
-	// TODO(user): implement a single conditional UPDATE inside txctx.
-	return false, ErrDebitIfEnoughTxNotImplemented
+	if userID <= 0 || amount <= 0 {
+		return false, fmt.Errorf("debit balance: user ID and amount must be positive")
+	}
+	conn, err := txctx.SessionConn(ctx)
+	if err != nil {
+		return false, fmt.Errorf("debit balance: %w", err)
+	}
+	result, err := conn.ExecCtx(ctx,
+		"UPDATE user_balance SET balance = balance - ? WHERE user_id = ? AND balance >= ?",
+		amount, userID, amount)
+	if err != nil {
+		return false, fmt.Errorf("debit balance for user %d: %w", userID, err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("debit balance for user %d: rows affected: %w", userID, err)
+	}
+	return affected == 1, nil
 }
 
 func (m *customUserBalanceModel) withSession(session sqlx.Session) UserBalanceModel {

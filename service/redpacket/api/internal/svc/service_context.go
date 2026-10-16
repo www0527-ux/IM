@@ -7,6 +7,7 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 	"infinitechatgo/common/auth"
 	"infinitechatgo/common/idgen"
+	"infinitechatgo/common/mysqlpool"
 	"infinitechatgo/service/redpacket/api/internal/config"
 	"infinitechatgo/service/redpacket/api/internal/middleware"
 	"infinitechatgo/service/redpacket/application"
@@ -39,11 +40,13 @@ type ServiceContext struct {
 	BalanceLogModel       balancelogmodel.BalanceLogModel
 	OutboxEventModel      outboxmodel.OutboxEventModel
 
-	SendService *application.SendService
+	SendService    *application.SendService
+	ReceiveService *application.ReceiveService
+	QueryService   *application.QueryService
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	conn := sqlx.NewMysql(c.DataSource)
+	conn := mysqlpool.MustNewMysql(c.DataSource, c.MySQLPool)
 	rds := redis.MustNewRedis(c.Redis)
 	idGenerator := idgen.MustNew(c.Snowflake)
 	userRPC := userrpc.NewUserRpc(zrpc.MustNewClient(c.UserRpc))
@@ -71,6 +74,13 @@ func NewServiceContext(c config.Config) *ServiceContext {
 			CacheBuild:             c.Kafka.CacheBuildTopic,
 		},
 	})
+	candidatePool := application.NewRedisCandidatePool(rds, conn)
+	receiveService := application.NewReceiveService(application.ReceiveDependencies{
+		SqlConn: conn, IDGenerator: idGenerator, UserRPC: userRPC,
+		CandidatePool: candidatePool, RedPacketModel: redPacketModel,
+		ReceiveModel: receiveModel, BalanceLogModel: balanceLogModel,
+	})
+	queryService := application.NewQueryService(conn, redPacketModel, userRPC)
 
 	return &ServiceContext{
 		Config:                c,
@@ -86,5 +96,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		BalanceLogModel:       balanceLogModel,
 		OutboxEventModel:      outboxEventModel,
 		SendService:           sendService,
+		ReceiveService:        receiveService,
+		QueryService:          queryService,
 	}
 }

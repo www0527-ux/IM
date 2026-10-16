@@ -40,35 +40,33 @@ func (c *MessageCacheConsumer) Consume(
 	key string,
 	value string,
 ) error {
+	if c == nil || c.cache == nil {
+		return &FatalError{Err: fmt.Errorf("cache consumer dependency is required")}
+	}
 	var event messageevent.ChatMessagePersistedEvent
 	if err := json.Unmarshal([]byte(value), &event); err != nil {
-		return fmt.Errorf("decode persisted message event key=%q: %w", key, err)
+		return permanent("invalid_json", fmt.Errorf("decode persisted message event key=%q: %w", key, err))
 	}
 	if event.EventType != messageevent.ChatMessagePersistedEventType ||
 		event.Version != messageevent.ChatMessageEventVersion {
-		return fmt.Errorf(
+		return permanent("unsupported_event", fmt.Errorf(
 			"unsupported persisted message event key=%q type=%q version=%d",
 			key,
 			event.EventType,
 			event.Version,
-		)
+		))
 	}
 	message := event.Message
 	if message.MessageID <= 0 || message.Seq <= 0 || message.SenderID <= 0 ||
 		message.SessionID <= 0 || message.ClientMessageID == "" {
-		return fmt.Errorf("invalid persisted message event key=%q", key)
+		return permanent("invalid_message", fmt.Errorf("invalid persisted message event key=%q", key))
 	}
-
+	//生成指纹
 	fingerprint, err := messageidentity.Fingerprint(message)
 	if err != nil {
 		return fmt.Errorf("fingerprint persisted message %d: %w", message.MessageID, err)
 	}
-	if event.Fingerprint != "" && event.Fingerprint != fingerprint {
-		return fmt.Errorf("persisted message %d fingerprint mismatch", message.MessageID)
-	}
-	event.Fingerprint = fingerprint
-
-	contentValue, err := json.Marshal(event)
+	contentValue, err := json.Marshal(message)
 	if err != nil {
 		return fmt.Errorf("encode persisted message cache: %w", err)
 	}
@@ -80,7 +78,7 @@ func (c *MessageCacheConsumer) Consume(
 	if err != nil {
 		return fmt.Errorf("encode message idempotency cache: %w", err)
 	}
-
+	//完整落库信息
 	if err := c.cache.SetexCtx(
 		ctx,
 		messagecache.ContentKey(message.SessionID, message.Seq),
@@ -89,6 +87,7 @@ func (c *MessageCacheConsumer) Consume(
 	); err != nil {
 		return fmt.Errorf("write persisted message content cache: %w", err)
 	}
+	//幂等查询结果
 	if err := c.cache.SetexCtx(
 		ctx,
 		messagecache.IdempotencyKey(message.SenderID, message.ClientMessageID),

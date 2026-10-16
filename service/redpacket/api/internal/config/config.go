@@ -6,6 +6,7 @@ package config
 import (
 	"infinitechatgo/common/auth"
 	"infinitechatgo/common/idgen"
+	"infinitechatgo/common/mysqlpool"
 
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/rest"
@@ -21,6 +22,7 @@ type KafkaConfig struct {
 type Config struct {
 	rest.RestConf
 	DataSource string
+	MySQLPool  mysqlpool.Config
 	Redis      redis.RedisConf
 	Auth       auth.Config
 	Snowflake  idgen.Config

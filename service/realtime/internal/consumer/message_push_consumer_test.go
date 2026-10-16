@@ -37,7 +37,7 @@ func (p *fakeGroupMemberProvider) GetGroupMemberIds(
 	return p.response, p.err
 }
 
-func TestMessagePushConsumerPushesGroupToEveryUniqueMember(t *testing.T) {
+func TestMessagePushConsumerPushesGroupToEveryUniqueOtherMember(t *testing.T) {
 	sender := &recordingSender{}
 	members := &fakeGroupMemberProvider{
 		response: &userrpc.GroupMemberIdsResp{
@@ -52,12 +52,13 @@ func TestMessagePushConsumerPushesGroupToEveryUniqueMember(t *testing.T) {
 	if err := consumer.Consume(
 		context.Background(),
 		"99",
-		sequencedEventJSON(t, messageevent.ChatMessage{
-			MessageID:   100,
-			SessionID:   99,
-			SessionType: messageevent.SessionTypeGroup,
-			SenderID:    11,
-			Seq:         7,
+		persistedEventJSON(t, messageevent.ChatMessage{
+			MessageID:       100,
+			ClientMessageID: "client-100",
+			SessionID:       99,
+			SessionType:     messageevent.SessionTypeGroup,
+			SenderID:        11,
+			Seq:             7,
 		}),
 	); err != nil {
 		t.Fatalf("Consume() error = %v", err)
@@ -66,8 +67,8 @@ func TestMessagePushConsumerPushesGroupToEveryUniqueMember(t *testing.T) {
 	if members.sessionID != 99 {
 		t.Fatalf("GetGroupMemberIds() sessionID = %d, want 99", members.sessionID)
 	}
-	if !reflect.DeepEqual(sender.userIDs, []int64{11, 22}) {
-		t.Fatalf("pushed users = %v, want [11 22]", sender.userIDs)
+	if !reflect.DeepEqual(sender.userIDs, []int64{22}) {
+		t.Fatalf("pushed users = %v, want [22]", sender.userIDs)
 	}
 }
 
@@ -82,10 +83,13 @@ func TestMessagePushConsumerRetriesGroupMemberLookupFailure(t *testing.T) {
 	err := consumer.Consume(
 		context.Background(),
 		"99",
-		sequencedEventJSON(t, messageevent.ChatMessage{
-			MessageID:   100,
-			SessionID:   99,
-			SessionType: messageevent.SessionTypeGroup,
+		persistedEventJSON(t, messageevent.ChatMessage{
+			MessageID:       100,
+			ClientMessageID: "client-100",
+			SessionID:       99,
+			SessionType:     messageevent.SessionTypeGroup,
+			SenderID:        11,
+			Seq:             7,
 		}),
 	)
 	if err == nil {
@@ -96,13 +100,37 @@ func TestMessagePushConsumerRetriesGroupMemberLookupFailure(t *testing.T) {
 	}
 }
 
-func sequencedEventJSON(
+func TestMessagePushConsumerOnlyQueuesSingleRecipient(t *testing.T) {
+	receiverID := int64(22)
+	sender := &recordingSender{}
+	consumer := &MessagePushConsumer{
+		manager:      sender,
+		groupMembers: &fakeGroupMemberProvider{},
+	}
+	err := consumer.Consume(context.Background(), "99", persistedEventJSON(t, messageevent.ChatMessage{
+		MessageID:       100,
+		ClientMessageID: "client-100",
+		SessionID:       99,
+		SessionType:     messageevent.SessionTypeSingle,
+		SenderID:        11,
+		ReceiverID:      &receiverID,
+		Seq:             7,
+	}))
+	if err != nil {
+		t.Fatalf("Consume() error = %v", err)
+	}
+	if !reflect.DeepEqual(sender.userIDs, []int64{22}) {
+		t.Fatalf("pushed users = %v, want only receiver 22", sender.userIDs)
+	}
+}
+
+func persistedEventJSON(
 	t *testing.T,
 	message messageevent.ChatMessage,
 ) string {
 	t.Helper()
 	payload, err := json.Marshal(
-		messageevent.NewChatMessageSequencedEvent(message),
+		messageevent.NewChatMessagePersistedEvent(message, 0),
 	)
 	if err != nil {
 		t.Fatalf("json.Marshal() error = %v", err)

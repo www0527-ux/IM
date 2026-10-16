@@ -5,6 +5,9 @@ package logic
 
 import (
 	"context"
+	"errors"
+	"infinitechatgo/common/auth"
+	"infinitechatgo/common/common"
 	"infinitechatgo/service/redpacket/application"
 
 	"infinitechatgo/service/redpacket/api/internal/svc"
@@ -28,5 +31,24 @@ func NewGetRedPacketLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetR
 }
 
 func (l *GetRedPacketLogic) GetRedPacket(req *types.GetRedPacketRequest) (resp *types.RedPacketDetailResponse, err error) {
-	return nil, application.ErrStageNotImplemented
+	identity, ok := auth.IdentityFromContext(l.ctx)
+	if !ok {
+		return nil, common.NotLoginError
+	}
+	if req == nil || req.RedPacketId <= 0 {
+		return nil, common.ParamsError
+	}
+	detail, err := l.svcCtx.QueryService.Get(l.ctx, req.RedPacketId, identity.UserID)
+	if err != nil {
+		switch {
+		case errors.Is(err, application.ErrReceiveNotFound):
+			return nil, common.WrapError(common.NotFoundError, err)
+		case errors.Is(err, application.ErrReceivePermission):
+			return nil, common.WrapError(common.NoAuthError, err)
+		default:
+			return nil, common.WrapError(common.SystemBusy, err)
+		}
+	}
+	value := detailResponse(detail)
+	return &value, nil
 }

@@ -1,0 +1,9 @@
+# Run from the IM-learn directory. Build the frontend before enabling StaticDir.
+ListenOn: 127.0.0.1:10010
+# StaticDir: ../webark-im-template/dist/demo
+
+Upstreams:
+  UserAPI: http://127.0.0.1:8104
+  OfflineAPI: http://127.0.0.1:8105
+  RedPacketAPI: http://127.0.0.1:8103
+  Realtime: http://127.0.0.1:9101

@@ -1,0 +1,2789 @@
+{
+  "environment": {
+    "RelayBatchSize": 500,
+    "Database": "im_acceptance_20261006_094040",
+    "ClaimRounds": 1,
+    "StageSeconds": 120,
+    "CPU": {
+      "Name": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+      "NumberOfCores": 4,
+      "NumberOfLogicalProcessors": 8
+    },
+    "MySQLPoolBudgets": {
+      "redpacket": 24,
+      "rpc": 16,
+      "relay": 4,
+      "realtime": 24,
+      "worker": 4,
+      "offline": 16,
+      "user": 8
+    },
+    "RelayPollMillis": 200,
+    "RunID": "20261006_094040",
+    "DockerCPU": 8,
+    "MessageLimit": 600,
+    "ServicesMode": "dev, example configuration",
+    "WithoutRelayIndex": false,
+    "IsolateStages": true,
+    "Node": "v24.14.0",
+    "DockerVersion": "29.4.3",
+    "RelayCheckpointSize": 20,
+    "DockerMemoryBytes": 8212672512,
+    "KafkaReplicationFactor": 1,
+    "Go": "go version go1.26.5 windows/amd64",
+    "KafkaPartitions": 3,
+    "MemoryBytes": 16952647680,
+    "RelayTimings": true
+  },
+  "results": {
+    "runID": "20261006_094040",
+    "database": "im_acceptance_20261006_094040",
+    "result": "PASS",
+    "methodology": {
+      "concurrency": [
+        10,
+        50,
+        100
+      ],
+      "maxStageSeconds": 120,
+      "maxMessagesPerStage": 600,
+      "claimsRoundsPerLevel": 1,
+      "claimsMaxStageSeconds": 120,
+      "maxSyncRequestsPerStage": 3000,
+      "warmupMessagesPerStage": 10,
+      "model": "closed loop, one in-flight operation per worker; message stages end on time or request limit",
+      "messageBytes": 128,
+      "onlineConnections": 101,
+      "groupMembers": 121,
+      "manyConversationCount": 20,
+      "gateway": "http://127.0.0.1:10010",
+      "latency": "client monotonic elapsed, no automatic retry in measurement",
+      "note": "Bounded local load; short capped stages are bursts, not sustainable capacity. Driver shares the host.",
+      "claimLatencyIncludesRoundBarrier": false,
+      "drainOutboxBetweenStages": true
+    },
+    "cases": [
+      {
+        "name": "same-conversation-c10",
+        "concurrency": 10,
+        "expectedCodes": [],
+        "startedAt": "2026-10-06T01:41:44.950Z",
+        "outboxBefore": {
+          "pending": 0,
+          "retries": 0,
+          "published": 40,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "durationSecs": 10.377,
+        "requests": 600,
+        "succeeded": 600,
+        "expectedRejections": 0,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 57.82,
+        "successRPS": 57.82,
+        "latencyAll": {
+          "n": 600,
+          "p50Ms": 164.62,
+          "p95Ms": 258.74,
+          "p99Ms": 384.39,
+          "maxMs": 435.24
+        },
+        "latencySuccess": {
+          "n": 600,
+          "p50Ms": 164.62,
+          "p95Ms": 258.74,
+          "p99Ms": 384.39,
+          "maxMs": 435.24
+        },
+        "latencyExpectedRejection": {
+          "n": 0
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 19.27,
+        "driverEventLoopP99Ms": 20.99,
+        "outboxAfter": {
+          "pending": 6,
+          "retries": 0,
+          "published": 634,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.234
+        },
+        "groups": [
+          "910179125087610100"
+        ],
+        "drainAfterStageSecs": 0.17,
+        "pushLatency": {
+          "n": 600,
+          "p50Ms": 345.22,
+          "p95Ms": 569.25,
+          "p99Ms": 655.56,
+          "maxMs": 699.99
+        },
+        "propagationFinishedAt": "2026-10-06T01:41:55.850Z",
+        "observedPushes": 600,
+        "persistedMessagesIncluding10Warmup": 610
+      },
+      {
+        "name": "20-conversations-c10",
+        "concurrency": 10,
+        "expectedCodes": [],
+        "startedAt": "2026-10-06T01:41:56.133Z",
+        "outboxBefore": {
+          "pending": 0,
+          "retries": 0,
+          "published": 650,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "durationSecs": 5.597,
+        "requests": 600,
+        "succeeded": 600,
+        "expectedRejections": 0,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 107.2,
+        "successRPS": 107.2,
+        "latencyAll": {
+          "n": 600,
+          "p50Ms": 78.51,
+          "p95Ms": 170.2,
+          "p99Ms": 213.03,
+          "maxMs": 262.55
+        },
+        "latencySuccess": {
+          "n": 600,
+          "p50Ms": 78.51,
+          "p95Ms": 170.2,
+          "p99Ms": 213.03,
+          "maxMs": 262.55
+        },
+        "latencyExpectedRejection": {
+          "n": 0
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 26.25,
+        "driverEventLoopP99Ms": 19.33,
+        "outboxAfter": {
+          "pending": 0,
+          "retries": 0,
+          "published": 1250,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "groups": [
+          "910179125087610103",
+          "910179125087610104",
+          "910179125087610105",
+          "910179125087610106",
+          "910179125087610107",
+          "910179125087610108",
+          "910179125087610109",
+          "910179125087610110",
+          "910179125087610111",
+          "910179125087610112",
+          "910179125087610113",
+          "910179125087610114",
+          "910179125087610115",
+          "910179125087610116",
+          "910179125087610117",
+          "910179125087610118",
+          "910179125087610119",
+          "910179125087610120",
+          "910179125087610121",
+          "910179125087610122"
+        ],
+        "drainAfterStageSecs": 0.69,
+        "pushLatency": {
+          "n": 600,
+          "p50Ms": 923.76,
+          "p95Ms": 1100.75,
+          "p99Ms": 1121.7,
+          "maxMs": 1142.43
+        },
+        "propagationFinishedAt": "2026-10-06T01:42:02.817Z",
+        "observedPushes": 600,
+        "persistedMessagesIncluding10Warmup": 610
+      },
+      {
+        "name": "same-conversation-c50",
+        "concurrency": 50,
+        "expectedCodes": [],
+        "startedAt": "2026-10-06T01:42:03.119Z",
+        "outboxBefore": {
+          "pending": 0,
+          "retries": 0,
+          "published": 1260,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "durationSecs": 10.622,
+        "requests": 600,
+        "succeeded": 600,
+        "expectedRejections": 0,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 56.49,
+        "successRPS": 56.49,
+        "latencyAll": {
+          "n": 600,
+          "p50Ms": 721.55,
+          "p95Ms": 1816.42,
+          "p99Ms": 2471.52,
+          "maxMs": 3214.16
+        },
+        "latencySuccess": {
+          "n": 600,
+          "p50Ms": 721.55,
+          "p95Ms": 1816.42,
+          "p99Ms": 2471.52,
+          "maxMs": 3214.16
+        },
+        "latencyExpectedRejection": {
+          "n": 0
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 17.79,
+        "driverEventLoopP99Ms": 20.43,
+        "outboxAfter": {
+          "pending": 6,
+          "retries": 0,
+          "published": 1854,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.224
+        },
+        "groups": [
+          "910179125087610101"
+        ],
+        "drainAfterStageSecs": 0.17,
+        "pushLatency": {
+          "n": 600,
+          "p50Ms": 920.66,
+          "p95Ms": 1995.83,
+          "p99Ms": 2607.43,
+          "maxMs": 3390.84
+        },
+        "propagationFinishedAt": "2026-10-06T01:42:14.243Z",
+        "observedPushes": 600,
+        "persistedMessagesIncluding10Warmup": 610
+      },
+      {
+        "name": "20-conversations-c50",
+        "concurrency": 50,
+        "expectedCodes": [],
+        "startedAt": "2026-10-06T01:42:14.558Z",
+        "outboxBefore": {
+          "pending": 0,
+          "retries": 0,
+          "published": 1870,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "durationSecs": 3.197,
+        "requests": 600,
+        "succeeded": 600,
+        "expectedRejections": 0,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 187.66,
+        "successRPS": 187.66,
+        "latencyAll": {
+          "n": 600,
+          "p50Ms": 225.13,
+          "p95Ms": 502.05,
+          "p99Ms": 678.31,
+          "maxMs": 1100.55
+        },
+        "latencySuccess": {
+          "n": 600,
+          "p50Ms": 225.13,
+          "p95Ms": 502.05,
+          "p99Ms": 678.31,
+          "maxMs": 1100.55
+        },
+        "latencyExpectedRejection": {
+          "n": 0
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 15.17,
+        "driverEventLoopP99Ms": 22.63,
+        "outboxAfter": {
+          "pending": 73,
+          "retries": 0,
+          "published": 2144,
+          "processing": 253,
+          "oldestUnpublishedSecs": 2.386
+        },
+        "groups": [
+          "910179125087610123",
+          "910179125087610124",
+          "910179125087610125",
+          "910179125087610126",
+          "910179125087610127",
+          "910179125087610128",
+          "910179125087610129",
+          "910179125087610130",
+          "910179125087610131",
+          "910179125087610132",
+          "910179125087610133",
+          "910179125087610134",
+          "910179125087610135",
+          "910179125087610136",
+          "910179125087610137",
+          "910179125087610138",
+          "910179125087610139",
+          "910179125087610140",
+          "910179125087610141",
+          "910179125087610142"
+        ],
+        "drainAfterStageSecs": 3.36,
+        "pushLatency": {
+          "n": 600,
+          "p50Ms": 3231.33,
+          "p95Ms": 4715.77,
+          "p99Ms": 5176.35,
+          "maxMs": 5490.97
+        },
+        "propagationFinishedAt": "2026-10-06T01:42:21.642Z",
+        "observedPushes": 600,
+        "persistedMessagesIncluding10Warmup": 610
+      },
+      {
+        "name": "same-conversation-c100",
+        "concurrency": 100,
+        "expectedCodes": [],
+        "startedAt": "2026-10-06T01:42:21.865Z",
+        "outboxBefore": {
+          "pending": 0,
+          "retries": 0,
+          "published": 2480,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "durationSecs": 10.519,
+        "requests": 600,
+        "succeeded": 600,
+        "expectedRejections": 0,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 57.04,
+        "successRPS": 57.04,
+        "latencyAll": {
+          "n": 600,
+          "p50Ms": 1187.26,
+          "p95Ms": 3831.36,
+          "p99Ms": 5894.08,
+          "maxMs": 9017.61
+        },
+        "latencySuccess": {
+          "n": 600,
+          "p50Ms": 1187.26,
+          "p95Ms": 3831.36,
+          "p99Ms": 5894.08,
+          "maxMs": 9017.61
+        },
+        "latencyExpectedRejection": {
+          "n": 0
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 17.99,
+        "driverEventLoopP99Ms": 21.25,
+        "outboxAfter": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3080,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "groups": [
+          "910179125087610102"
+        ],
+        "drainAfterStageSecs": 0.16,
+        "pushLatency": {
+          "n": 600,
+          "p50Ms": 1459.76,
+          "p95Ms": 3967.03,
+          "p99Ms": 6092.98,
+          "maxMs": 9166.97
+        },
+        "propagationFinishedAt": "2026-10-06T01:42:32.896Z",
+        "observedPushes": 600,
+        "persistedMessagesIncluding10Warmup": 610
+      },
+      {
+        "name": "20-conversations-c100",
+        "concurrency": 100,
+        "expectedCodes": [],
+        "startedAt": "2026-10-06T01:42:33.271Z",
+        "outboxBefore": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3090,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "durationSecs": 3.342,
+        "requests": 600,
+        "succeeded": 600,
+        "expectedRejections": 0,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 179.53,
+        "successRPS": 179.53,
+        "latencyAll": {
+          "n": 600,
+          "p50Ms": 419.82,
+          "p95Ms": 1279.53,
+          "p99Ms": 1799.81,
+          "maxMs": 3083.04
+        },
+        "latencySuccess": {
+          "n": 600,
+          "p50Ms": 419.82,
+          "p95Ms": 1279.53,
+          "p99Ms": 1799.81,
+          "maxMs": 3083.04
+        },
+        "latencyExpectedRejection": {
+          "n": 0
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 23.82,
+        "driverEventLoopP99Ms": 20.14,
+        "outboxAfter": {
+          "pending": 55,
+          "retries": 0,
+          "published": 3452,
+          "processing": 183,
+          "oldestUnpublishedSecs": 1.904
+        },
+        "groups": [
+          "910179125087610143",
+          "910179125087610144",
+          "910179125087610145",
+          "910179125087610146",
+          "910179125087610147",
+          "910179125087610148",
+          "910179125087610149",
+          "910179125087610150",
+          "910179125087610151",
+          "910179125087610152",
+          "910179125087610153",
+          "910179125087610154",
+          "910179125087610155",
+          "910179125087610156",
+          "910179125087610157",
+          "910179125087610158",
+          "910179125087610159",
+          "910179125087610160",
+          "910179125087610161",
+          "910179125087610162"
+        ],
+        "drainAfterStageSecs": 3.01,
+        "pushLatency": {
+          "n": 600,
+          "p50Ms": 3006.19,
+          "p95Ms": 4394.68,
+          "p99Ms": 5060.39,
+          "maxMs": 5883.69
+        },
+        "propagationFinishedAt": "2026-10-06T01:42:40.069Z",
+        "observedPushes": 600,
+        "persistedMessagesIncluding10Warmup": 610
+      },
+      {
+        "name": "claim-hot-packet-c10",
+        "concurrency": 10,
+        "expectedCodes": [
+          "code_73003"
+        ],
+        "startedAt": "2026-10-06T01:42:40.116Z",
+        "outboxBefore": {
+          "pending": 1,
+          "retries": 0,
+          "published": 3692,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.076
+        },
+        "durationSecs": 2.071,
+        "requests": 120,
+        "succeeded": 100,
+        "expectedRejections": 20,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 57.94,
+        "successRPS": 48.28,
+        "latencyAll": {
+          "n": 120,
+          "p50Ms": 185.39,
+          "p95Ms": 214.39,
+          "p99Ms": 226.52,
+          "maxMs": 233.16
+        },
+        "latencySuccess": {
+          "n": 100,
+          "p50Ms": 189.29,
+          "p95Ms": 215.1,
+          "p99Ms": 226.52,
+          "maxMs": 233.16
+        },
+        "latencyExpectedRejection": {
+          "n": 20,
+          "p50Ms": 54.44,
+          "p95Ms": 166.09,
+          "p99Ms": 180.67,
+          "maxMs": 180.67
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 10.57,
+        "driverEventLoopP99Ms": 22.56,
+        "outboxAfter": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3693,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "packets": [
+          "2107285377394946048"
+        ],
+        "successfulAmountTotal": 100,
+        "roundsWith120UniqueClaimants": 1,
+        "databaseConfirmedClaims": 100,
+        "committedWithoutSuccessResponse": 0,
+        "completedPackets": 1
+      },
+      {
+        "name": "claim-hot-packet-c50",
+        "concurrency": 50,
+        "expectedCodes": [
+          "code_73003"
+        ],
+        "startedAt": "2026-10-06T01:42:42.538Z",
+        "outboxBefore": {
+          "pending": 2,
+          "retries": 0,
+          "published": 3693,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.126
+        },
+        "durationSecs": 2.747,
+        "requests": 120,
+        "succeeded": 100,
+        "expectedRejections": 20,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 43.68,
+        "successRPS": 36.4,
+        "latencyAll": {
+          "n": 120,
+          "p50Ms": 1057.02,
+          "p95Ms": 1762.36,
+          "p99Ms": 2063.14,
+          "maxMs": 2389.64
+        },
+        "latencySuccess": {
+          "n": 100,
+          "p50Ms": 1053.35,
+          "p95Ms": 1655.95,
+          "p99Ms": 1955.16,
+          "maxMs": 2063.14
+        },
+        "latencyExpectedRejection": {
+          "n": 20,
+          "p50Ms": 1103.23,
+          "p95Ms": 1961.53,
+          "p99Ms": 2389.64,
+          "maxMs": 2389.64
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 8.52,
+        "driverEventLoopP99Ms": 23.9,
+        "outboxAfter": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3696,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "packets": [
+          "2107285387557744640"
+        ],
+        "successfulAmountTotal": 100,
+        "roundsWith120UniqueClaimants": 1,
+        "databaseConfirmedClaims": 100,
+        "committedWithoutSuccessResponse": 0,
+        "completedPackets": 1
+      },
+      {
+        "name": "claim-hot-packet-c100",
+        "concurrency": 100,
+        "expectedCodes": [
+          "code_73003"
+        ],
+        "startedAt": "2026-10-06T01:42:45.593Z",
+        "outboxBefore": {
+          "pending": 1,
+          "retries": 0,
+          "published": 3698,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.103
+        },
+        "durationSecs": 2.047,
+        "requests": 120,
+        "succeeded": 100,
+        "expectedRejections": 20,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 58.63,
+        "successRPS": 48.86,
+        "latencyAll": {
+          "n": 120,
+          "p50Ms": 1179.25,
+          "p95Ms": 1997.17,
+          "p99Ms": 2034.46,
+          "maxMs": 2038.81
+        },
+        "latencySuccess": {
+          "n": 100,
+          "p50Ms": 1044.64,
+          "p95Ms": 1818.65,
+          "p99Ms": 1948.5,
+          "maxMs": 1960.12
+        },
+        "latencyExpectedRejection": {
+          "n": 20,
+          "p50Ms": 1897.06,
+          "p95Ms": 2034.46,
+          "p99Ms": 2038.81,
+          "maxMs": 2038.81
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 11.48,
+        "driverEventLoopP99Ms": 21.66,
+        "outboxAfter": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "packets": [
+          "2107285400358760448"
+        ],
+        "successfulAmountTotal": 100,
+        "roundsWith120UniqueClaimants": 1,
+        "databaseConfirmedClaims": 100,
+        "committedWithoutSuccessResponse": 0,
+        "completedPackets": 1
+      },
+      {
+        "name": "offline-cache-hit-c10",
+        "concurrency": 10,
+        "expectedCodes": [],
+        "startedAt": "2026-10-06T01:42:48.265Z",
+        "outboxBefore": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "durationSecs": 6.357,
+        "requests": 3000,
+        "succeeded": 3000,
+        "expectedRejections": 0,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 471.91,
+        "successRPS": 471.91,
+        "latencyAll": {
+          "n": 3000,
+          "p50Ms": 19.56,
+          "p95Ms": 31.13,
+          "p99Ms": 44.2,
+          "maxMs": 119.25
+        },
+        "latencySuccess": {
+          "n": 3000,
+          "p50Ms": 19.56,
+          "p95Ms": 31.13,
+          "p99Ms": 44.2,
+          "maxMs": 119.25
+        },
+        "latencyExpectedRejection": {
+          "n": 0
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 90.43,
+        "driverEventLoopP99Ms": 16.05,
+        "outboxAfter": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        }
+      },
+      {
+        "name": "offline-cache-hit-c50",
+        "concurrency": 50,
+        "expectedCodes": [],
+        "startedAt": "2026-10-06T01:42:54.937Z",
+        "outboxBefore": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "durationSecs": 5.806,
+        "requests": 3000,
+        "succeeded": 3000,
+        "expectedRejections": 0,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 516.71,
+        "successRPS": 516.71,
+        "latencyAll": {
+          "n": 3000,
+          "p50Ms": 88.93,
+          "p95Ms": 167.34,
+          "p99Ms": 216.83,
+          "maxMs": 281.84
+        },
+        "latencySuccess": {
+          "n": 3000,
+          "p50Ms": 88.93,
+          "p95Ms": 167.34,
+          "p99Ms": 216.83,
+          "maxMs": 281.84
+        },
+        "latencyExpectedRejection": {
+          "n": 0
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 84.78,
+        "driverEventLoopP99Ms": 17.4,
+        "outboxAfter": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        }
+      },
+      {
+        "name": "offline-cache-hit-c100",
+        "concurrency": 100,
+        "expectedCodes": [],
+        "startedAt": "2026-10-06T01:43:01.098Z",
+        "outboxBefore": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "durationSecs": 5.277,
+        "requests": 3000,
+        "succeeded": 3000,
+        "expectedRejections": 0,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 568.56,
+        "successRPS": 568.56,
+        "latencyAll": {
+          "n": 3000,
+          "p50Ms": 148.69,
+          "p95Ms": 366.27,
+          "p99Ms": 498.78,
+          "maxMs": 824.79
+        },
+        "latencySuccess": {
+          "n": 3000,
+          "p50Ms": 148.69,
+          "p95Ms": 366.27,
+          "p99Ms": 498.78,
+          "maxMs": 824.79
+        },
+        "latencyExpectedRejection": {
+          "n": 0
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 92.69,
+        "driverEventLoopP99Ms": 16.22,
+        "outboxAfter": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        }
+      },
+      {
+        "name": "offline-mysql-fallback-c50",
+        "concurrency": 50,
+        "expectedCodes": [],
+        "startedAt": "2026-10-06T01:43:06.824Z",
+        "outboxBefore": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "durationSecs": 6.805,
+        "requests": 3000,
+        "succeeded": 3000,
+        "expectedRejections": 0,
+        "unexpectedErrors": 0,
+        "errors": {},
+        "throughputRPS": 440.85,
+        "successRPS": 440.85,
+        "latencyAll": {
+          "n": 3000,
+          "p50Ms": 105.71,
+          "p95Ms": 189.72,
+          "p99Ms": 235.46,
+          "maxMs": 339.3
+        },
+        "latencySuccess": {
+          "n": 3000,
+          "p50Ms": 105.71,
+          "p95Ms": 189.72,
+          "p99Ms": 235.46,
+          "maxMs": 339.3
+        },
+        "latencyExpectedRejection": {
+          "n": 0
+        },
+        "endedBy": "request limit (burst)",
+        "driverCPUPercentOneCore": 73.71,
+        "driverEventLoopP99Ms": 14.96,
+        "outboxAfter": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        }
+      }
+    ],
+    "telemetry": [
+      {
+        "at": "2026-10-06T01:41:35.032Z",
+        "phase": "setup",
+        "outbox": {
+          "pending": null,
+          "retries": 0,
+          "published": null,
+          "processing": null,
+          "oldestUnpublishedSecs": null
+        },
+        "mysqlConnections": {
+          "globalConnected": "12",
+          "ownedConnections": 12,
+          "ownedActiveConnections": 1
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 1.77GB",
+            "CPUPerc": "15.09%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.17%",
+            "MemUsage": "718MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "89.4MB / 261MB",
+            "PIDs": "47"
+          },
+          {
+            "BlockIO": "26.2MB / 153MB",
+            "CPUPerc": "0.43%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.40%",
+            "MemUsage": "31.53MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "114MB / 549MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 52.2MB",
+            "CPUPerc": "1.42%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.15%",
+            "MemUsage": "1.083GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "24MB / 26.7MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:41:39.073Z",
+        "phase": "low-load",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 14,
+          "processing": 1,
+          "oldestUnpublishedSecs": 0.166
+        },
+        "mysqlConnections": {
+          "globalConnected": "26",
+          "ownedConnections": 26,
+          "ownedActiveConnections": 1
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 1.78GB",
+            "CPUPerc": "3.84%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.18%",
+            "MemUsage": "718.9MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "89.5MB / 261MB",
+            "PIDs": "61"
+          },
+          {
+            "BlockIO": "26.2MB / 153MB",
+            "CPUPerc": "0.61%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.40%",
+            "MemUsage": "31.38MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "114MB / 549MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 52.3MB",
+            "CPUPerc": "1.83%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.18%",
+            "MemUsage": "1.085GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "24.1MB / 26.7MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:41:45.003Z",
+        "phase": "low-load",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 26,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "mysqlConnections": {
+          "globalConnected": "27",
+          "ownedConnections": 26,
+          "ownedActiveConnections": 2
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 1.78GB",
+            "CPUPerc": "8.70%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.18%",
+            "MemUsage": "718.9MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "89.7MB / 262MB",
+            "PIDs": "61"
+          },
+          {
+            "BlockIO": "26.2MB / 153MB",
+            "CPUPerc": "1.33%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.40%",
+            "MemUsage": "31.39MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "114MB / 549MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 52.4MB",
+            "CPUPerc": "2.00%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.20%",
+            "MemUsage": "1.086GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "24.1MB / 26.8MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:41:50.050Z",
+        "phase": "same-conversation-c10",
+        "outbox": {
+          "pending": 5,
+          "retries": 0,
+          "published": 233,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.115
+        },
+        "mysqlConnections": {
+          "globalConnected": "28",
+          "ownedConnections": 28,
+          "ownedActiveConnections": 9
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 1.79GB",
+            "CPUPerc": "68.17%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.20%",
+            "MemUsage": "720.2MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "90.8MB / 264MB",
+            "PIDs": "63"
+          },
+          {
+            "BlockIO": "26.2MB / 153MB",
+            "CPUPerc": "4.71%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.40%",
+            "MemUsage": "31.59MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "114MB / 550MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 52.5MB",
+            "CPUPerc": "19.45%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.46%",
+            "MemUsage": "1.106GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "24.7MB / 27.4MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:41:55.116Z",
+        "phase": "same-conversation-c10",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 522,
+          "processing": 2,
+          "oldestUnpublishedSecs": 0.065
+        },
+        "mysqlConnections": {
+          "globalConnected": "28",
+          "ownedConnections": 28,
+          "ownedActiveConnections": 9
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 1.83GB",
+            "CPUPerc": "54.08%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.21%",
+            "MemUsage": "721.6MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "92.3MB / 267MB",
+            "PIDs": "63"
+          },
+          {
+            "BlockIO": "26.2MB / 154MB",
+            "CPUPerc": "5.23%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.41%",
+            "MemUsage": "31.76MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "115MB / 550MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 52.5MB",
+            "CPUPerc": "176.89%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "15.64%",
+            "MemUsage": "1.196GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "25.3MB / 28MB",
+            "PIDs": "131"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:41:59.163Z",
+        "phase": "20-conversations-c10",
+        "outbox": {
+          "pending": 31,
+          "retries": 0,
+          "published": 813,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.542
+        },
+        "mysqlConnections": {
+          "globalConnected": "29",
+          "ownedConnections": 29,
+          "ownedActiveConnections": 12
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 1.85GB",
+            "CPUPerc": "143.80%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.23%",
+            "MemUsage": "723.3MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "93.8MB / 270MB",
+            "PIDs": "63"
+          },
+          {
+            "BlockIO": "26.3MB / 154MB",
+            "CPUPerc": "11.29%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.41%",
+            "MemUsage": "32.04MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "115MB / 550MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 53.6MB",
+            "CPUPerc": "52.66%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.75%",
+            "MemUsage": "1.128GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "26.1MB / 28.9MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:05.036Z",
+        "phase": "20-conversations-c10-drain",
+        "outbox": {
+          "pending": 7,
+          "retries": 0,
+          "published": 1252,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.209
+        },
+        "mysqlConnections": {
+          "globalConnected": "26",
+          "ownedConnections": 26,
+          "ownedActiveConnections": 2
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 1.89GB",
+            "CPUPerc": "67.26%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.25%",
+            "MemUsage": "724.7MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "95.5MB / 274MB",
+            "PIDs": "76"
+          },
+          {
+            "BlockIO": "26.3MB / 154MB",
+            "CPUPerc": "4.47%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.42%",
+            "MemUsage": "32.51MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "116MB / 551MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 53.7MB",
+            "CPUPerc": "18.57%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.75%",
+            "MemUsage": "1.128GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "27MB / 29.9MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:09.116Z",
+        "phase": "same-conversation-c50",
+        "outbox": {
+          "pending": 4,
+          "retries": 0,
+          "published": 1509,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.118
+        },
+        "mysqlConnections": {
+          "globalConnected": "42",
+          "ownedConnections": 42,
+          "ownedActiveConnections": 24
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 1.91GB",
+            "CPUPerc": "75.35%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.27%",
+            "MemUsage": "725.9MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "96.7MB / 277MB",
+            "PIDs": "77"
+          },
+          {
+            "BlockIO": "26.3MB / 155MB",
+            "CPUPerc": "5.75%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.42%",
+            "MemUsage": "32.68MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "116MB / 551MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 53.8MB",
+            "CPUPerc": "25.00%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.76%",
+            "MemUsage": "1.129GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "27.5MB / 30.5MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:15.086Z",
+        "phase": "same-conversation-c50",
+        "outbox": {
+          "pending": 3,
+          "retries": 0,
+          "published": 1807,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.073
+        },
+        "mysqlConnections": {
+          "globalConnected": "42",
+          "ownedConnections": 42,
+          "ownedActiveConnections": 23
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 1.94GB",
+            "CPUPerc": "56.05%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.32%",
+            "MemUsage": "730.2MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "98MB / 279MB",
+            "PIDs": "74"
+          },
+          {
+            "BlockIO": "26.3MB / 155MB",
+            "CPUPerc": "6.08%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.42%",
+            "MemUsage": "33MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "117MB / 552MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 55MB",
+            "CPUPerc": "16.96%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.76%",
+            "MemUsage": "1.129GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "28.3MB / 31.3MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:19.194Z",
+        "phase": "20-conversations-c50",
+        "outbox": {
+          "pending": 73,
+          "retries": 0,
+          "published": 2144,
+          "processing": 253,
+          "oldestUnpublishedSecs": 2.378
+        },
+        "mysqlConnections": {
+          "globalConnected": "27",
+          "ownedConnections": 27,
+          "ownedActiveConnections": 2
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 1.99GB",
+            "CPUPerc": "65.05%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.32%",
+            "MemUsage": "729.9MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "101MB / 284MB",
+            "PIDs": "68"
+          },
+          {
+            "BlockIO": "26.3MB / 155MB",
+            "CPUPerc": "8.80%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.43%",
+            "MemUsage": "33.36MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "118MB / 552MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 55MB",
+            "CPUPerc": "270.98%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "15.34%",
+            "MemUsage": "1.174GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "29.1MB / 32.3MB",
+            "PIDs": "132"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:25.104Z",
+        "phase": "same-conversation-c100",
+        "outbox": {
+          "pending": 2,
+          "retries": 0,
+          "published": 2539,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.059
+        },
+        "mysqlConnections": {
+          "globalConnected": "43",
+          "ownedConnections": 43,
+          "ownedActiveConnections": 25
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2GB",
+            "CPUPerc": "73.91%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.35%",
+            "MemUsage": "732.7MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "101MB / 286MB",
+            "PIDs": "84"
+          },
+          {
+            "BlockIO": "26.4MB / 156MB",
+            "CPUPerc": "6.11%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.44%",
+            "MemUsage": "34.23MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "118MB / 552MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 55.1MB",
+            "CPUPerc": "27.18%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.76%",
+            "MemUsage": "1.129GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "29.9MB / 33MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:29.163Z",
+        "phase": "same-conversation-c100",
+        "outbox": {
+          "pending": 10,
+          "retries": 0,
+          "published": 2834,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.309
+        },
+        "mysqlConnections": {
+          "globalConnected": "40",
+          "ownedConnections": 40,
+          "ownedActiveConnections": 23
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2.03GB",
+            "CPUPerc": "77.63%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.36%",
+            "MemUsage": "732.8MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "103MB / 289MB",
+            "PIDs": "82"
+          },
+          {
+            "BlockIO": "26.4MB / 156MB",
+            "CPUPerc": "5.36%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.44%",
+            "MemUsage": "34.36MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "119MB / 553MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 56.4MB",
+            "CPUPerc": "21.06%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.77%",
+            "MemUsage": "1.129GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "30.4MB / 33.6MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:35.087Z",
+        "phase": "same-conversation-c100-drain",
+        "outbox": {
+          "pending": 1,
+          "retries": 0,
+          "published": 3084,
+          "processing": 0,
+          "oldestUnpublishedSecs": 0.011
+        },
+        "mysqlConnections": {
+          "globalConnected": "19",
+          "ownedConnections": 19,
+          "ownedActiveConnections": 1
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2.08GB",
+            "CPUPerc": "207.65%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.37%",
+            "MemUsage": "733.6MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "105MB / 293MB",
+            "PIDs": "76"
+          },
+          {
+            "BlockIO": "26.4MB / 171MB",
+            "CPUPerc": "11.27%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.44%",
+            "MemUsage": "34.74MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "119MB / 553MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 56.5MB",
+            "CPUPerc": "48.87%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.77%",
+            "MemUsage": "1.13GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "31MB / 34.3MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:39.117Z",
+        "phase": "20-conversations-c100-drain",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3690,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "mysqlConnections": {
+          "globalConnected": "20",
+          "ownedConnections": 20,
+          "ownedActiveConnections": 1
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2.11GB",
+            "CPUPerc": "40.33%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.36%",
+            "MemUsage": "733.4MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "106MB / 296MB",
+            "PIDs": "61"
+          },
+          {
+            "BlockIO": "26.4MB / 172MB",
+            "CPUPerc": "3.20%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.47%",
+            "MemUsage": "36.73MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "120MB / 554MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 56.5MB",
+            "CPUPerc": "12.04%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.77%",
+            "MemUsage": "1.13GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "32MB / 35.4MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:45.060Z",
+        "phase": "claim-hot-packet-c50",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3696,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "mysqlConnections": {
+          "globalConnected": "43",
+          "ownedConnections": 43,
+          "ownedActiveConnections": 25
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2.14GB",
+            "CPUPerc": "62.12%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.39%",
+            "MemUsage": "735.1MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "107MB / 299MB",
+            "PIDs": "78"
+          },
+          {
+            "BlockIO": "26.4MB / 172MB",
+            "CPUPerc": "3.08%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.47%",
+            "MemUsage": "36.69MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "120MB / 554MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 57.6MB",
+            "CPUPerc": "172.54%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "15.69%",
+            "MemUsage": "1.2GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "32.1MB / 35.4MB",
+            "PIDs": "132"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:49.136Z",
+        "phase": "drain-before-sync",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "mysqlConnections": {
+          "globalConnected": "28",
+          "ownedConnections": 27,
+          "ownedActiveConnections": 1
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2.16GB",
+            "CPUPerc": "72.93%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.39%",
+            "MemUsage": "735.8MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "108MB / 301MB",
+            "PIDs": "70"
+          },
+          {
+            "BlockIO": "26.5MB / 172MB",
+            "CPUPerc": "16.09%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.48%",
+            "MemUsage": "37.36MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "121MB / 560MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 57.7MB",
+            "CPUPerc": "2.52%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.77%",
+            "MemUsage": "1.13GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "32.1MB / 35.5MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:55.096Z",
+        "phase": "offline-cache-hit-c10",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "mysqlConnections": {
+          "globalConnected": "36",
+          "ownedConnections": 36,
+          "ownedActiveConnections": 1
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2.18GB",
+            "CPUPerc": "52.74%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.48%",
+            "MemUsage": "742.2MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "110MB / 303MB",
+            "PIDs": "71"
+          },
+          {
+            "BlockIO": "26.5MB / 172MB",
+            "CPUPerc": "11.00%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.47%",
+            "MemUsage": "36.84MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "128MB / 613MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 57.7MB",
+            "CPUPerc": "2.73%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.77%",
+            "MemUsage": "1.13GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "32.1MB / 35.5MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:42:59.231Z",
+        "phase": "offline-cache-hit-c50",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "mysqlConnections": {
+          "globalConnected": "43",
+          "ownedConnections": 43,
+          "ownedActiveConnections": 2
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2.19GB",
+            "CPUPerc": "158.28%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.39%",
+            "MemUsage": "735.8MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "111MB / 305MB",
+            "PIDs": "77"
+          },
+          {
+            "BlockIO": "26.5MB / 172MB",
+            "CPUPerc": "19.39%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.49%",
+            "MemUsage": "38.04MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "133MB / 652MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 57.8MB",
+            "CPUPerc": "151.22%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "15.53%",
+            "MemUsage": "1.188GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "32.1MB / 35.5MB",
+            "PIDs": "135"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:43:05.151Z",
+        "phase": "offline-cache-hit-c100",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "mysqlConnections": {
+          "globalConnected": "45",
+          "ownedConnections": 45,
+          "ownedActiveConnections": 1
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2.19GB",
+            "CPUPerc": "159.73%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.41%",
+            "MemUsage": "737.3MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "113MB / 307MB",
+            "PIDs": "79"
+          },
+          {
+            "BlockIO": "26.5MB / 172MB",
+            "CPUPerc": "24.26%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.48%",
+            "MemUsage": "37.28MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "142MB / 714MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 57.9MB",
+            "CPUPerc": "5.82%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.77%",
+            "MemUsage": "1.13GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "32.1MB / 35.5MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:43:09.320Z",
+        "phase": "offline-mysql-fallback-c50",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "mysqlConnections": {
+          "globalConnected": "44",
+          "ownedConnections": 44,
+          "ownedActiveConnections": 2
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2.19GB",
+            "CPUPerc": "180.39%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.42%",
+            "MemUsage": "737.5MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "115MB / 322MB",
+            "PIDs": "78"
+          },
+          {
+            "BlockIO": "26.5MB / 172MB",
+            "CPUPerc": "17.15%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.47%",
+            "MemUsage": "37.07MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "147MB / 731MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 58MB",
+            "CPUPerc": "3.47%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.77%",
+            "MemUsage": "1.13GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "32.1MB / 35.5MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:43:15.115Z",
+        "phase": "offline-mysql-fallback-c50",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "mysqlConnections": {
+          "globalConnected": "45",
+          "ownedConnections": 45,
+          "ownedActiveConnections": 5
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2.19GB",
+            "CPUPerc": "29.75%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.53%",
+            "MemUsage": "746.6MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "117MB / 350MB",
+            "PIDs": "79"
+          },
+          {
+            "BlockIO": "26.5MB / 172MB",
+            "CPUPerc": "11.48%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.50%",
+            "MemUsage": "39.45MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "152MB / 732MB",
+            "PIDs": "12"
+          },
+          {
+            "BlockIO": "110MB / 58.1MB",
+            "CPUPerc": "33.34%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.77%",
+            "MemUsage": "1.13GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "32.1MB / 35.6MB",
+            "PIDs": "110"
+          }
+        ]
+      },
+      {
+        "at": "2026-10-06T01:43:19.163Z",
+        "phase": "verification",
+        "outbox": {
+          "pending": 0,
+          "retries": 0,
+          "published": 3699,
+          "processing": 0,
+          "oldestUnpublishedSecs": null
+        },
+        "mysqlConnections": {
+          "globalConnected": "36",
+          "ownedConnections": 36,
+          "ownedActiveConnections": 1
+        },
+        "containers": [
+          {
+            "BlockIO": "216MB / 2.19GB",
+            "CPUPerc": "1.88%",
+            "Container": "im-learn-mysql",
+            "ID": "44d8ed506070",
+            "MemPerc": "9.42%",
+            "MemUsage": "737.7MiB / 7.649GiB",
+            "Name": "im-learn-mysql",
+            "NetIO": "118MB / 350MB",
+            "PIDs": "78"
+          },
+          {
+            "BlockIO": "26.5MB / 172MB",
+            "CPUPerc": "0.40%",
+            "Container": "im-learn-redis",
+            "ID": "56e237b16651",
+            "MemPerc": "0.47%",
+            "MemUsage": "36.82MiB / 7.649GiB",
+            "Name": "im-learn-redis",
+            "NetIO": "152MB / 732MB",
+            "PIDs": "6"
+          },
+          {
+            "BlockIO": "110MB / 58.2MB",
+            "CPUPerc": "74.69%",
+            "Container": "im-learn-kafka",
+            "ID": "f68912162ea4",
+            "MemPerc": "14.84%",
+            "MemUsage": "1.135GiB / 7.649GiB",
+            "Name": "im-learn-kafka",
+            "NetIO": "32.1MB / 35.6MB",
+            "PIDs": "113"
+          }
+        ]
+      }
+    ],
+    "relayProbe": {
+      "messages": 10,
+      "storedAckSecs": 0.236,
+      "allPublishedSecs": 1.005,
+      "measuredPublicationRPS": 9.95,
+      "outbox": {
+        "pending": 0,
+        "retries": 0,
+        "published": 10,
+        "processing": 0,
+        "oldestUnpublishedSecs": null
+      }
+    },
+    "lowLoad": {
+      "messages": 20,
+      "concurrentRequests": 1,
+      "pacing": "wait for delivery, then 200ms before next send",
+      "storedAck": {
+        "n": 20,
+        "p50Ms": 18.8,
+        "p95Ms": 23.51,
+        "p99Ms": 27.22,
+        "maxMs": 27.22
+      },
+      "push": {
+        "n": 20,
+        "p50Ms": 193.34,
+        "p95Ms": 207.53,
+        "p99Ms": 215.88,
+        "maxMs": 215.88
+      }
+    },
+    "failureSamples": [
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      },
+      {
+        "phase": "claim-hot-packet-c10",
+        "path": "/api/redpacket/2107285377394946048/receive",
+        "code": 73003,
+        "httpStatus": 200,
+        "message": "红包已领完"
+      }
+    ],
+    "outboxDrainBeforeSyncSecs": 0.19,
+    "verification": {
+      "packetAudits": [
+        {
+          "redPacketId": "2107285377394946048",
+          "totalAmount": 100,
+          "receivedAmount": 100,
+          "receivedCount": 100,
+          "claimedShareAmount": 100,
+          "claimedShareCount": 100,
+          "receiveRecordAmount": 100,
+          "receiveRecordCount": 100,
+          "receiveLogAmount": 100,
+          "receiveLogCount": 100,
+          "sendLogAmount": -100,
+          "sendLogCount": 1,
+          "refundAmount": 0,
+          "refundLogCount": 0,
+          "problems": []
+        },
+        {
+          "redPacketId": "2107285387557744640",
+          "totalAmount": 100,
+          "receivedAmount": 100,
+          "receivedCount": 100,
+          "claimedShareAmount": 100,
+          "claimedShareCount": 100,
+          "receiveRecordAmount": 100,
+          "receiveRecordCount": 100,
+          "receiveLogAmount": 100,
+          "receiveLogCount": 100,
+          "sendLogAmount": -100,
+          "sendLogCount": 1,
+          "refundAmount": 0,
+          "refundLogCount": 0,
+          "problems": []
+        },
+        {
+          "redPacketId": "2107285400358760448",
+          "totalAmount": 100,
+          "receivedAmount": 100,
+          "receivedCount": 100,
+          "claimedShareAmount": 100,
+          "claimedShareCount": 100,
+          "receiveRecordAmount": 100,
+          "receiveRecordCount": 100,
+          "receiveLogAmount": 100,
+          "receiveLogCount": 100,
+          "sendLogAmount": -100,
+          "sendLogCount": 1,
+          "refundAmount": 0,
+          "refundLogCount": 0,
+          "problems": []
+        }
+      ],
+      "usersBalanceChecked": 121,
+      "balanceMismatches": [],
+      "sequenceChecks": [
+        {
+          "count": 610,
+          "maxSeq": 610,
+          "minSeq": 1,
+          "lastSeq": 610,
+          "sessionId": "910179125087610100"
+        },
+        {
+          "count": 610,
+          "maxSeq": 610,
+          "minSeq": 1,
+          "lastSeq": 610,
+          "sessionId": "910179125087610101"
+        },
+        {
+          "count": 610,
+          "maxSeq": 610,
+          "minSeq": 1,
+          "lastSeq": 610,
+          "sessionId": "910179125087610102"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610103"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610104"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610105"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610106"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610107"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610108"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610109"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610110"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610111"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610112"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610113"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610114"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610115"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610116"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610117"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610118"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610119"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610120"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610121"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610122"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610123"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610124"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610125"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610126"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610127"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610128"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610129"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610130"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610131"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610132"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610133"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610134"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610135"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610136"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610137"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610138"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610139"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610140"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610141"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610142"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610143"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610144"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610145"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610146"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610147"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610148"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610149"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610150"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610151"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179125087610152"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610153"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610154"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610155"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610156"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610157"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610158"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610159"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610160"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610161"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610162"
+        },
+        {
+          "count": 3,
+          "maxSeq": 3,
+          "minSeq": 1,
+          "lastSeq": 3,
+          "sessionId": "910179125087610163"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179125087610164"
+        }
+      ],
+      "messageCountMismatches": [],
+      "outOfOrderPushes": [],
+      "observedUniqueMessages": 3693,
+      "finalOutbox": {
+        "pending": 0,
+        "retries": 0,
+        "published": 3699,
+        "processing": 0,
+        "oldestUnpublishedSecs": null
+      }
+    },
+    "kafkaConsumerLag": {
+      "message-writer-consumer-group": "GROUP                                              TOPIC                                               PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                            HOST            CLIENT-ID\nmessage-writer-consumer-group-load-20261006_094040 message-create-requested-topic-load-20261006_094040 1          3               3               0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-c87aa8ff-bfc0-4e5d-9f90-ccc0aa4728ac /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-writer-consumer-group-load-20261006_094040 message-create-requested-topic-load-20261006_094040 0          -               0               -               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-c87aa8ff-bfc0-4e5d-9f90-ccc0aa4728ac /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-writer-consumer-group-load-20261006_094040 message-create-requested-topic-load-20261006_094040 2          -               0               -               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-c87aa8ff-bfc0-4e5d-9f90-ccc0aa4728ac /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)",
+      "message-push-consumer-group": "GROUP                                            TOPIC                                        PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                            HOST            CLIENT-ID\nmessage-push-consumer-group-load-20261006_094040 message-persisted-topic-load-20261006_094040 0          1218            1218            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-9923c7b1-bc55-4a1c-a29c-75767b03ec1b /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-push-consumer-group-load-20261006_094040 message-persisted-topic-load-20261006_094040 1          1284            1284            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-9923c7b1-bc55-4a1c-a29c-75767b03ec1b /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-push-consumer-group-load-20261006_094040 message-persisted-topic-load-20261006_094040 2          1191            1191            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-9923c7b1-bc55-4a1c-a29c-75767b03ec1b /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)",
+      "message-cache-consumer-group": "GROUP                                             TOPIC                                        PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                            HOST            CLIENT-ID\nmessage-cache-consumer-group-load-20261006_094040 message-persisted-topic-load-20261006_094040 0          1218            1218            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-3b773c1b-574b-4a80-b3c3-74b5db7d9aab /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-cache-consumer-group-load-20261006_094040 message-persisted-topic-load-20261006_094040 1          1284            1284            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-3b773c1b-574b-4a80-b3c3-74b5db7d9aab /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-cache-consumer-group-load-20261006_094040 message-persisted-topic-load-20261006_094040 2          1191            1191            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-3b773c1b-574b-4a80-b3c3-74b5db7d9aab /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)",
+      "redpacket-cache-build-group": "GROUP                                            TOPIC                                            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                          HOST            CLIENT-ID\nredpacket-cache-build-group-load-20261006_094040 redpacket-cache-build-topic-load-20261006_094040 0          1               1               0               worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)-26d3db78-9c86-4871-9c9a-6b812c0b838b /172.19.0.1     worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nredpacket-cache-build-group-load-20261006_094040 redpacket-cache-build-topic-load-20261006_094040 1          -               0               -               worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)-26d3db78-9c86-4871-9c9a-6b812c0b838b /172.19.0.1     worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nredpacket-cache-build-group-load-20261006_094040 redpacket-cache-build-topic-load-20261006_094040 2          2               2               0               worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)-26d3db78-9c86-4871-9c9a-6b812c0b838b /172.19.0.1     worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)"
+    },
+    "finishedAt": "2026-10-06T01:43:21.970Z"
+  },
+  "claimFailures": [
+    "2026/10/06 09:41:35 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:45 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:45 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:46 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:46 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:46 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:47 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:48 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:48 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:49 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:49 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:49 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:49 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:50 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:50 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:50 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:51 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:51 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:52 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:52 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:53 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:53 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:54 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:54 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:55 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:41:55 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:03 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:04 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:04 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:04 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:05 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:06 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:06 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:06 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:07 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:07 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:07 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:08 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:08 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:09 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:09 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:09 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:10 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:10 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:11 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:11 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:12 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:12 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:12 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:13 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:13 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:13 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:15 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:15 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:22 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:22 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:22 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:23 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:23 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:23 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:24 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:24 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:25 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:25 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:26 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:26 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:26 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:27 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:27 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:27 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:28 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:28 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:28 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:29 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:29 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:29 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:30 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:30 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:31 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:31 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:31 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.",
+    "2026/10/06 09:42:33 outbox relay batch failed: claim outbox batch: claim outbox batch: lock conversation prefix: Error 3572 (HY000): Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set."
+  ]
+}

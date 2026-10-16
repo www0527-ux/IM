@@ -10,7 +10,6 @@ import (
 
 	messageevent "infinitechatgo/common/model/event"
 	messageapplication "infinitechatgo/service/message/application"
-	"infinitechatgo/service/realtime/internal/messageid"
 	"infinitechatgo/service/realtime/internal/protocol"
 	"infinitechatgo/service/realtime/internal/svc"
 	"infinitechatgo/service/user/rpc/userrpc"
@@ -18,7 +17,7 @@ import (
 
 const (
 	dependencyTimeout = 3 * time.Second
-	publishTimeout    = 10 * time.Second
+	writeTimeout      = 10 * time.Second
 )
 
 func handleMessage(
@@ -133,166 +132,48 @@ func handleMessage(
 		return
 	}
 
-	if svcCtx.UsesOutboxPipeline() {
-		writeCtx, cancelWrite := context.WithTimeout(
-			context.Background(),
-			publishTimeout,
-		)
-		result, writeErr := svcCtx.MessageWriter.Send(
-			writeCtx,
-			messageapplication.Command{
-				Source: messageapplication.SourceRealtime,
-				Message: protocol.BuildChatMessage(
-					request,
-					sender.userID,
-					0,
-					0,
-				),
-				Fingerprint: fingerprint,
-			},
-		)
-		cancelWrite()
-
-		if writeErr != nil {
-			switch {
-			case errors.Is(writeErr, messageapplication.ErrIdempotencyConflict),
-				errors.Is(writeErr, messageapplication.ErrInvalidCommand):
-				sendJSON(
-					sender,
-					protocol.NewRejectedError(
-						request.ClientMessageID,
-						"idempotency_conflict",
-						"同一个clientMessageId不能用于不同的消息内容",
-					),
-				)
-			default:
-				// TODO(user): map the persistent writer's retryable and unknown
-				// COMMIT errors to separate protocol responses.
-				log.Printf("write message through outbox pipeline failed: %v", writeErr)
-				sendJSON(
-					sender,
-					protocol.NewUnavailableError(
-						request.ClientMessageID,
-						"message_write_unavailable",
-						"消息持久化服务尚未就绪或暂时不可用",
-					),
-				)
-			}
-			return
-		}
-
-		sendJSON(
-			sender,
-			protocol.NewStoredAck(
-				request.ClientMessageID,
-				result.Message.MessageID,
-				result.Message.Seq,
-			),
-		)
-		return
-	}
-
-	identityCtx, cancelIdentity :=
-		context.WithTimeout(
-			context.Background(),
-			dependencyTimeout,
-		)
-
-	identity, err :=
-		svcCtx.MessageIDResolver.GetOrCreate(
-			identityCtx,
-			sender.userID,
-			request.ClientMessageID,
-			fingerprint,
-		)
-
-	cancelIdentity()
-
-	if err != nil {
-		if errors.Is(err, messageid.ErrIdempotencyConflict) {
-			sendJSON(
-				sender,
-				protocol.NewRejectedError(
-					request.ClientMessageID,
-					"idempotency_conflict",
-					"同一个clientMessageId不能用于不同的消息内容",
-				),
-			)
-			return
-		}
-
-		log.Printf(
-			"get message identity failed: %v",
-			err,
-		)
-
-		sendJSON(
-			sender,
-			protocol.NewUnavailableError(
-				request.ClientMessageID,
-				"idempotency_unavailable",
-				"消息服务暂时不可用",
-			),
-		)
-		return
-	}
-
-	message := protocol.BuildChatMessage(
-		request,
-		sender.userID,
-		identity.MessageID,
-		identity.CreatedAt,
+	writeCtx, cancelWrite := context.WithTimeout(context.Background(), writeTimeout)
+	result, writeErr := svcCtx.MessageWriter.Send(
+		writeCtx,
+		messageapplication.Command{
+			Source:      messageapplication.SourceRealtime,
+			Message:     protocol.BuildChatMessage(request, sender.userID, 0, 0),
+			Fingerprint: fingerprint,
+		},
 	)
-
-	event :=
-		messageevent.NewChatMessageAcceptedEvent(
-			message,
-		)
-
-	publishCtx, cancelPublish :=
-		context.WithTimeout(
-			context.Background(),
-			publishTimeout,
-		)
-
-	err = svcCtx.AcceptedPublisher.Publish(
-		publishCtx,
-		event,
-	)
-	//释放定时器资源
-	cancelPublish()
-
-	if err != nil {
-		log.Printf(
-			"publish accepted message failed: messageId=%d, err=%v",
-			message.MessageID,
-			err,
-		)
-		sendJSON(
-			sender,
-			protocol.NewUnknownError(
+	cancelWrite()
+	if writeErr != nil {
+		switch {
+		case errors.Is(writeErr, messageapplication.ErrIdempotencyConflict):
+			sendJSON(sender, protocol.NewRejectedError(
 				request.ClientMessageID,
-				message.MessageID,
-				"kafka_publish_unknown",
-				"消息发送结果暂时无法确定，请使用相同ID重试",
-			),
-		)
+				"idempotency_conflict",
+				"该clientMessageId已被当前账号用于另一条不同的消息请求",
+			))
+		case errors.Is(writeErr, messageapplication.ErrInvalidCommand):
+			sendJSON(sender, protocol.NewRejectedError(
+				request.ClientMessageID,
+				"invalid_message",
+				"消息参数不正确",
+			))
+		default:
+			// TODO: distinguish retryable failures from unknown COMMIT results.
+			log.Printf("write message through outbox pipeline failed: %v", writeErr)
+			sendJSON(sender, protocol.NewUnavailableError(
+				request.ClientMessageID,
+				"message_write_unavailable",
+				"消息持久化服务尚未就绪或暂时不可用",
+			))
+		}
 		return
 	}
-
 	sendJSON(
 		sender,
-		protocol.NewAcceptedAck(
+		protocol.NewStoredAck(
 			request.ClientMessageID,
-			message.MessageID,
+			result.Message.MessageID,
+			result.Message.Seq,
 		),
-	)
-
-	log.Printf(
-		"message accepted: messageId=%d, sessionId=%d, senderId=%d",
-		message.MessageID,
-		message.SessionID,
-		message.SenderID,
 	)
 }
 

@@ -1,12 +1,14 @@
 package websocket
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 	"strings"
 
 	"infinitechatgo/common/auth"
+	"infinitechatgo/service/realtime/internal/protocol"
 	"infinitechatgo/service/realtime/internal/svc"
 
 	ws "github.com/gorilla/websocket"
@@ -121,6 +123,15 @@ func handleConnection(
 
 	manager.add(client)
 	defer manager.remove(client)
+	ready, err := json.Marshal(protocol.NewConnectionReady())
+	if err != nil {
+		log.Printf("encode websocket connection ready failed: %v", err)
+		return
+	}
+	if !client.sendMessage(ready) {
+		log.Print("queue websocket connection ready failed")
+		return
+	}
 
 	log.Printf(
 		"WebSocket connected: userId=%d, loginSessionId=%s, remote=%s",

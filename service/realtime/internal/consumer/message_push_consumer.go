@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	messageevent "infinitechatgo/common/model/event"
@@ -31,8 +32,7 @@ type groupMemberProvider interface {
 
 type MessagePushConsumer struct {
 	manager      messageSender
-	groupMembers groupMemberProvider
-	expectedType string
+	groupMembers groupMemberProvider //群成员查询依赖
 }
 
 func NewMessagePushConsumer(
@@ -42,18 +42,6 @@ func NewMessagePushConsumer(
 	return &MessagePushConsumer{
 		manager:      manager,
 		groupMembers: groupMembers,
-		expectedType: messageevent.ChatMessageSequencedEventType,
-	}
-}
-
-func NewPersistedMessagePushConsumer(
-	manager *realtimews.Manager,
-	groupMembers userrpc.UserRpc,
-) *MessagePushConsumer {
-	return &MessagePushConsumer{
-		manager:      manager,
-		groupMembers: groupMembers,
-		expectedType: messageevent.ChatMessagePersistedEventType,
 	}
 }
 
@@ -62,48 +50,49 @@ func (c *MessagePushConsumer) Consume(
 	key string,
 	value string,
 ) error {
+	if c == nil || c.manager == nil || c.groupMembers == nil {
+		return &FatalError{Err: fmt.Errorf("push consumer dependencies are required")}
+	}
 	var event struct {
 		EventType string                   `json:"eventType"`
 		Version   int                      `json:"version"`
 		Message   messageevent.ChatMessage `json:"message"`
 	}
 	if err := json.Unmarshal([]byte(value), &event); err != nil {
-		log.Printf("discard invalid message event: key=%s, err=%v", key, err)
-		return nil
+		return permanent("invalid_json", fmt.Errorf("decode persisted message event key=%q: %w", key, err))
 	}
-	expectedType := c.expectedType
-	if expectedType == "" {
-		expectedType = messageevent.ChatMessageSequencedEventType
-	}
-	if event.EventType != expectedType {
-		log.Printf("discard unexpected push event type: key=%s, type=%s", key, event.EventType)
-		return nil
+	if event.EventType != messageevent.ChatMessagePersistedEventType {
+		return permanent("unsupported_event", fmt.Errorf("unexpected push event type key=%q type=%q", key, event.EventType))
 	}
 	if event.Version != messageevent.ChatMessageEventVersion {
-		log.Printf("discard unsupported push event version: key=%s, version=%d", key, event.Version)
-		return nil
+		return permanent("unsupported_event", fmt.Errorf("unsupported push event version key=%q version=%d", key, event.Version))
 	}
 
 	message := event.Message
+	if message.MessageID <= 0 || message.Seq <= 0 || message.SenderID <= 0 ||
+		message.SessionID <= 0 || strings.TrimSpace(message.ClientMessageID) == "" {
+		return permanent("invalid_message", fmt.Errorf(
+			"invalid persisted message for push: key=%q messageId=%d", key, message.MessageID,
+		))
+	}
 	payload, err := json.Marshal(protocol.NewMessage(message))
 	if err != nil {
-		log.Printf("marshal realtime message failed: messageId=%d, err=%v", message.MessageID, err)
-		return nil
+		return fmt.Errorf("marshal realtime message %d: %w", message.MessageID, err)
 	}
 
 	switch message.SessionType {
 	case messageevent.SessionTypeSingle:
 		return c.pushSingle(message, payload)
 	case messageevent.SessionTypeGroup:
+		//message用来提供结构化数据
 		return c.pushGroup(ctx, message, payload)
 	default:
-		log.Printf(
-			"discard unsupported realtime session type: messageId=%d, sessionId=%d, type=%d",
+		return permanent("invalid_message", fmt.Errorf(
+			"unsupported realtime session type: messageId=%d, sessionId=%d, type=%d",
 			message.MessageID,
 			message.SessionID,
 			message.SessionType,
-		)
-		return nil
+		))
 	}
 }
 
@@ -112,26 +101,26 @@ func (c *MessagePushConsumer) pushSingle(
 	payload []byte,
 ) error {
 	if message.ReceiverID == nil || *message.ReceiverID <= 0 {
-		log.Printf(
-			"discard single message without receiver: messageId=%d, sessionId=%d",
+		return permanent("invalid_message", fmt.Errorf(
+			"single message without receiver: messageId=%d, sessionId=%d",
 			message.MessageID,
 			message.SessionID,
-		)
-		return nil
+		))
 	}
-
-	senderQueued := c.manager.SendToUser(message.SenderID, payload)
-	receiverQueued := 0
-	if *message.ReceiverID != message.SenderID {
-		receiverQueued = c.manager.SendToUser(*message.ReceiverID, payload)
+	if *message.ReceiverID == message.SenderID {
+		return permanent("invalid_message", fmt.Errorf(
+			"single message receiver equals sender: messageId=%d, sessionId=%d",
+			message.MessageID, message.SessionID,
+		))
 	}
+	//记录输入的数目
+	receiverQueued := c.manager.SendToUser(*message.ReceiverID, payload)
 
 	log.Printf(
-		"realtime push attempted: messageId=%d, sessionId=%d, seq=%d, senderQueued=%d, receiverQueued=%d",
+		"realtime push attempted: messageId=%d, sessionId=%d, seq=%d, receiverQueued=%d",
 		message.MessageID,
 		message.SessionID,
 		message.Seq,
-		senderQueued,
 		receiverQueued,
 	)
 	return nil
@@ -167,7 +156,7 @@ func (c *MessagePushConsumer) pushGroup(
 	memberCount := 0
 	queued := 0
 	for _, userID := range result.UserIds {
-		if userID <= 0 {
+		if userID <= 0 || userID == message.SenderID {
 			continue
 		}
 		if _, exists := seen[userID]; exists {

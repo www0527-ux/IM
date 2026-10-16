@@ -5,6 +5,7 @@ import (
 
 	"infinitechatgo/common/auth"
 	"infinitechatgo/common/idgen"
+	"infinitechatgo/common/mysqlpool"
 	messageapplication "infinitechatgo/service/message/application"
 	messagecache "infinitechatgo/service/message/cache"
 	sequencemodel "infinitechatgo/service/message/model/conversation_sequence"
@@ -12,8 +13,6 @@ import (
 	outboxmodel "infinitechatgo/service/message/model/outbox_event"
 	messagepersistence "infinitechatgo/service/message/persistence"
 	"infinitechatgo/service/realtime/internal/config"
-	"infinitechatgo/service/realtime/internal/messageid"
-	"infinitechatgo/service/realtime/internal/mq"
 	"infinitechatgo/service/user/rpc/userrpc"
 
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -29,9 +28,7 @@ type ServiceContext struct {
 	Authenticator *auth.Authenticator
 	UserRPC       userrpc.UserRpc
 
-	MessageIDResolver *messageid.Resolver
-	AcceptedPublisher *mq.AcceptedMessagePublisher
-	MessageWriter     *messageapplication.MessageWriteService
+	MessageWriter *messageapplication.MessageWriteService
 }
 
 func NewServiceContext(
@@ -56,20 +53,10 @@ func NewServiceContext(
 		),
 	}
 
-	if c.MessagePipeline.NormalizedMode() == config.PipelineModeLegacy {
-		publisher, err := mq.NewAcceptedMessagePublisher(c.Kafka)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"create accepted message publisher: %w",
-				err,
-			)
-		}
-		ctx.MessageIDResolver = messageid.NewResolver(rds, idGenerator)
-		ctx.AcceptedPublisher = publisher
-		return ctx, nil
+	ctx.SqlConn, err = mysqlpool.NewMysql(c.DataSource, c.MySQLPool)
+	if err != nil {
+		return nil, err
 	}
-
-	ctx.SqlConn = sqlx.NewMysql(c.DataSource)
 	persistentWriter, err := messagepersistence.NewWriter(
 		messagepersistence.Dependencies{
 			SqlConn:        ctx.SqlConn,
@@ -88,16 +75,4 @@ func NewServiceContext(
 		persistentWriter,
 	)
 	return ctx, nil
-}
-
-func (s *ServiceContext) UsesOutboxPipeline() bool {
-	return s != nil &&
-		s.Config.MessagePipeline.NormalizedMode() == config.PipelineModeOutbox
-}
-
-func (s *ServiceContext) Close() error {
-	if s == nil || s.AcceptedPublisher == nil {
-		return nil
-	}
-	return s.AcceptedPublisher.Close()
 }

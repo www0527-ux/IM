@@ -1,0 +1,2137 @@
+{
+  "baseline": {
+    "runID": "20261006_090415",
+    "result": "PASS",
+    "environment": {
+      "RelayBatchSize": 100,
+      "CPU": {
+        "Name": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+        "NumberOfCores": 4,
+        "NumberOfLogicalProcessors": 8
+      },
+      "ClaimRounds": 1,
+      "WithoutRelayIndex": true,
+      "DockerVersion": "29.4.3",
+      "RelayTimings": true,
+      "MessageLimit": 600,
+      "Go": "go version go1.26.5 windows/amd64",
+      "KafkaReplicationFactor": 1,
+      "KafkaPartitions": 3,
+      "RelayPollMillis": 200,
+      "Node": "v24.14.0",
+      "DockerMemoryBytes": 8212672512,
+      "MySQLPoolBudgets": {
+        "redpacket": 24,
+        "rpc": 16,
+        "relay": 4,
+        "realtime": 24,
+        "worker": 4,
+        "offline": 16,
+        "user": 8
+      },
+      "DockerCPU": 8,
+      "StageSeconds": 120,
+      "IsolateStages": true,
+      "MemoryBytes": 16952647680,
+      "ServicesMode": "dev, example configuration",
+      "Database": "im_acceptance_20261006_090415",
+      "RunID": "20261006_090415"
+    },
+    "cases": [
+      {
+        "name": "same-conversation-c10",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 188.89,
+          "p95Ms": 372.95,
+          "p99Ms": 433.34,
+          "maxMs": 507.73
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 24732.3,
+          "p95Ms": 48950.18,
+          "p99Ms": 48999.19,
+          "maxMs": 49037.26
+        },
+        "drainAfterStageSecs": 49.27,
+        "stageSecs": 13.169,
+        "phases": {
+          "claim": {
+            "n": 608,
+            "failures": 0,
+            "count": 604,
+            "totalMs": 54540.325,
+            "p50Ms": 107.951,
+            "p95Ms": 181.255,
+            "maxMs": 345.052
+          },
+          "publish": {
+            "n": 604,
+            "failures": 0,
+            "count": 604,
+            "totalMs": 1488.766,
+            "p50Ms": 2.102,
+            "p95Ms": 4.517,
+            "maxMs": 17.72
+          },
+          "mark_published": {
+            "n": 605,
+            "failures": 0,
+            "count": 605,
+            "totalMs": 5515.705,
+            "p50Ms": 7.694,
+            "p95Ms": 16.355,
+            "maxMs": 58.441
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 604,
+          "failures": 0,
+          "count": 604,
+          "totalMs": 54520.143,
+          "p50Ms": 108.125,
+          "p95Ms": 181.255,
+          "maxMs": 345.052
+        },
+        "emptyClaim": {
+          "n": 4,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 20.182,
+          "p50Ms": 3.594,
+          "p95Ms": 7.771,
+          "maxMs": 7.771
+        }
+      },
+      {
+        "name": "20-conversations-c10",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 71.66,
+          "p95Ms": 136.48,
+          "p99Ms": 159.07,
+          "maxMs": 183.05
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 4754.85,
+          "p95Ms": 6586.39,
+          "p99Ms": 6752.59,
+          "maxMs": 6786.4
+        },
+        "drainAfterStageSecs": 6.53,
+        "stageSecs": 4.726,
+        "phases": {
+          "claim": {
+            "n": 33,
+            "failures": 0,
+            "count": 605,
+            "totalMs": 2624.753,
+            "p50Ms": 74.117,
+            "p95Ms": 152.279,
+            "maxMs": 160.967
+          },
+          "publish": {
+            "n": 605,
+            "failures": 0,
+            "count": 605,
+            "totalMs": 1672.366,
+            "p50Ms": 2.141,
+            "p95Ms": 6.567,
+            "maxMs": 21.619
+          },
+          "mark_published": {
+            "n": 605,
+            "failures": 0,
+            "count": 605,
+            "totalMs": 6693.892,
+            "p50Ms": 9.008,
+            "p95Ms": 22.03,
+            "maxMs": 66.972
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 32,
+          "failures": 0,
+          "count": 605,
+          "totalMs": 2620.55,
+          "p50Ms": 74.117,
+          "p95Ms": 152.279,
+          "maxMs": 160.967
+        },
+        "emptyClaim": {
+          "n": 1,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 4.203,
+          "p50Ms": 4.203,
+          "p95Ms": 4.203,
+          "maxMs": 4.203
+        }
+      },
+      {
+        "name": "same-conversation-c50",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 739.57,
+          "p95Ms": 1710.27,
+          "p99Ms": 2491.08,
+          "maxMs": 3424.71
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 6654.07,
+          "p95Ms": 34617.11,
+          "p99Ms": 35184.35,
+          "maxMs": 36132.88
+        },
+        "drainAfterStageSecs": 33.95,
+        "stageSecs": 10.679,
+        "phases": {
+          "claim": {
+            "n": 604,
+            "failures": 0,
+            "count": 602,
+            "totalMs": 38166.654,
+            "p50Ms": 18.505,
+            "p95Ms": 164.019,
+            "maxMs": 315.507
+          },
+          "publish": {
+            "n": 602,
+            "failures": 0,
+            "count": 602,
+            "totalMs": 1054.817,
+            "p50Ms": 1.601,
+            "p95Ms": 2.687,
+            "maxMs": 4.651
+          },
+          "mark_published": {
+            "n": 602,
+            "failures": 0,
+            "count": 602,
+            "totalMs": 4904.502,
+            "p50Ms": 7.625,
+            "p95Ms": 12.643,
+            "maxMs": 19.987
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 602,
+          "failures": 0,
+          "count": 602,
+          "totalMs": 38156.759,
+          "p50Ms": 18.59,
+          "p95Ms": 164.019,
+          "maxMs": 315.507
+        },
+        "emptyClaim": {
+          "n": 2,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 9.895,
+          "p50Ms": 4.628,
+          "p95Ms": 5.267,
+          "maxMs": 5.267
+        }
+      },
+      {
+        "name": "20-conversations-c50",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 196.3,
+          "p95Ms": 403.55,
+          "p99Ms": 554.15,
+          "maxMs": 677.08
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 4602.62,
+          "p95Ms": 7359.35,
+          "p99Ms": 7493.51,
+          "maxMs": 7676.46
+        },
+        "drainAfterStageSecs": 7.51,
+        "stageSecs": 2.713,
+        "phases": {
+          "claim": {
+            "n": 35,
+            "failures": 0,
+            "count": 601,
+            "totalMs": 2252.275,
+            "p50Ms": 64.263,
+            "p95Ms": 114.437,
+            "maxMs": 136.639
+          },
+          "publish": {
+            "n": 601,
+            "failures": 0,
+            "count": 601,
+            "totalMs": 1297.545,
+            "p50Ms": 1.607,
+            "p95Ms": 6.12,
+            "maxMs": 12.95
+          },
+          "mark_published": {
+            "n": 601,
+            "failures": 0,
+            "count": 601,
+            "totalMs": 6079.215,
+            "p50Ms": 7.991,
+            "p95Ms": 23.637,
+            "maxMs": 51.771
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 32,
+          "failures": 0,
+          "count": 601,
+          "totalMs": 2237.508,
+          "p50Ms": 67.223,
+          "p95Ms": 114.437,
+          "maxMs": 136.639
+        },
+        "emptyClaim": {
+          "n": 3,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 14.767,
+          "p50Ms": 4.294,
+          "p95Ms": 7.378,
+          "maxMs": 7.378
+        }
+      },
+      {
+        "name": "same-conversation-c100",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 1305.64,
+          "p95Ms": 3863.69,
+          "p99Ms": 5135.19,
+          "maxMs": 7189.16
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 19702.67,
+          "p95Ms": 47486.11,
+          "p99Ms": 49556.58,
+          "maxMs": 52419.4
+        },
+        "drainAfterStageSecs": 45.88,
+        "stageSecs": 10.44,
+        "phases": {
+          "claim": {
+            "n": 607,
+            "failures": 0,
+            "count": 603,
+            "totalMs": 49655.016,
+            "p50Ms": 82.057,
+            "p95Ms": 183.596,
+            "maxMs": 333.011
+          },
+          "publish": {
+            "n": 603,
+            "failures": 0,
+            "count": 603,
+            "totalMs": 950.301,
+            "p50Ms": 1.577,
+            "p95Ms": 2.315,
+            "maxMs": 5.816
+          },
+          "mark_published": {
+            "n": 603,
+            "failures": 0,
+            "count": 603,
+            "totalMs": 4649.997,
+            "p50Ms": 7.234,
+            "p95Ms": 11.24,
+            "maxMs": 49.015
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 603,
+          "failures": 0,
+          "count": 603,
+          "totalMs": 49632.939,
+          "p50Ms": 83.043,
+          "p95Ms": 183.596,
+          "maxMs": 333.011
+        },
+        "emptyClaim": {
+          "n": 4,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 22.077,
+          "p50Ms": 5.332,
+          "p95Ms": 6.441,
+          "maxMs": 6.441
+        }
+      },
+      {
+        "name": "20-conversations-c100",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 339.37,
+          "p95Ms": 933.02,
+          "p99Ms": 1412,
+          "maxMs": 1983.43
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 4405.59,
+          "p95Ms": 7128.26,
+          "p99Ms": 7585.52,
+          "maxMs": 8225.8
+        },
+        "drainAfterStageSecs": 7.54,
+        "stageSecs": 2.643,
+        "phases": {
+          "claim": {
+            "n": 38,
+            "failures": 0,
+            "count": 607,
+            "totalMs": 2138.785,
+            "p50Ms": 58.635,
+            "p95Ms": 86.789,
+            "maxMs": 101.64
+          },
+          "publish": {
+            "n": 607,
+            "failures": 0,
+            "count": 607,
+            "totalMs": 1144.666,
+            "p50Ms": 1.59,
+            "p95Ms": 4.335,
+            "maxMs": 14.682
+          },
+          "mark_published": {
+            "n": 607,
+            "failures": 0,
+            "count": 607,
+            "totalMs": 5784.422,
+            "p50Ms": 7.542,
+            "p95Ms": 22.131,
+            "maxMs": 53.858
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 32,
+          "failures": 0,
+          "count": 607,
+          "totalMs": 2113.7,
+          "p50Ms": 62.838,
+          "p95Ms": 86.789,
+          "maxMs": 101.64
+        },
+        "emptyClaim": {
+          "n": 6,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 25.085,
+          "p50Ms": 3.683,
+          "p95Ms": 5.575,
+          "maxMs": 5.575
+        }
+      }
+    ],
+    "phases": {
+      "claim": {
+        "n": 2220,
+        "failures": 0,
+        "count": 3679,
+        "totalMs": 153058.874,
+        "p50Ms": 56.45,
+        "p95Ms": 171.338,
+        "maxMs": 345.052
+      },
+      "publish": {
+        "n": 3679,
+        "failures": 0,
+        "count": 3679,
+        "totalMs": 7777.691,
+        "p50Ms": 1.611,
+        "p95Ms": 4.651,
+        "maxMs": 44.934
+      },
+      "mark_published": {
+        "n": 3679,
+        "failures": 0,
+        "count": 3679,
+        "totalMs": 34092.9,
+        "p50Ms": 7.856,
+        "p95Ms": 18.916,
+        "maxMs": 66.972
+      },
+      "reschedule": {
+        "n": 0,
+        "failures": 0,
+        "count": 0,
+        "totalMs": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "maxMs": null
+      }
+    },
+    "verification": {
+      "packetAudits": [
+        {
+          "redPacketId": "2107276891432955904",
+          "totalAmount": 100,
+          "receivedAmount": 100,
+          "receivedCount": 100,
+          "claimedShareAmount": 100,
+          "claimedShareCount": 100,
+          "receiveRecordAmount": 100,
+          "receiveRecordCount": 100,
+          "receiveLogAmount": 100,
+          "receiveLogCount": 100,
+          "sendLogAmount": -100,
+          "sendLogCount": 1,
+          "refundAmount": 0,
+          "refundLogCount": 0,
+          "problems": []
+        },
+        {
+          "redPacketId": "2107276902824685568",
+          "totalAmount": 100,
+          "receivedAmount": 100,
+          "receivedCount": 100,
+          "claimedShareAmount": 100,
+          "claimedShareCount": 100,
+          "receiveRecordAmount": 100,
+          "receiveRecordCount": 100,
+          "receiveLogAmount": 100,
+          "receiveLogCount": 100,
+          "sendLogAmount": -100,
+          "sendLogCount": 1,
+          "refundAmount": 0,
+          "refundLogCount": 0,
+          "problems": []
+        },
+        {
+          "redPacketId": "2107276912643551232",
+          "totalAmount": 100,
+          "receivedAmount": 100,
+          "receivedCount": 100,
+          "claimedShareAmount": 100,
+          "claimedShareCount": 100,
+          "receiveRecordAmount": 100,
+          "receiveRecordCount": 100,
+          "receiveLogAmount": 100,
+          "receiveLogCount": 100,
+          "sendLogAmount": -100,
+          "sendLogCount": 1,
+          "refundAmount": 0,
+          "refundLogCount": 0,
+          "problems": []
+        }
+      ],
+      "usersBalanceChecked": 121,
+      "balanceMismatches": [],
+      "sequenceChecks": [
+        {
+          "count": 610,
+          "maxSeq": 610,
+          "minSeq": 1,
+          "lastSeq": 610,
+          "sessionId": "910179124871802700"
+        },
+        {
+          "count": 610,
+          "maxSeq": 610,
+          "minSeq": 1,
+          "lastSeq": 610,
+          "sessionId": "910179124871802701"
+        },
+        {
+          "count": 610,
+          "maxSeq": 610,
+          "minSeq": 1,
+          "lastSeq": 610,
+          "sessionId": "910179124871802702"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802703"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802704"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802705"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802706"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802707"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802708"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802709"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802710"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802711"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802712"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802713"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802714"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802715"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802716"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802717"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802718"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802719"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802720"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802721"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802722"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802723"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802724"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802725"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802726"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802727"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802728"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802729"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802730"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802731"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802732"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802733"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802734"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802735"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802736"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802737"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802738"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802739"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802740"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802741"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802742"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802743"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802744"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802745"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802746"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802747"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802748"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802749"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802750"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802751"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124871802752"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802753"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802754"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802755"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802756"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802757"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802758"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802759"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802760"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802761"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124871802762"
+        },
+        {
+          "count": 3,
+          "maxSeq": 3,
+          "minSeq": 1,
+          "lastSeq": 3,
+          "sessionId": "910179124871802763"
+        },
+        {
+          "count": 10,
+          "maxSeq": 10,
+          "minSeq": 1,
+          "lastSeq": 10,
+          "sessionId": "910179124871802764"
+        }
+      ],
+      "messageCountMismatches": [],
+      "outOfOrderPushes": [],
+      "observedUniqueMessages": 3673,
+      "finalOutbox": {
+        "pending": 0,
+        "retries": 0,
+        "published": 3679,
+        "processing": 0,
+        "oldestUnpublishedSecs": null
+      }
+    },
+    "kafkaConsumerLag": {
+      "message-writer-consumer-group": "GROUP                                              TOPIC                                               PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                            HOST            CLIENT-ID\nmessage-writer-consumer-group-load-20261006_090415 message-create-requested-topic-load-20261006_090415 2          -               0               -               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-9f10b058-9bc8-49e4-b41b-59a75e8fc8ac /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-writer-consumer-group-load-20261006_090415 message-create-requested-topic-load-20261006_090415 1          3               3               0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-9f10b058-9bc8-49e4-b41b-59a75e8fc8ac /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-writer-consumer-group-load-20261006_090415 message-create-requested-topic-load-20261006_090415 0          -               0               -               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-9f10b058-9bc8-49e4-b41b-59a75e8fc8ac /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)",
+      "message-push-consumer-group": "GROUP                                            TOPIC                                        PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                            HOST            CLIENT-ID\nmessage-push-consumer-group-load-20261006_090415 message-persisted-topic-load-20261006_090415 0          1309            1309            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-0e022681-6300-46d2-9dde-0693d40ef4ac /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-push-consumer-group-load-20261006_090415 message-persisted-topic-load-20261006_090415 1          1204            1204            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-0e022681-6300-46d2-9dde-0693d40ef4ac /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-push-consumer-group-load-20261006_090415 message-persisted-topic-load-20261006_090415 2          1160            1160            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-0e022681-6300-46d2-9dde-0693d40ef4ac /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)",
+      "message-cache-consumer-group": "GROUP                                             TOPIC                                        PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                            HOST            CLIENT-ID\nmessage-cache-consumer-group-load-20261006_090415 message-persisted-topic-load-20261006_090415 0          1309            1309            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-6cacc556-6945-4468-9115-7cc520874a77 /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-cache-consumer-group-load-20261006_090415 message-persisted-topic-load-20261006_090415 1          1204            1204            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-6cacc556-6945-4468-9115-7cc520874a77 /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-cache-consumer-group-load-20261006_090415 message-persisted-topic-load-20261006_090415 2          1160            1160            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-6cacc556-6945-4468-9115-7cc520874a77 /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)",
+      "redpacket-cache-build-group": "GROUP                                            TOPIC                                            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                          HOST            CLIENT-ID\nredpacket-cache-build-group-load-20261006_090415 redpacket-cache-build-topic-load-20261006_090415 2          -               0               -               worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)-25fa5446-41f3-45de-a8f4-8c2c0e344cd3 /172.19.0.1     worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nredpacket-cache-build-group-load-20261006_090415 redpacket-cache-build-topic-load-20261006_090415 0          1               1               0               worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)-25fa5446-41f3-45de-a8f4-8c2c0e344cd3 /172.19.0.1     worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nredpacket-cache-build-group-load-20261006_090415 redpacket-cache-build-topic-load-20261006_090415 1          2               2               0               worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)-25fa5446-41f3-45de-a8f4-8c2c0e344cd3 /172.19.0.1     worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)"
+    },
+    "requestCount": 15960,
+    "unexpectedErrors": 0
+  },
+  "indexed": {
+    "runID": "20261006_090950",
+    "result": "PASS",
+    "environment": {
+      "RelayBatchSize": 100,
+      "CPU": {
+        "Name": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+        "NumberOfCores": 4,
+        "NumberOfLogicalProcessors": 8
+      },
+      "ClaimRounds": 1,
+      "WithoutRelayIndex": false,
+      "DockerVersion": "29.4.3",
+      "RelayTimings": true,
+      "MessageLimit": 600,
+      "Go": "go version go1.26.5 windows/amd64",
+      "KafkaReplicationFactor": 1,
+      "KafkaPartitions": 3,
+      "RelayPollMillis": 200,
+      "Node": "v24.14.0",
+      "DockerMemoryBytes": 8212672512,
+      "MySQLPoolBudgets": {
+        "redpacket": 24,
+        "rpc": 16,
+        "relay": 4,
+        "realtime": 24,
+        "worker": 4,
+        "offline": 16,
+        "user": 8
+      },
+      "DockerCPU": 8,
+      "StageSeconds": 120,
+      "IsolateStages": true,
+      "MemoryBytes": 16952647680,
+      "ServicesMode": "dev, example configuration",
+      "Database": "im_acceptance_20261006_090950",
+      "RunID": "20261006_090950"
+    },
+    "cases": [
+      {
+        "name": "same-conversation-c10",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 194.61,
+          "p95Ms": 329.91,
+          "p99Ms": 407.65,
+          "maxMs": 444.46
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 6722.47,
+          "p95Ms": 7322.82,
+          "p99Ms": 7554.98,
+          "maxMs": 7617.1
+        },
+        "drainAfterStageSecs": 7.42,
+        "stageSecs": 12.753,
+        "phases": {
+          "claim": {
+            "n": 603,
+            "failures": 0,
+            "count": 601,
+            "totalMs": 13064.051,
+            "p50Ms": 12.955,
+            "p95Ms": 65.287,
+            "maxMs": 180.778
+          },
+          "publish": {
+            "n": 601,
+            "failures": 0,
+            "count": 601,
+            "totalMs": 1089.92,
+            "p50Ms": 1.61,
+            "p95Ms": 2.873,
+            "maxMs": 13.225
+          },
+          "mark_published": {
+            "n": 602,
+            "failures": 0,
+            "count": 602,
+            "totalMs": 5426.455,
+            "p50Ms": 8.153,
+            "p95Ms": 14.225,
+            "maxMs": 77.538
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 601,
+          "failures": 0,
+          "count": 601,
+          "totalMs": 13051.398,
+          "p50Ms": 12.969,
+          "p95Ms": 65.287,
+          "maxMs": 180.778
+        },
+        "emptyClaim": {
+          "n": 2,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 12.653,
+          "p50Ms": 5.318,
+          "p95Ms": 7.335,
+          "maxMs": 7.335
+        }
+      },
+      {
+        "name": "20-conversations-c10",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 61.08,
+          "p95Ms": 97.81,
+          "p99Ms": 141.48,
+          "maxMs": 164.36
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 3674.76,
+          "p95Ms": 6013.58,
+          "p99Ms": 6233.09,
+          "maxMs": 6282.33
+        },
+        "drainAfterStageSecs": 6.42,
+        "stageSecs": 3.901,
+        "phases": {
+          "claim": {
+            "n": 35,
+            "failures": 0,
+            "count": 601,
+            "totalMs": 2096.058,
+            "p50Ms": 61.086,
+            "p95Ms": 104.076,
+            "maxMs": 127.304
+          },
+          "publish": {
+            "n": 602,
+            "failures": 0,
+            "count": 602,
+            "totalMs": 1272.886,
+            "p50Ms": 1.73,
+            "p95Ms": 4.348,
+            "maxMs": 9.424
+          },
+          "mark_published": {
+            "n": 603,
+            "failures": 0,
+            "count": 603,
+            "totalMs": 6305.886,
+            "p50Ms": 9.151,
+            "p95Ms": 17.649,
+            "maxMs": 42.886
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 32,
+          "failures": 0,
+          "count": 601,
+          "totalMs": 2081.057,
+          "p50Ms": 62.527,
+          "p95Ms": 104.076,
+          "maxMs": 127.304
+        },
+        "emptyClaim": {
+          "n": 3,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 15.001,
+          "p50Ms": 4.265,
+          "p95Ms": 7.08,
+          "maxMs": 7.08
+        }
+      },
+      {
+        "name": "same-conversation-c50",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 893.16,
+          "p95Ms": 2214.21,
+          "p99Ms": 2771.66,
+          "maxMs": 4387.94
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 4573.09,
+          "p95Ms": 7457.72,
+          "p99Ms": 8191.72,
+          "maxMs": 9812.02
+        },
+        "drainAfterStageSecs": 6.53,
+        "stageSecs": 13.029,
+        "phases": {
+          "claim": {
+            "n": 609,
+            "failures": 0,
+            "count": 605,
+            "totalMs": 11026.964,
+            "p50Ms": 15.732,
+            "p95Ms": 32.472,
+            "maxMs": 121.249
+          },
+          "publish": {
+            "n": 605,
+            "failures": 0,
+            "count": 605,
+            "totalMs": 1216.8,
+            "p50Ms": 1.733,
+            "p95Ms": 3.408,
+            "maxMs": 10.889
+          },
+          "mark_published": {
+            "n": 606,
+            "failures": 0,
+            "count": 606,
+            "totalMs": 6300.785,
+            "p50Ms": 9.347,
+            "p95Ms": 16.315,
+            "maxMs": 70.324
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 605,
+          "failures": 0,
+          "count": 605,
+          "totalMs": 11004.103,
+          "p50Ms": 15.749,
+          "p95Ms": 32.472,
+          "maxMs": 121.249
+        },
+        "emptyClaim": {
+          "n": 4,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 22.861,
+          "p50Ms": 5.097,
+          "p95Ms": 7.072,
+          "maxMs": 7.072
+        }
+      },
+      {
+        "name": "20-conversations-c50",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 226.77,
+          "p95Ms": 453.38,
+          "p99Ms": 571.29,
+          "maxMs": 689.65
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 5181.48,
+          "p95Ms": 7550.22,
+          "p99Ms": 7716.91,
+          "maxMs": 8028.45
+        },
+        "drainAfterStageSecs": 7.7,
+        "stageSecs": 3.108,
+        "phases": {
+          "claim": {
+            "n": 37,
+            "failures": 0,
+            "count": 601,
+            "totalMs": 2174.666,
+            "p50Ms": 59.316,
+            "p95Ms": 128.819,
+            "maxMs": 130.76
+          },
+          "publish": {
+            "n": 608,
+            "failures": 0,
+            "count": 608,
+            "totalMs": 1225.432,
+            "p50Ms": 1.597,
+            "p95Ms": 4.996,
+            "maxMs": 14.472
+          },
+          "mark_published": {
+            "n": 609,
+            "failures": 0,
+            "count": 609,
+            "totalMs": 6747.657,
+            "p50Ms": 8.476,
+            "p95Ms": 31.151,
+            "maxMs": 51.239
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 33,
+          "failures": 0,
+          "count": 601,
+          "totalMs": 2159.362,
+          "p50Ms": 63.007,
+          "p95Ms": 128.819,
+          "maxMs": 130.76
+        },
+        "emptyClaim": {
+          "n": 4,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 15.304,
+          "p50Ms": 3.135,
+          "p95Ms": 5.045,
+          "maxMs": 5.045
+        }
+      },
+      {
+        "name": "same-conversation-c100",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 1320.04,
+          "p95Ms": 4018.46,
+          "p99Ms": 5283.46,
+          "maxMs": 8452.76
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 4747.68,
+          "p95Ms": 9634.52,
+          "p99Ms": 11499.47,
+          "maxMs": 15337.99
+        },
+        "drainAfterStageSecs": 7.18,
+        "stageSecs": 10.773,
+        "phases": {
+          "claim": {
+            "n": 609,
+            "failures": 0,
+            "count": 607,
+            "totalMs": 10304.83,
+            "p50Ms": 15.851,
+            "p95Ms": 28.305,
+            "maxMs": 68.859
+          },
+          "publish": {
+            "n": 607,
+            "failures": 0,
+            "count": 607,
+            "totalMs": 912.983,
+            "p50Ms": 1.576,
+            "p95Ms": 2.264,
+            "maxMs": 4.323
+          },
+          "mark_published": {
+            "n": 608,
+            "failures": 0,
+            "count": 608,
+            "totalMs": 6215.628,
+            "p50Ms": 9.595,
+            "p95Ms": 15.433,
+            "maxMs": 25.59
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 607,
+          "failures": 0,
+          "count": 607,
+          "totalMs": 10297.457,
+          "p50Ms": 15.868,
+          "p95Ms": 28.305,
+          "maxMs": 68.859
+        },
+        "emptyClaim": {
+          "n": 2,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 7.373,
+          "p50Ms": 3.646,
+          "p95Ms": 3.727,
+          "maxMs": 3.727
+        }
+      },
+      {
+        "name": "20-conversations-c100",
+        "requests": 600,
+        "storedAck": {
+          "n": 600,
+          "p50Ms": 405.43,
+          "p95Ms": 1154.04,
+          "p99Ms": 1484.4,
+          "maxMs": 1747.3
+        },
+        "push": {
+          "n": 600,
+          "p50Ms": 6533.16,
+          "p95Ms": 9809.44,
+          "p99Ms": 10433.61,
+          "maxMs": 10774.58
+        },
+        "drainAfterStageSecs": 9.76,
+        "stageSecs": 3.309,
+        "phases": {
+          "claim": {
+            "n": 36,
+            "failures": 0,
+            "count": 601,
+            "totalMs": 1936.672,
+            "p50Ms": 52.968,
+            "p95Ms": 101.176,
+            "maxMs": 129.872
+          },
+          "publish": {
+            "n": 601,
+            "failures": 0,
+            "count": 601,
+            "totalMs": 1018.989,
+            "p50Ms": 1.113,
+            "p95Ms": 4.25,
+            "maxMs": 15.438
+          },
+          "mark_published": {
+            "n": 602,
+            "failures": 0,
+            "count": 602,
+            "totalMs": 9222.985,
+            "p50Ms": 12.466,
+            "p95Ms": 36.504,
+            "maxMs": 78.296
+          },
+          "reschedule": {
+            "n": 0,
+            "failures": 0,
+            "count": 0,
+            "totalMs": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "maxMs": null
+          }
+        },
+        "productiveClaim": {
+          "n": 31,
+          "failures": 0,
+          "count": 601,
+          "totalMs": 1884.721,
+          "p50Ms": 56.132,
+          "p95Ms": 101.176,
+          "maxMs": 129.872
+        },
+        "emptyClaim": {
+          "n": 5,
+          "failures": 0,
+          "count": 0,
+          "totalMs": 51.951,
+          "p50Ms": 3.61,
+          "p95Ms": 37.119,
+          "maxMs": 37.119
+        }
+      }
+    ],
+    "phases": {
+      "claim": {
+        "n": 2222,
+        "failures": 0,
+        "count": 3679,
+        "totalMs": 44291.519,
+        "p50Ms": 14.96,
+        "p95Ms": 52.429,
+        "maxMs": 204.011
+      },
+      "publish": {
+        "n": 3679,
+        "failures": 0,
+        "count": 3679,
+        "totalMs": 6874.145,
+        "p50Ms": 1.601,
+        "p95Ms": 3.693,
+        "maxMs": 27.444
+      },
+      "mark_published": {
+        "n": 3679,
+        "failures": 0,
+        "count": 3679,
+        "totalMs": 40836.29,
+        "p50Ms": 9.569,
+        "p95Ms": 19.574,
+        "maxMs": 78.296
+      },
+      "reschedule": {
+        "n": 0,
+        "failures": 0,
+        "count": 0,
+        "totalMs": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "maxMs": null
+      }
+    },
+    "verification": {
+      "packetAudits": [
+        {
+          "redPacketId": "2107277790528155648",
+          "totalAmount": 100,
+          "receivedAmount": 100,
+          "receivedCount": 100,
+          "claimedShareAmount": 100,
+          "claimedShareCount": 100,
+          "receiveRecordAmount": 100,
+          "receiveRecordCount": 100,
+          "receiveLogAmount": 100,
+          "receiveLogCount": 100,
+          "sendLogAmount": -100,
+          "sendLogCount": 1,
+          "refundAmount": 0,
+          "refundLogCount": 0,
+          "problems": []
+        },
+        {
+          "redPacketId": "2107277804960755712",
+          "totalAmount": 100,
+          "receivedAmount": 100,
+          "receivedCount": 100,
+          "claimedShareAmount": 100,
+          "claimedShareCount": 100,
+          "receiveRecordAmount": 100,
+          "receiveRecordCount": 100,
+          "receiveLogAmount": 100,
+          "receiveLogCount": 100,
+          "sendLogAmount": -100,
+          "sendLogCount": 1,
+          "refundAmount": 0,
+          "refundLogCount": 0,
+          "problems": []
+        },
+        {
+          "redPacketId": "2107277817556250624",
+          "totalAmount": 100,
+          "receivedAmount": 100,
+          "receivedCount": 100,
+          "claimedShareAmount": 100,
+          "claimedShareCount": 100,
+          "receiveRecordAmount": 100,
+          "receiveRecordCount": 100,
+          "receiveLogAmount": 100,
+          "receiveLogCount": 100,
+          "sendLogAmount": -100,
+          "sendLogCount": 1,
+          "refundAmount": 0,
+          "refundLogCount": 0,
+          "problems": []
+        }
+      ],
+      "usersBalanceChecked": 121,
+      "balanceMismatches": [],
+      "sequenceChecks": [
+        {
+          "count": 610,
+          "maxSeq": 610,
+          "minSeq": 1,
+          "lastSeq": 610,
+          "sessionId": "910179124903365100"
+        },
+        {
+          "count": 610,
+          "maxSeq": 610,
+          "minSeq": 1,
+          "lastSeq": 610,
+          "sessionId": "910179124903365101"
+        },
+        {
+          "count": 610,
+          "maxSeq": 610,
+          "minSeq": 1,
+          "lastSeq": 610,
+          "sessionId": "910179124903365102"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365103"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365104"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365105"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365106"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365107"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365108"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365109"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365110"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365111"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365112"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365113"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365114"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365115"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365116"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365117"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365118"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365119"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365120"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365121"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365122"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365123"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365124"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365125"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365126"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365127"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365128"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365129"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365130"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365131"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365132"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365133"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365134"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365135"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365136"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365137"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365138"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365139"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365140"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365141"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365142"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365143"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365144"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365145"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365146"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365147"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365148"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365149"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365150"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365151"
+        },
+        {
+          "count": 31,
+          "maxSeq": 31,
+          "minSeq": 1,
+          "lastSeq": 31,
+          "sessionId": "910179124903365152"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365153"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365154"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365155"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365156"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365157"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365158"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365159"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365160"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365161"
+        },
+        {
+          "count": 30,
+          "maxSeq": 30,
+          "minSeq": 1,
+          "lastSeq": 30,
+          "sessionId": "910179124903365162"
+        },
+        {
+          "count": 3,
+          "maxSeq": 3,
+          "minSeq": 1,
+          "lastSeq": 3,
+          "sessionId": "910179124903365163"
+        },
+        {
+          "count": 10,
+          "maxSeq": 10,
+          "minSeq": 1,
+          "lastSeq": 10,
+          "sessionId": "910179124903365164"
+        }
+      ],
+      "messageCountMismatches": [],
+      "outOfOrderPushes": [],
+      "observedUniqueMessages": 3673,
+      "finalOutbox": {
+        "pending": 0,
+        "retries": 0,
+        "published": 3679,
+        "processing": 0,
+        "oldestUnpublishedSecs": null
+      }
+    },
+    "kafkaConsumerLag": {
+      "message-writer-consumer-group": "GROUP                                              TOPIC                                               PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                            HOST            CLIENT-ID\nmessage-writer-consumer-group-load-20261006_090950 message-create-requested-topic-load-20261006_090950 2          -               0               -               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-3e0b5f85-ce7c-4348-9bf3-0803a823662f /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-writer-consumer-group-load-20261006_090950 message-create-requested-topic-load-20261006_090950 1          -               0               -               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-3e0b5f85-ce7c-4348-9bf3-0803a823662f /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-writer-consumer-group-load-20261006_090950 message-create-requested-topic-load-20261006_090950 0          3               3               0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-3e0b5f85-ce7c-4348-9bf3-0803a823662f /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)",
+      "message-push-consumer-group": "GROUP                                            TOPIC                                        PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                            HOST            CLIENT-ID\nmessage-push-consumer-group-load-20261006_090950 message-persisted-topic-load-20261006_090950 2          1748            1748            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-35dd3557-6741-4b77-864c-e6cc1cc17320 /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-push-consumer-group-load-20261006_090950 message-persisted-topic-load-20261006_090950 0          705             705             0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-35dd3557-6741-4b77-864c-e6cc1cc17320 /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-push-consumer-group-load-20261006_090950 message-persisted-topic-load-20261006_090950 1          1220            1220            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-35dd3557-6741-4b77-864c-e6cc1cc17320 /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)",
+      "message-cache-consumer-group": "GROUP                                             TOPIC                                        PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                            HOST            CLIENT-ID\nmessage-cache-consumer-group-load-20261006_090950 message-persisted-topic-load-20261006_090950 2          1748            1748            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-62814dc0-3e64-48f9-9082-4255ce721879 /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-cache-consumer-group-load-20261006_090950 message-persisted-topic-load-20261006_090950 0          705             705             0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-62814dc0-3e64-48f9-9082-4255ce721879 /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nmessage-cache-consumer-group-load-20261006_090950 message-persisted-topic-load-20261006_090950 1          1220            1220            0               realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)-62814dc0-3e64-48f9-9082-4255ce721879 /172.19.0.1     realtime.exe@陨墨智脑 (github.com/segmentio/kafka-go)",
+      "redpacket-cache-build-group": "GROUP                                            TOPIC                                            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                          HOST            CLIENT-ID\nredpacket-cache-build-group-load-20261006_090950 redpacket-cache-build-topic-load-20261006_090950 2          2               2               0               worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)-138fd977-0eff-4b5c-ba86-fc380407e41f /172.19.0.1     worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nredpacket-cache-build-group-load-20261006_090950 redpacket-cache-build-topic-load-20261006_090950 0          1               1               0               worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)-138fd977-0eff-4b5c-ba86-fc380407e41f /172.19.0.1     worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)\nredpacket-cache-build-group-load-20261006_090950 redpacket-cache-build-topic-load-20261006_090950 1          -               0               -               worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)-138fd977-0eff-4b5c-ba86-fc380407e41f /172.19.0.1     worker.exe@陨墨智脑 (github.com/segmentio/kafka-go)"
+    },
+    "requestCount": 15960,
+    "unexpectedErrors": 0
+  },
+  "methodology": "Sequential isolated runs; six fixed 600-message stages each, same service code/configuration except predecessor index; timings include lease transaction and synchronous Kafka ACK. Per-stage windows run through online delivery; no parallel compilation during load."
+}

@@ -77,6 +77,11 @@ var (
 	GroupInviteNoAuth     = newErrorCode(72003, "只有群主或管理员可以邀请成员")
 	GroupKickNoAuth       = newErrorCode(72004, "无权移除该群成员")
 	GroupOwnerCannotLeave = newErrorCode(72005, "群主需要先转让群主或解散群聊")
+
+	RedPacketInsufficientBalance = newErrorCode(73000, "余额不足")
+	RedPacketSendConflict        = newErrorCode(73001, "重复请求的红包内容不一致")
+	RedPacketExpired             = newErrorCode(73002, "红包已过期")
+	RedPacketSoldOut             = newErrorCode(73003, "红包已领完")
 )
 
 // 在某些情况下，直接终止调用栈，统一由外层中间件捕获

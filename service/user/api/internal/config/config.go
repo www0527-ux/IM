@@ -6,6 +6,7 @@ package config
 import (
 	"infinitechatgo/common/auth"
 	"infinitechatgo/common/idgen"
+	"infinitechatgo/common/mysqlpool"
 
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -30,6 +31,7 @@ type MinioConf struct {
 type Config struct {
 	rest.RestConf
 	DataSource string
+	MySQLPool  mysqlpool.Config
 	Cache      cache.CacheConf
 	Redis      redis.RedisConf
 	Email      EmailConf

@@ -1,0 +1,23 @@
+DataSource: root:YOUR_MYSQL_PASSWORD@tcp(127.0.0.1:3306)/infiniteChat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+MySQLPool:
+  MaxOpenConns: 4
+  MaxIdleConns: 2
+
+Redis:
+  Host: 127.0.0.1:6379
+  Pass: ""
+  Type: node
+
+Snowflake:
+  NodeID: 4
+
+Kafka:
+  Brokers:
+    - 127.0.0.1:9092
+  CacheBuildTopic: redpacket-cache-build-topic
+  CacheBuildGroup: redpacket-cache-build-group
+  DLQTopic: message-consumer-dlq-topic
+
+ExpiryPollMillis: 1000
+RebuildPollSeconds: 30
+BatchSize: 100

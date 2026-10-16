@@ -27,6 +27,7 @@ func (f fakeCache) Lookup(
 type fakeWriter struct {
 	called bool
 	result Result
+	err    error
 }
 
 func (f *fakeWriter) Persist(
@@ -34,7 +35,7 @@ func (f *fakeWriter) Persist(
 	Command,
 ) (Result, error) {
 	f.called = true
-	return f.result, nil
+	return f.result, f.err
 }
 
 func validRealtimeCommand(t *testing.T) Command {
@@ -99,8 +100,12 @@ func TestMessageWriteServiceFallsBackWhenCacheFails(t *testing.T) {
 	}
 }
 
-func TestMessageWriteServiceRejectsFingerprintConflict(t *testing.T) {
+func TestMessageWriteServiceChecksMySQLOnCacheFingerprintConflict(t *testing.T) {
 	command := validRealtimeCommand(t)
+	writer := &fakeWriter{result: Result{
+		Message: messageevent.ChatMessage{MessageID: 30, Seq: 40},
+		Created: false,
+	}}
 	service := NewMessageWriteService(fakeCache{
 		entry: messagecache.IdempotencyEntry{
 			MessageID:   30,
@@ -108,10 +113,24 @@ func TestMessageWriteServiceRejectsFingerprintConflict(t *testing.T) {
 			Fingerprint: "different",
 		},
 		found: true,
-	}, &fakeWriter{})
+	}, writer)
+
+	result, err := service.Send(context.Background(), command)
+	if err != nil || !writer.called || result.Message.MessageID != 30 {
+		t.Fatalf("MySQL fallback not used: result=%+v err=%v called=%t", result, err, writer.called)
+	}
+}
+
+func TestMessageWriteServiceReturnsConfirmedMySQLConflict(t *testing.T) {
+	command := validRealtimeCommand(t)
+	writer := &fakeWriter{err: ErrIdempotencyConflict}
+	service := NewMessageWriteService(fakeCache{
+		entry: messagecache.IdempotencyEntry{Fingerprint: "different"},
+		found: true,
+	}, writer)
 
 	_, err := service.Send(context.Background(), command)
-	if !errors.Is(err, ErrIdempotencyConflict) {
-		t.Fatalf("expected idempotency conflict, got %v", err)
+	if !writer.called || !errors.Is(err, ErrIdempotencyConflict) {
+		t.Fatalf("confirmed MySQL conflict: called=%t err=%v", writer.called, err)
 	}
 }

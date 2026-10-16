@@ -13,6 +13,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest"
 	"infinitechatgo/common/idgen"
+	"infinitechatgo/common/mysqlpool"
 	"infinitechatgo/service/user/api/internal/config"
 	userMiddleware "infinitechatgo/service/user/api/internal/middleware"
 	userService "infinitechatgo/service/user/api/internal/service"
@@ -44,7 +45,7 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	conn := sqlx.NewMysql(c.DataSource)
+	conn := mysqlpool.MustNewMysql(c.DataSource, c.MySQLPool)
 	rds := redis.MustNewRedis(c.Redis)
 	idGenerator := idgen.MustNew(c.Snowflake)
 	userModel := user.NewUserModel(conn, c.Cache)

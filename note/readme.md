@@ -840,3 +840,28 @@ flag.String(
     "etc/offline.yaml",   // 默认值
     "the config file",    // 帮助说明
 )
+
+| 列 | 类型 | 作用 |
+|---|---|---|
+| `event_id` | `bigint` | 事件主键；不同于聊天消息的 `messageID` |
+| `event_type` | `varchar(64)` | 发生了什么事 |
+| `aggregate_type` | `varchar(32)` | 事件按哪类对象归组 |
+| `aggregate_id` | `bigint` | 归组对象的 ID |
+| `aggregate_seq` | `bigint`，可空 | 对象内顺序；已落库消息填写会话 Seq |
+| `topic` | `varchar(128)` | Kafka Topic |
+| `message_key` | `varchar(128)` | Kafka Key；消息事件使用 `sessionID` |
+| `payload` | `json` | 要发给消费者的完整事件 |
+| `status` | `tinyint` | `0=PENDING`、`1=PROCESSING`、`2=PUBLISHED` |
+| `retry_count` | `int` | 发布失败后的重试次数 |
+| `next_retry_at` | `datetime(3)` | 下次允许领取的时间 |
+| `lease_owner` | `varchar(64)`，可空 | 当前领取它的 Worker |
+| `lease_until` | `datetime(3)`，可空 | 当前租约截止时间 |
+| `last_error` | `text`，可空 | 最近一次发布错误 |
+| `created_time` | `datetime(3)` | 创建时间 |
+| `updated_time` | `datetime(3)` | 最近更新时间 |
+| `published_time` | `datetime(3)`，可空 | Broker 确认接收的时间 |
+
+| 事件 | 含义 | `aggregate_id` / `aggregate_seq` | `payload` 内容 |
+|---|---|---|---|
+| `chat.message.create_requested` | 红包资金事务已提交，请消息服务**创建聊天消息** | `redPacketID` / `NULL`，因为尚未签发 Seq | `eventId`、`eventType`、`version`、`message`、`fingerprint` |
+| `chat.message.persisted` | 聊天消息**已经落库**，可以生成缓存和推送 | `sessionID` / `message.seq` | 上述字段，加 `persistedAt` |

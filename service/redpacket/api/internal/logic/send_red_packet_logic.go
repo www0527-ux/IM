@@ -5,6 +5,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 
 	"infinitechatgo/common/auth"
 	"infinitechatgo/common/common"
@@ -50,7 +51,22 @@ func (l *SendRedPacketLogic) SendRedPacket(req *types.SendRedPacketRequest) (res
 		},
 	)
 	if err != nil {
-		return nil, err
+		var validationErr application.SendValidationError
+		switch {
+		case errors.As(err, &validationErr):
+			return nil, common.WrapError(common.ParamsError, err)
+		case errors.Is(err, application.ErrSendPermissionDenied):
+			return nil, common.WrapError(common.NoAuthError, err)
+		case errors.Is(err, application.ErrSendInsufficientBalance):
+			return nil, common.WrapError(common.RedPacketInsufficientBalance, err)
+		case errors.Is(err, application.ErrSendIdempotencyConflict):
+			return nil, common.WrapError(common.RedPacketSendConflict, err)
+		case errors.Is(err, application.ErrSendInvariantViolation),
+			errors.Is(err, application.ErrSendDependenciesMissing):
+			return nil, common.WrapError(common.SystemError, err)
+		default:
+			return nil, common.WrapError(common.SystemBusy, err)
+		}
 	}
 
 	return &types.SendRedPacketResponse{

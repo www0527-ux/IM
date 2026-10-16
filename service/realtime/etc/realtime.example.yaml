@@ -5,14 +5,14 @@ Mode: dev
 
 ListenOn: 0.0.0.0:9101
 
-# Keep legacy until MessageWriteService.PersistentWriter and Outbox Relay are
-# implemented and accepted. Then change this to outbox.
 MessagePipeline:
-  Mode: legacy
   ContentCacheTTLSeconds: 604800
   IdempotencyCacheTTLSeconds: 604800
 
 DataSource: root:YOUR_MYSQL_PASSWORD@tcp(127.0.0.1:3306)/infiniteChat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+MySQLPool:
+  MaxOpenConns: 24
+  MaxIdleConns: 8
 
 Redis:
   Host: 127.0.0.1:6379
@@ -34,10 +34,9 @@ UserRpc:
 Kafka:
   Brokers:
     - 127.0.0.1:9092
-  AcceptedTopic: chat-message-accepted-topic
-  SequencedTopic: chat-message-sequenced-topic
   CreateRequestedTopic: message-create-requested-topic
   PersistedTopic: message-persisted-topic
+  DLQTopic: message-consumer-dlq-topic
   MessageWriterGroup: message-writer-consumer-group
   PushGroup: message-push-consumer-group
   MessageCacheGroup: message-cache-consumer-group

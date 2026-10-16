@@ -1,7 +1,7 @@
 package svc
 
 import (
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"infinitechatgo/common/mysqlpool"
 	friendModel "infinitechatgo/service/user/model/friend"
 	sessionModel "infinitechatgo/service/user/model/session"
 	userModel "infinitechatgo/service/user/model/user"
@@ -16,9 +16,10 @@ type ServiceContext struct {
 	SessionModel     sessionModel.SessionModel
 	FriendModel      friendModel.FriendModel
 }
+
 //创建连接
 func NewServiceContext(c config.Config) *ServiceContext {
-	conn := sqlx.NewMysql(c.DataSource)
+	conn := mysqlpool.MustNewMysql(c.DataSource, c.MySQLPool)
 	return &ServiceContext{
 		Config: c,
 		UserModel: userModel.NewUserModel(

@@ -1,15 +1,23 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+
+	"infinitechatgo/common/kafkareader"
 
 	"infinitechatgo/service/realtime/internal/config"
 	"infinitechatgo/service/realtime/internal/consumer"
 	"infinitechatgo/service/realtime/internal/svc"
 	realtimews "infinitechatgo/service/realtime/internal/websocket"
 
-	"github.com/zeromicro/go-queue/kq"
+	"github.com/segmentio/kafka-go"
 	"github.com/zeromicro/go-zero/core/conf"
 )
 
@@ -20,6 +28,12 @@ var configFile = flag.String(
 )
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run() error {
 	flag.Parse()
 
 	var c config.Config
@@ -31,112 +45,94 @@ func main() {
 
 	svcCtx, err := svc.NewServiceContext(c)
 	if err != nil {
-		log.Fatalf(
-			"initialize realtime service: %v",
-			err,
-		)
+		return fmt.Errorf("initialize realtime service: %w", err)
 	}
-
+	dlqPublisher, err := consumer.NewKafkaDeadLetterPublisher(c.Kafka.Brokers, c.Kafka.DLQTopic)
+	if err != nil {
+		return fmt.Errorf("initialize Kafka DLQ publisher: %w", err)
+	}
 	defer func() {
-		if err := svcCtx.Close(); err != nil {
-			log.Printf(
-				"close realtime service: %v",
-				err,
-			)
+		if err := dlqPublisher.Close(); err != nil {
+			log.Printf("close Kafka DLQ publisher: %v", err)
 		}
 	}()
+	//创建一个可以监听系统中断信号的上下文
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	readers := make([]*kafkareader.Reader, 0, 3)
+	var consumerWorkers sync.WaitGroup
+	defer func() {
+		stop()
+		for _, reader := range readers {
+			_ = reader.Close()
+		}
+		consumerWorkers.Wait()
+	}()
+	consumerErrors := make(chan error, 3)
+	// startConsumer is a helper function to start a Kafka consumer in a separate goroutine.
+	startConsumer := func(topic, group string, handler consumer.KafkaConsumer) {
+		// 创建 Reader 并启动消费组后台任务；Kafka 连接异步建立。
+		//handler为消费者的处理逻辑，实现了consume接口
+		reader := kafkareader.New(kafka.ReaderConfig{
+			Brokers:        c.Kafka.Brokers, //kafka集群地址
+			GroupID:        group,
+			Topic:          topic,
+			StartOffset:    kafka.FirstOffset, // Only used when this group has no committed offset.
+			CommitInterval: 0,                 // CommitMessages 调用时同步等待提交结果；不会自动提交。
+		})
+		readers = append(readers, reader)
+		consumerWorkers.Add(1)
+		go func() {
+			defer consumerWorkers.Done()
+			if err := consumer.RunKafkaConsumer(ctx, reader, handler, group, dlqPublisher); err != nil {
+				consumerErrors <- fmt.Errorf("Kafka consumer group=%s topic=%s stopped: %w", group, topic, err)
+			}
+		}()
+		log.Printf("Kafka consumer started: topic=%s group=%s", topic, group)
+	}
 
 	manager := realtimews.NewManager()
-	pushTopic := c.Kafka.SequencedTopic
+	//创建handler
 	pushConsumer := consumer.NewMessagePushConsumer(manager, svcCtx.UserRPC)
-	if svcCtx.UsesOutboxPipeline() {
-		pushTopic = c.Kafka.PersistedTopic
-		pushConsumer = consumer.NewPersistedMessagePushConsumer(
-			manager,
-			svcCtx.UserRPC,
-		)
+	writerConsumer := consumer.NewMessageWriterConsumer(svcCtx.MessageWriter)
+	cacheConsumer, err := consumer.NewMessageCacheConsumer(
+		svcCtx.Redis,
+		c.MessagePipeline.ContentCacheTTLSeconds,
+		c.MessagePipeline.IdempotencyCacheTTLSeconds,
+	)
+	if err != nil {
+		return fmt.Errorf("initialize message cache consumer: %w", err)
 	}
-	pushQueue := kq.MustNewQueue(
-		kq.KqConf{
-			ServiceConf: c.ServiceConf,
-			Brokers:     c.Kafka.Brokers,
-			Group:       c.Kafka.PushGroup,
-			Topic:       pushTopic,
-			Offset:      "first",
-			Conns:       1,
-			Consumers:   1,
-			Processors:  1,
-			ForceCommit: false,
-		},
+	//启动消费者循环
+	startConsumer(
+		c.Kafka.PersistedTopic,
+		c.Kafka.PushGroup,
 		pushConsumer,
 	)
-	go pushQueue.Start()
-	defer pushQueue.Stop()
-
-	log.Printf(
-		"realtime push consumer started: topic=%s group=%s",
-		pushTopic,
-		c.Kafka.PushGroup,
+	startConsumer(
+		c.Kafka.CreateRequestedTopic,
+		c.Kafka.MessageWriterGroup,
+		writerConsumer,
+	)
+	startConsumer(
+		c.Kafka.PersistedTopic,
+		c.Kafka.MessageCacheGroup,
+		cacheConsumer,
 	)
 
-	if svcCtx.UsesOutboxPipeline() {
-		writerQueue := kq.MustNewQueue(
-			kq.KqConf{
-				ServiceConf: c.ServiceConf,
-				Brokers:     c.Kafka.Brokers,
-				Group:       c.Kafka.MessageWriterGroup,
-				Topic:       c.Kafka.CreateRequestedTopic,
-				Offset:      "first",
-				Conns:       1,
-				Consumers:   1,
-				Processors:  1,
-				ForceCommit: false,
-			},
-			consumer.NewMessageWriterConsumer(svcCtx.MessageWriter),
-		)
-		go writerQueue.Start()
-		defer writerQueue.Stop()
-
-		cacheConsumer, err := consumer.NewMessageCacheConsumer(
-			svcCtx.Redis,
-			c.MessagePipeline.ContentCacheTTLSeconds,
-			c.MessagePipeline.IdempotencyCacheTTLSeconds,
-		)
+	serverErrors := make(chan error, 1)
+	//启动websocket服务
+	go func() {
+		serverErrors <- realtimews.StartServer(c.ListenOn, manager, svcCtx)
+	}()
+	select {
+	case err := <-consumerErrors:
+		return err
+	case err := <-serverErrors:
 		if err != nil {
-			log.Fatalf("initialize message cache consumer: %v", err)
+			return fmt.Errorf("realtime server stopped: %w", err)
 		}
-		cacheQueue := kq.MustNewQueue(
-			kq.KqConf{
-				ServiceConf: c.ServiceConf,
-				Brokers:     c.Kafka.Brokers,
-				Group:       c.Kafka.MessageCacheGroup,
-				Topic:       c.Kafka.PersistedTopic,
-				Offset:      "first",
-				Conns:       1,
-				Consumers:   1,
-				Processors:  1,
-				ForceCommit: false,
-			},
-			cacheConsumer,
-		)
-		go cacheQueue.Start()
-		defer cacheQueue.Stop()
-
-		log.Printf(
-			"outbox message consumers started: createTopic=%s persistedTopic=%s",
-			c.Kafka.CreateRequestedTopic,
-			c.Kafka.PersistedTopic,
-		)
-	}
-
-	if err := realtimews.StartServer(
-		c.ListenOn,
-		manager,
-		svcCtx,
-	); err != nil {
-		log.Printf(
-			"realtime server stopped: %v",
-			err,
-		)
+		return fmt.Errorf("realtime server stopped unexpectedly")
+	case <-ctx.Done():
+		return nil
 	}
 }

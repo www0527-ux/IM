@@ -7,17 +7,25 @@ import (
 
 // client<->realtime server
 const (
-	EventTypeMessageSend  = "message.send"
-	EventTypeMessageAck   = "message.ack"
-	EventTypeMessageError = "message.error"
-	EventTypeMessageNew   = "message.new"
+	EventTypeConnectionReady = "connection.ready"
+	EventTypeMessageSend     = "message.send"
+	EventTypeMessageAck      = "message.ack"
+	EventTypeMessageError    = "message.error"
+	EventTypeMessageNew      = "message.new"
 )
+
+type ConnectionReady struct {
+	EventType string `json:"eventType"`
+}
+
+func NewConnectionReady() ConnectionReady {
+	return ConnectionReady{EventType: EventTypeConnectionReady}
+}
 
 type MessageAckStatus string
 
 const (
-	MessageAckStatusAccepted MessageAckStatus = "accepted"
-	MessageAckStatusStored   MessageAckStatus = "stored"
+	MessageAckStatusStored MessageAckStatus = "stored"
 )
 
 type MessageErrorStatus string
@@ -74,18 +82,6 @@ type NewMessageResponse struct {
 	Message messageevent.ChatMessage `json:"message"`
 }
 
-func NewAcceptedAck(
-	clientMessageID string,
-	messageID int64,
-) MessageAck {
-	return MessageAck{
-		EventType:       EventTypeMessageAck,
-		ClientMessageID: clientMessageID,
-		MessageID:       messageID,
-		Status:          MessageAckStatusAccepted,
-		ServerTime:      time.Now().UnixMilli(),
-	}
-}
 func NewStoredAck(
 	clientMessageID string,
 	messageID int64,
@@ -116,24 +112,6 @@ func NewRejectedError(
 	}
 }
 
-func NewUnknownError(
-	clientMessageID string,
-	messageID int64,
-	code string,
-	message string,
-) MessageErrorResponse {
-	return MessageErrorResponse{
-		EventType:       EventTypeMessageError,
-		ClientMessageID: clientMessageID,
-		MessageID:       &messageID,
-		Status:          MessageErrorStatusUnknown,
-		Code:            code,
-		Message:         message,
-		Retryable:       true,
-		ServerTime:      time.Now().UnixMilli(),
-	}
-}
-
 func NewUnavailableError(
 	clientMessageID string,
 	code string,
@@ -154,7 +132,7 @@ func NewMessage(
 	message messageevent.ChatMessage,
 ) NewMessageResponse {
 	return NewMessageResponse{
-		EventType: EventTypeMessageNew,
+		EventType: EventTypeMessageNew, //消息类型
 		Message:   message,
 	}
 }

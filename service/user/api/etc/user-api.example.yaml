@@ -3,6 +3,9 @@ Host: 0.0.0.0
 Port: 8104
 
 DataSource: root:YOUR_MYSQL_PASSWORD@tcp(127.0.0.1:3306)/infinitechat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+MySQLPool:
+  MaxOpenConns: 8
+  MaxIdleConns: 4
 
 Cache:
   - Host: 127.0.0.1:6379

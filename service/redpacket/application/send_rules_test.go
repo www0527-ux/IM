@@ -100,3 +100,39 @@ func TestValidateSendCommandRejectsInvalidFields(t *testing.T) {
 		})
 	}
 }
+
+func TestAllocateShareAmountsPreservesMoneyAndMinimumShare(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		total int64
+		count int64
+		kind  int64
+	}{
+		{name: "ordinary", total: 100, count: 10, kind: RedPacketTypeOrdinary},
+		{name: "lucky minimum edge", total: 101, count: 100, kind: RedPacketTypeLucky},
+		{name: "lucky maximum", total: 20_000, count: 100, kind: RedPacketTypeLucky},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			amounts, err := AllocateShareAmounts(test.total, test.count, test.kind)
+			if err != nil {
+				t.Fatalf("AllocateShareAmounts() error = %v", err)
+			}
+			if int64(len(amounts)) != test.count {
+				t.Fatalf("share count = %d, want %d", len(amounts), test.count)
+			}
+			var sum int64
+			for _, amount := range amounts {
+				if amount < 1 || amount > maxRedPacketAmount {
+					t.Fatalf("invalid share amount %d", amount)
+				}
+				if test.kind == RedPacketTypeOrdinary && amount != test.total/test.count {
+					t.Fatalf("ordinary share = %d, want %d", amount, test.total/test.count)
+				}
+				sum += amount
+			}
+			if sum != test.total {
+				t.Fatalf("share sum = %d, want %d", sum, test.total)
+			}
+		})
+	}
+}

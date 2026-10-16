@@ -24,7 +24,8 @@ CREATE TABLE `outbox_event`
     PRIMARY KEY (`event_id`),
     INDEX `idx_pending_schedule` (`status`, `next_retry_at`, `lease_until`, `created_time`),
     INDEX `idx_aggregate` (`aggregate_type`, `aggregate_id`),
-    INDEX `idx_aggregate_seq` (`aggregate_type`, `aggregate_id`, `aggregate_seq`)
+    INDEX `idx_aggregate_seq` (`aggregate_type`, `aggregate_id`, `aggregate_seq`),
+    INDEX `idx_relay_predecessor` (`aggregate_type`, `aggregate_id`, `event_type`, `status`, `aggregate_seq`)
 ) ENGINE = InnoDB
   CHARACTER SET = utf8mb4
   COLLATE = utf8mb4_0900_ai_ci

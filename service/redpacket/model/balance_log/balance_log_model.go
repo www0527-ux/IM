@@ -3,12 +3,12 @@ package balance_log
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"fmt"
+
+	"infinitechatgo/common/txctx"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
-
-var ErrInsertTxNotImplemented = errors.New("balance log InsertTx is not implemented")
 
 var _ BalanceLogModel = (*customBalanceLogModel)(nil)
 
@@ -34,11 +34,25 @@ func NewBalanceLogModel(conn sqlx.SqlConn) BalanceLogModel {
 }
 
 func (m *customBalanceLogModel) InsertTx(
-	context.Context,
-	*BalanceLog,
+	ctx context.Context,
+	data *BalanceLog,
 ) (sql.Result, error) {
-	// TODO(user): insert through txctx and preserve the business unique key.
-	return nil, ErrInsertTxNotImplemented
+	if data == nil || data.BalanceLogId <= 0 || data.UserId <= 0 ||
+		data.Amount == 0 || data.RelatedId <= 0 {
+		return nil, fmt.Errorf("insert balance log: invalid data")
+	}
+	conn, err := txctx.SessionConn(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("insert balance log: %w", err)
+	}
+	result, err := conn.ExecCtx(ctx, `INSERT INTO balance_log
+		(balance_log_id, user_id, amount, type, related_id)
+		VALUES (?, ?, ?, ?, ?)`, data.BalanceLogId, data.UserId, data.Amount,
+		data.Type, data.RelatedId)
+	if err != nil {
+		return nil, fmt.Errorf("insert balance log %d: %w", data.BalanceLogId, err)
+	}
+	return result, nil
 }
 
 func (m *customBalanceLogModel) withSession(session sqlx.Session) BalanceLogModel {

@@ -6,13 +6,10 @@ import (
 
 	"infinitechatgo/common/middleware"
 	"infinitechatgo/service/offline/internal/config"
-	"infinitechatgo/service/offline/internal/consumer"
 	"infinitechatgo/service/offline/internal/httpapi"
 	"infinitechatgo/service/offline/internal/svc"
 
-	"github.com/zeromicro/go-queue/kq"
 	"github.com/zeromicro/go-zero/core/conf"
-	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/rest"
 )
 
@@ -41,32 +38,5 @@ func main() {
 		c.Port,
 	)
 
-	serviceGroup := service.NewServiceGroup()
-	if !c.MessagePipeline.UsesOutbox() {
-		messageConsumer := consumer.NewMessageStoreConsumer(svcCtx)
-		queue := kq.MustNewQueue(
-			kq.KqConf{
-				ServiceConf: c.ServiceConf,
-				Brokers:     c.Kafka.Brokers,
-				Group:       c.Kafka.StoreGroup,
-				Topic:       c.Kafka.SequencedTopic,
-				Offset:      "first",
-				Conns:       1,
-				Consumers:   1,
-				Processors:  1,
-				ForceCommit: false,
-			},
-			messageConsumer,
-		)
-		serviceGroup.Add(queue)
-		log.Printf(
-			"legacy offline store consumer started: topic=%s group=%s",
-			c.Kafka.SequencedTopic,
-			c.Kafka.StoreGroup,
-		)
-	} else {
-		log.Printf("offline service running read-only in outbox message pipeline")
-	}
-	serviceGroup.Add(server)
-	serviceGroup.Start()
+	server.Start()
 }

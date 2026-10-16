@@ -37,6 +37,10 @@ func main() {
 	httpx.SetErrorHandlerCtx(func(ctx context.Context, err error) (int, any) {
 		var appErr common.ErrorCode
 		if errors.As(err, &appErr) {
+			if appErr.Code == common.SystemBusy.Code {
+				logx.WithContext(ctx).Errorf("redpacket retryable error: %v", appErr.Cause)
+				return http.StatusOK, utils.Fail(appErr)
+			}
 			if appErr.Code >= 50000 && appErr.Code < 60000 {
 				logx.WithContext(ctx).Errorf(
 					"redpacket system error: code=%d, message=%s, cause=%v",

@@ -12,9 +12,10 @@ import (
 )
 
 var (
-	ErrCoreNotImplemented  = errors.New("message persistent writer is not implemented")
-	ErrInvalidCommand      = errors.New("invalid message write command")
-	ErrIdempotencyConflict = errors.New("message idempotency conflict")
+	ErrPersistenceDependencyMissing = errors.New("message persistent writer dependency is missing")
+	ErrInvalidCommand               = errors.New("invalid message write command")
+	ErrIdempotencyConflict          = errors.New("message idempotency conflict")
+	ErrUniqueConstraintViolation    = errors.New("message unique constraint violation outside idempotency key")
 )
 
 type Source string
@@ -80,18 +81,16 @@ func (s *MessageWriteService) Send(
 			command.Message.SenderID,
 			command.Message.ClientMessageID,
 		)
-		// Redis is only a projection. Any read failure degrades to the
-		// persistent writer instead of rejecting a valid message.
+		//与redis缓存冲突，回源数据库
 		if err == nil && found {
 			if entry.Fingerprint != command.Fingerprint ||
 				(command.Source == SourceRedPacket &&
 					entry.MessageID != command.Message.MessageID) {
-				return Result{}, fmt.Errorf(
-					"%w: sender_id=%d client_message_id=%q",
-					ErrIdempotencyConflict,
-					command.Message.SenderID,
-					command.Message.ClientMessageID,
-				)
+
+				if s.writer == nil {
+					return Result{}, ErrPersistenceDependencyMissing
+				}
+				return s.writer.Persist(ctx, command)
 			}
 
 			cachedMessage := command.Message
@@ -102,7 +101,7 @@ func (s *MessageWriteService) Send(
 	}
 
 	if s.writer == nil {
-		return Result{}, ErrCoreNotImplemented
+		return Result{}, ErrPersistenceDependencyMissing
 	}
 	return s.writer.Persist(ctx, command)
 }

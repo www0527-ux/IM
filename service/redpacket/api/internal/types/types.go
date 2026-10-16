@@ -13,10 +13,16 @@ type GetSentRedPacketsRequest struct {
 }
 
 type GetSentRedPacketsResponse struct {
-	List     []RedPacketDetailResponse `json:"list"`
-	Total    int64                     `json:"total"`
-	PageNum  int64                     `json:"pageNum"`
-	PageSize int64                     `json:"pageSize"`
+	List     []SentRedPacketSummary `json:"list"`
+	Total    int64                  `json:"total"`
+	PageNum  int64                  `json:"pageNum"`
+	PageSize int64                  `json:"pageSize"`
+}
+
+type RedPacketReceiveItem struct {
+	ReceiverId int64 `json:"receiverId,string"`
+	Amount     int64 `json:"amount"`
+	ReceivedAt int64 `json:"receivedAt"`
 }
 
 type ReceiveRedPacketRequest struct {
@@ -31,6 +37,23 @@ type ReceiveRedPacketResponse struct {
 }
 
 type RedPacketDetailResponse struct {
+	RedPacketId    int64                  `json:"redPacketId,string"`
+	MessageId      int64                  `json:"messageId,string"`
+	SenderId       int64                  `json:"senderId,string"`
+	SessionId      int64                  `json:"sessionId,string"`
+	SessionType    int64                  `json:"sessionType"`
+	RedPacketType  int64                  `json:"redPacketType"`
+	WrapperText    string                 `json:"wrapperText"`
+	TotalAmount    int64                  `json:"totalAmount"`
+	TotalCount     int64                  `json:"totalCount"`
+	ReceivedAmount int64                  `json:"receivedAmount"`
+	ReceivedCount  int64                  `json:"receivedCount"`
+	Status         int64                  `json:"status"`
+	ExpireAt       int64                  `json:"expireAt"`
+	Receives       []RedPacketReceiveItem `json:"receives"`
+}
+
+type SentRedPacketSummary struct {
 	RedPacketId    int64  `json:"redPacketId,string"`
 	MessageId      int64  `json:"messageId,string"`
 	SenderId       int64  `json:"senderId,string"`

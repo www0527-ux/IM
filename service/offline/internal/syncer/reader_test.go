@@ -72,9 +72,7 @@ func TestReaderSyncMergesCacheAndDatabaseAndSkipsSeqHole(t *testing.T) {
 		Body:            messageevent.MessageBody{Content: "cached"},
 		CreatedAt:       1_700_000_000_000,
 	}
-	payload, err := json.Marshal(
-		messageevent.NewChatMessagePersistedEvent(cachedMessage, cachedMessage.CreatedAt),
-	)
+	payload, err := json.Marshal(cachedMessage)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,6 +139,23 @@ func TestReaderSyncFallsBackWhenCacheIsUnavailable(t *testing.T) {
 			store.requestedAfter,
 			store.requestedThrough,
 		)
+	}
+}
+
+func TestDecodeCachedMessageRejectsOldEventWrapper(t *testing.T) {
+	message := messageevent.ChatMessage{
+		MessageID:       101,
+		ClientMessageID: "client-1",
+		SessionID:       20,
+		Seq:             1,
+		SenderID:        7,
+	}
+	payload, err := json.Marshal(messageevent.NewChatMessagePersistedEvent(message, 0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := decodeCachedMessage(string(payload), 20, 1); ok {
+		t.Fatal("old event wrapper must fall back to the message store")
 	}
 }
 

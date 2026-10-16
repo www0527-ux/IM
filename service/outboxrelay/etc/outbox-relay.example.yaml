@@ -2,6 +2,9 @@ Name: outbox-relay
 Mode: dev
 
 DataSource: root:YOUR_MYSQL_PASSWORD@tcp(127.0.0.1:3306)/infiniteChat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+MySQLPool:
+  MaxOpenConns: 4
+  MaxIdleConns: 2
 
 Kafka:
   Brokers:
@@ -9,10 +12,12 @@ Kafka:
 
 Relay:
   WorkerID: local-relay-1
-  BatchSize: 100
+  BatchSize: 500
+  CheckpointSize: 20
   PollIntervalMillis: 200
-  LeaseSeconds: 30
+  LeaseSeconds: 120
   MaxRetryBackoffSecs: 60
+  LogTimings: false
 
 Log:
   Mode: console

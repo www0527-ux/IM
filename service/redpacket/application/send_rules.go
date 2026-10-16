@@ -1,8 +1,9 @@
 package application
 
 import (
-	"errors"
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"strings"
 	"unicode/utf8"
 )
@@ -18,10 +19,6 @@ const (
 	maxWrapperTextLength     = 50
 	maxRedPacketAmount       = 20_000
 	maxGroupPacketCount      = 100
-)
-
-var (
-	ErrShareAllocationNotImplemented = errors.New("red packet share allocation is not implemented")
 )
 
 type SendValidationError struct {
@@ -119,6 +116,38 @@ func AllocateShareAmounts(
 	count int64,
 	redPacketType int64,
 ) ([]int64, error) {
-	// TODO(user): implement the ordinary and double-mean allocation algorithms.
-	return nil, ErrShareAllocationNotImplemented
+	if count < 1 || count > maxGroupPacketCount || totalAmount < count ||
+		totalAmount > maxRedPacketAmount {
+		return nil, invalidSendField("totalAmount", "amount or share count is out of range")
+	}
+	amounts := make([]int64, count)
+	switch redPacketType {
+	case RedPacketTypeOrdinary:
+		if totalAmount%count != 0 {
+			return nil, invalidSendField("totalAmount", "must divide evenly by totalCount")
+		}
+		for index := range amounts {
+			amounts[index] = totalAmount / count
+		}
+	case RedPacketTypeLucky:
+		remaining := totalAmount
+		for index := int64(0); index < count-1; index++ {
+			left := count - index
+			// Reserve one cent for every remaining share before drawing.
+			upper := min(remaining-(left-1), remaining*2/left)
+			if upper < 1 {
+				return nil, fmt.Errorf("allocate lucky shares: no positive amount remains")
+			}
+			drawn, err := rand.Int(rand.Reader, big.NewInt(upper))
+			if err != nil {
+				return nil, fmt.Errorf("draw lucky share: %w", err)
+			}
+			amounts[index] = drawn.Int64() + 1
+			remaining -= amounts[index]
+		}
+		amounts[count-1] = remaining
+	default:
+		return nil, invalidSendField("redPacketType", "unsupported packet type")
+	}
+	return amounts, nil
 }

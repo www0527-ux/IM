@@ -1,0 +1,282 @@
+{
+    "date":  "2026-10-05",
+    "checks":  {
+                   "frontendProductionBuild":  "PASS",
+                   "goBuild":  "PASS",
+                   "nodeVersion":  "v24.14.0",
+                   "goTests":  "PASS",
+                   "frontendTypeCheck":  "PASS",
+                   "goVersion":  "go1.26.5 windows/amd64"
+               },
+    "backend":  {
+                    "runID":  "20261005_222554",
+                    "database":  "im_acceptance_20261005_222554",
+                    "results":  [
+                                    {
+                                        "name":  "gateway static files, routes and authentication",
+                                        "result":  "PASS",
+                                        "durationMs":  1447,
+                                        "evidence":  {
+                                                         "staticStatus":  200,
+                                                         "unknownRoute":  404,
+                                                         "logins":  16
+                                                     }
+                                    },
+                                    {
+                                        "name":  "message stored ACK, receiver push and offline overlap through gateway",
+                                        "result":  "PASS",
+                                        "durationMs":  1714,
+                                        "evidence":  {
+                                                         "messageID":  "2107115282194505728",
+                                                         "seq":  "1",
+                                                         "nextSeq":  "1"
+                                                     }
+                                    },
+                                    {
+                                        "name":  "message repeated request and content conflict",
+                                        "result":  "PASS",
+                                        "durationMs":  753,
+                                        "evidence":  {
+                                                         "messageID":  "2107115287449968640",
+                                                         "seq":  "2",
+                                                         "conflict":  "idempotency_conflict"
+                                                     }
+                                    },
+                                    {
+                                        "name":  "offline pagination and reading permission",
+                                        "result":  "PASS",
+                                        "durationMs":  20,
+                                        "evidence":  {
+                                                         "firstSeq":  "1",
+                                                         "secondSeq":  "2",
+                                                         "forbiddenCode":  40101
+                                                     }
+                                    },
+                                    {
+                                        "name":  "single red packet debit, async message and both Redis projections",
+                                        "result":  "PASS",
+                                        "durationMs":  3711,
+                                        "evidence":  {
+                                                         "packetID":  "2107115291203874816",
+                                                         "debit":  250,
+                                                         "candidates":  1
+                                                     }
+                                    },
+                                    {
+                                        "name":  "single claim qualification, idempotency and detail list",
+                                        "result":  "PASS",
+                                        "durationMs":  479,
+                                        "evidence":  {
+                                                         "amount":  250,
+                                                         "recordCount":  1
+                                                     }
+                                    },
+                                    {
+                                        "name":  "invalid amount, insufficient balance and nonmember leave no funds facts",
+                                        "result":  "PASS",
+                                        "durationMs":  597,
+                                        "evidence":  {
+                                                         "validationCode":  40000,
+                                                         "insufficientCode":  73000,
+                                                         "permissionCode":  40101
+                                                     }
+                                    },
+                                    {
+                                        "name":  "12 simultaneous identical sends debit exactly once",
+                                        "result":  "PASS",
+                                        "durationMs":  535,
+                                        "evidence":  {
+                                                         "attempts":  12,
+                                                         "packetID":  "2107115311378477056",
+                                                         "debit":  1000
+                                                     }
+                                    },
+                                    {
+                                        "name":  "20 simultaneous claims by the same user credit exactly once",
+                                        "result":  "PASS",
+                                        "durationMs":  636,
+                                        "evidence":  {
+                                                         "attempts":  20,
+                                                         "amount":  100,
+                                                         "receiveRecords":  1
+                                                     }
+                                    },
+                                    {
+                                        "name":  "competing group claimants cannot oversell; sender can claim",
+                                        "result":  "PASS",
+                                        "durationMs":  584,
+                                        "evidence":  {
+                                                         "contenders":  13,
+                                                         "successful":  9,
+                                                         "totalClaims":  10,
+                                                         "totalAmount":  1000
+                                                     }
+                                    },
+                                    {
+                                        "name":  "missing and stale Redis candidates fall back to MySQL",
+                                        "result":  "PASS",
+                                        "durationMs":  6310,
+                                        "evidence":  {
+                                                         "packetID":  "2107115318097752064",
+                                                         "claims":  2,
+                                                         "remainingCandidates":  "1"
+                                                     }
+                                    },
+                                    {
+                                        "name":  "claim SQL failure rolls back share, receive row and packet totals",
+                                        "result":  "PASS",
+                                        "durationMs":  1168,
+                                        "evidence":  {
+                                                         "packetID":  "2107115344572198912",
+                                                         "rolledBack":  true,
+                                                         "retrySucceeded":  true
+                                                     }
+                                    },
+                                    {
+                                        "name":  "partial expiry returns only remaining funds and concurrent refunds occur once",
+                                        "result":  "PASS",
+                                        "durationMs":  743,
+                                        "evidence":  {
+                                                         "packetID":  "2107115349462757376",
+                                                         "claims":  250,
+                                                         "refund":  750,
+                                                         "concurrentRefundAttempts":  20
+                                                     }
+                                    },
+                                    {
+                                        "name":  "expiry during claim rolls back credit; refund wins after packet lock",
+                                        "result":  "PASS",
+                                        "durationMs":  2643,
+                                        "evidence":  {
+                                                         "packetID":  "2107115352591708160",
+                                                         "rejectedClaim":  73002,
+                                                         "refund":  200,
+                                                         "receiverCredit":  0
+                                                     }
+                                    },
+                                    {
+                                        "name":  "scheduled worker expires a packet without direct helper calls",
+                                        "result":  "PASS",
+                                        "durationMs":  1253,
+                                        "evidence":  {
+                                                         "packetID":  "2107115363673059328",
+                                                         "refund":  300
+                                                     }
+                                    },
+                                    {
+                                        "name":  "Kafka outage preserves committed funds and Outbox recovers after restart",
+                                        "result":  "PASS",
+                                        "durationMs":  46984,
+                                        "evidence":  {
+                                                         "packetID":  "2107115408124293120",
+                                                         "committedDebit":  500,
+                                                         "recoveredMessageCount":  1
+                                                     }
+                                    },
+                                    {
+                                        "name":  "replayed creation and cache Outbox do not duplicate message, Seq or debit",
+                                        "result":  "PASS",
+                                        "durationMs":  7698,
+                                        "evidence":  {
+                                                         "packetID":  "2107115566048227328",
+                                                         "seqUnchanged":  9,
+                                                         "balanceUnchanged":  true
+                                                     }
+                                    },
+                                    {
+                                        "name":  "Redis outage refuses unauthenticated writes and retries converge after restart",
+                                        "result":  "PASS",
+                                        "durationMs":  3624,
+                                        "evidence":  {
+                                                         "writeRefusedDuringOutage":  true,
+                                                         "permissionUnavailableDuringOutage":  true,
+                                                         "retryPacketID":  "2107115611447373824",
+                                                         "debit":  1000,
+                                                         "recoveryAttempts":  4
+                                                     }
+                                    },
+                                    {
+                                        "name":  "message cache deletion falls back to MySQL",
+                                        "result":  "PASS",
+                                        "durationMs":  571,
+                                        "evidence":  {
+                                                         "messagesReadFromMySQL":  4,
+                                                         "nextSeq":  "4"
+                                                     }
+                                    },
+                                    {
+                                        "name":  "lucky packet 101 cents in 100 shares preserves amount and minimum share",
+                                        "result":  "PASS",
+                                        "durationMs":  432,
+                                        "evidence":  {
+                                                         "packetID":  "2107115615880753152",
+                                                         "shareCount":  100,
+                                                         "totalAmount":  101,
+                                                         "minimumShare":  1
+                                                     }
+                                    },
+                                    {
+                                        "name":  "all packet audits and per-user balance-ledger reconciliation",
+                                        "result":  "PASS",
+                                        "durationMs":  5331,
+                                        "evidence":  {
+                                                         "auditedPackets":  12,
+                                                         "reconciledUsers":  16
+                                                     }
+                                    }
+                                ],
+                    "packetIDs":  [
+                                      "2107115291203874816",
+                                      "2107115311378477056",
+                                      "2107115317548298240",
+                                      "2107115318097752064",
+                                      "2107115344572198912",
+                                      "2107115349462757376",
+                                      "2107115352591708160",
+                                      "2107115363673059328",
+                                      "2107115408124293120",
+                                      "2107115566048227328",
+                                      "2107115611447373824",
+                                      "2107115615880753152"
+                                  ]
+                },
+    "browserUI":  {
+                      "result":  "PASS",
+                      "builtFrontend":  true,
+                      "loginUsers":  2,
+                      "messageVisibleToReceiver":  true,
+                      "recoveredAfterReload":  true,
+                      "browserErrors":  [
+
+                                        ]
+                  },
+    "browserHandoff":  {
+                           "baseline":  "5",
+                           "liveMessageID":  "2107115717676507136",
+                           "cursorAfterPush":  "5",
+                           "cursorAfterSync":  "6",
+                           "disconnectedMessageID":  "2107115722231521280",
+                           "finalCursor":  "7",
+                           "result":  "PASS"
+                       },
+    "priorFailures":  [
+                          {
+                              "runID":  "20261005_221019",
+                              "failure":  {
+                                              "name":  "Kafka outage preserves committed funds and Outbox recovers after restart",
+                                              "result":  "FAIL",
+                                              "durationMs":  68487,
+                                              "error":  "Timed out: message after Kafka recovery"
+                                          }
+                          },
+                          {
+                              "runID":  "20261005_222038",
+                              "failure":  {
+                                              "name":  "Redis outage refuses unauthenticated writes and retries converge after restart",
+                                              "result":  "FAIL",
+                                              "durationMs":  1890,
+                                              "error":  "Business response: {\"status\":200,\"code\":500,\"data\":null,\"message\":\"系统内部异常\"}\n\n500 !== 200\n"
+                                          }
+                          }
+                      ]
+}
