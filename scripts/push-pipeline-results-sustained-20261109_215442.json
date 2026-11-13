@@ -1,0 +1,285 @@
+{
+  "environment": {
+    "MessageCount": 600,
+    "DockerResources": "8 CPU / 8212668416 bytes",
+    "CurrentWriterBatchSize": 64,
+    "Node": "v24.14.0",
+    "Method": "Matched pre-optimization source vs current; mode=Sustained; identical configuration and infrastructure; group recipient cache enabled in both",
+    "RPCPool": 16,
+    "KafkaReplicationFactor": 1,
+    "Docker": "29.4.3",
+    "MySQLSettings": [
+      "innodb_flush_log_at_trx_commit\t1",
+      "max_connections\t151",
+      "sync_binlog\t1",
+      "transaction_isolation\tREPEATABLE-READ"
+    ],
+    "RealtimePool": 24,
+    "KafkaPartitions": 3,
+    "Order": [
+      "current-r1"
+    ],
+    "RunID": "20261109_215442",
+    "OfflinePool": 16,
+    "BaselineWriterBatchSize": 32,
+    "Go": "go version go1.26.5 windows/amd64"
+  },
+  "notes": [
+    "Source baseline is im-push-pipeline-backup-20261109-204320, including member cache and the original per-conversation batching.",
+    "Current combines publishing, offset commit, logging and ordinary-message SQL changes; results do not isolate any individual change.",
+    "Push latency is sender actual send to observer client receipt. One observer measures latency; each group has 101 members.",
+    "Push percentiles contain received messages only: inspect errorCount, pushMissing and syncMissing before interpreting them.",
+    "Sustained input is open-loop; burst input waits for stored ACK before that worker sends again. Neither is production capacity certification.",
+    "Seq recovery checks content through a separate HTTP pull, not replay of Kafka business handlers or automatic missing-final-notification discovery.",
+    "Only these summary fields are exported. Private fixtures, YAML, login tokens and DSNs are not read."
+  ],
+  "trials": [
+    {
+      "name": "current-r1",
+      "result": "PASS",
+      "methodology": {
+        "messagesPerCase": "rate * durationSeconds",
+        "concurrency": "not fixed; observed in-flight ACKs",
+        "conversations": [
+          1,
+          20
+        ],
+        "senders": 100,
+        "groupMembers": 101,
+        "messageBytes": 128,
+        "model": "open-loop fixed-rate sends, round-robin across 100 clients; ACK does not pace sending",
+        "warmup": "100 messages per case, excluded from measurements, drain before measurement",
+        "note": "Same Windows host and shared local Docker resources. This is a bounded comparison, not sustainable capacity.",
+        "login": "Fixtures generated with project JWT/session functions; live WebSocket authentication and permission RPC remain enabled",
+        "rates": [
+          600
+        ],
+        "durationSeconds": 20,
+        "tracing": true,
+        "profiling": false
+      },
+      "lowLoad": {
+        "messages": 20,
+        "ack": {
+          "n": 20,
+          "p50Ms": 48.15,
+          "p95Ms": 54.31,
+          "p99Ms": 60.98,
+          "maxMs": 60.98
+        },
+        "push": {
+          "n": 20,
+          "p50Ms": 53.49,
+          "p95Ms": 62.3,
+          "p99Ms": 67.35,
+          "maxMs": 67.35
+        }
+      },
+      "cases": [
+        {
+          "name": "hot-r600",
+          "rate": 600,
+          "groupCount": 1,
+          "requests": 12000,
+          "succeeded": 12000,
+          "errorCount": 0,
+          "errors": {},
+          "targetDurationSecs": 20,
+          "durationSecs": 20.068,
+          "sendDurationSecs": 20.009,
+          "actualSendRPS": 599.74,
+          "ackRPS": 597.98,
+          "ack": {
+            "n": 12000,
+            "p50Ms": 57.9,
+            "p95Ms": 146.13,
+            "p99Ms": 205.36,
+            "maxMs": 253.31
+          },
+          "push": {
+            "n": 12000,
+            "p50Ms": 72.58,
+            "p95Ms": 173.33,
+            "p99Ms": 240.83,
+            "maxMs": 309.71
+          },
+          "pushed": 12000,
+          "duringSendDelivered": 11941,
+          "maxInflight": 150,
+          "backlog": [
+            {
+              "second": 1,
+              "sent": 601,
+              "awaitingAck": 113,
+              "awaitingPush": 113
+            },
+            {
+              "second": 2,
+              "sent": 1201,
+              "awaitingAck": 77,
+              "awaitingPush": 77
+            },
+            {
+              "second": 3,
+              "sent": 1802,
+              "awaitingAck": 36,
+              "awaitingPush": 55
+            },
+            {
+              "second": 4.01,
+              "sent": 2406,
+              "awaitingAck": 33,
+              "awaitingPush": 33
+            },
+            {
+              "second": 5.01,
+              "sent": 3007,
+              "awaitingAck": 33,
+              "awaitingPush": 33
+            },
+            {
+              "second": 6.01,
+              "sent": 3608,
+              "awaitingAck": 40,
+              "awaitingPush": 80
+            },
+            {
+              "second": 7.02,
+              "sent": 4211,
+              "awaitingAck": 74,
+              "awaitingPush": 103
+            },
+            {
+              "second": 8.02,
+              "sent": 4811,
+              "awaitingAck": 38,
+              "awaitingPush": 38
+            },
+            {
+              "second": 9.02,
+              "sent": 5414,
+              "awaitingAck": 54,
+              "awaitingPush": 74
+            },
+            {
+              "second": 10.02,
+              "sent": 6015,
+              "awaitingAck": 39,
+              "awaitingPush": 39
+            },
+            {
+              "second": 11.03,
+              "sent": 6616,
+              "awaitingAck": 40,
+              "awaitingPush": 40
+            },
+            {
+              "second": 12.03,
+              "sent": 7218,
+              "awaitingAck": 36,
+              "awaitingPush": 48
+            },
+            {
+              "second": 13.03,
+              "sent": 7820,
+              "awaitingAck": 28,
+              "awaitingPush": 42
+            },
+            {
+              "second": 14.04,
+              "sent": 8427,
+              "awaitingAck": 40,
+              "awaitingPush": 42
+            },
+            {
+              "second": 15.05,
+              "sent": 9030,
+              "awaitingAck": 40,
+              "awaitingPush": 40
+            },
+            {
+              "second": 16.05,
+              "sent": 9632,
+              "awaitingAck": 28,
+              "awaitingPush": 42
+            },
+            {
+              "second": 17.05,
+              "sent": 10233,
+              "awaitingAck": 61,
+              "awaitingPush": 61
+            },
+            {
+              "second": 18.06,
+              "sent": 10834,
+              "awaitingAck": 25,
+              "awaitingPush": 44
+            },
+            {
+              "second": 19.06,
+              "sent": 11437,
+              "awaitingAck": 37,
+              "awaitingPush": 37
+            },
+            {
+              "second": 20.01,
+              "sent": 12000,
+              "awaitingAck": 28,
+              "awaitingPush": 59
+            }
+          ],
+          "schedulingLateness": {
+            "n": 12000,
+            "p50Ms": 3.96,
+            "p95Ms": 10.61,
+            "p99Ms": 14.48,
+            "maxMs": 27.15
+          },
+          "driverCPUPercentOneCore": 55.13,
+          "driverEventLoopP99Ms": 22.32,
+          "drainWaitSecs": 0.086,
+          "pushMissing": 0,
+          "sequenceChecks": [
+            {
+              "count": 12100,
+              "maxSeq": 12100,
+              "minSeq": 1,
+              "lastSeq": 12100,
+              "sessionId": "17942325161161000"
+            }
+          ],
+          "databaseMessages": 12100,
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0,
+          "traceTimings": {
+            "databaseBatch": {
+              "n": 12000,
+              "p50Ms": 30.523,
+              "p95Ms": 68.315
+            },
+            "publisherQueue": {
+              "n": 12000,
+              "p50Ms": 0,
+              "p95Ms": 1.155
+            },
+            "postCommitToSocketWrite": {
+              "n": 12000,
+              "p50Ms": 11.343,
+              "p95Ms": 27.329
+            },
+            "pushHandler": {
+              "n": 12000,
+              "p50Ms": 0,
+              "p95Ms": 0.624
+            }
+          }
+        }
+      ],
+      "trace": {
+        "records": 12125,
+        "completedObserved": 12125,
+        "missing": 0
+      }
+    }
+  ]
+}

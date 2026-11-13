@@ -1,0 +1,3227 @@
+{
+  "environment": {
+    "MessageCount": 600,
+    "DockerResources": "8 CPU / 8212676608 bytes",
+    "KafkaReplicationFactor": 1,
+    "OfflinePool": 16,
+    "Node": "v24.14.0",
+    "MySQLSettings": [
+      "innodb_flush_log_at_trx_commit\t1",
+      "max_connections\t151",
+      "sync_binlog\t1",
+      "transaction_isolation\tREPEATABLE-READ"
+    ],
+    "RPCPool": 16,
+    "HostCPU": [
+      {
+        "Name": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+        "NumberOfCores": 4,
+        "NumberOfLogicalProcessors": 8
+      }
+    ],
+    "Rounds": 2,
+    "Method": "Alternating pre-batch and current binaries, same host, full WS/RPC/MySQL/Kafka/WS path, login setup outside measurements",
+    "RealtimePool": 24,
+    "Docker": "29.4.3",
+    "KafkaPartitions": 3,
+    "RunID": "20261109_172551",
+    "BaselineBackup": "C:\\Users\\21201\\Downloads\\IM\\IM\\im-seq-batch-implementation-backup-20261109-164931",
+    "Go": "go version go1.26.5 windows/amd64"
+  },
+  "methodology": {
+    "messagesPerCase": 600,
+    "concurrency": [
+      10,
+      50,
+      100
+    ],
+    "conversations": [
+      1,
+      20
+    ],
+    "senders": 100,
+    "groupMembers": 101,
+    "messageBytes": 128,
+    "model": "closed loop, exactly one in-flight request per sender, fixed-count bursts",
+    "warmup": "100 messages per case, excluded from measurements, drain before measurement",
+    "note": "Same Windows host and shared local Docker resources. This is a bounded comparison, not sustainable capacity.",
+    "login": "Fixtures generated with project JWT/session functions; live WebSocket authentication and permission RPC remain enabled"
+  },
+  "comparisons": [
+    {
+      "name": "hot-c10",
+      "conversations": 1,
+      "concurrency": 10,
+      "baseline": {
+        "ackRPS": 53.63,
+        "meanTrialAckP95Ms": 234.03,
+        "meanTrialPushP95Ms": 246.04,
+        "errors": 0,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          600,
+          600
+        ],
+        "sampleSuccessCounts": [
+          600,
+          600
+        ]
+      },
+      "current": {
+        "ackRPS": 134.8,
+        "meanTrialAckP95Ms": 115.63,
+        "meanTrialPushP95Ms": 1504.82,
+        "errors": 0,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          120,
+          120
+        ],
+        "sampleSuccessCounts": [
+          600,
+          600
+        ]
+      },
+      "throughputFactor": 2.51,
+      "ackP95ReductionPercent": 50.59
+    },
+    {
+      "name": "many-c10",
+      "conversations": 20,
+      "concurrency": 10,
+      "baseline": {
+        "ackRPS": 128.68,
+        "meanTrialAckP95Ms": 118.25,
+        "meanTrialPushP95Ms": 2725.98,
+        "errors": 0,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          593,
+          597
+        ],
+        "sampleSuccessCounts": [
+          600,
+          600
+        ]
+      },
+      "current": {
+        "ackRPS": 125.65,
+        "meanTrialAckP95Ms": 129.06,
+        "meanTrialPushP95Ms": 1758.93,
+        "errors": 0,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          595,
+          593
+        ],
+        "sampleSuccessCounts": [
+          600,
+          600
+        ]
+      },
+      "throughputFactor": 0.98,
+      "ackP95ReductionPercent": -9.14
+    },
+    {
+      "name": "hot-c50",
+      "conversations": 1,
+      "concurrency": 50,
+      "baseline": {
+        "ackRPS": 50.25,
+        "meanTrialAckP95Ms": 1930.68,
+        "meanTrialPushP95Ms": 1945.58,
+        "errors": 0,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          600,
+          600
+        ],
+        "sampleSuccessCounts": [
+          600,
+          600
+        ]
+      },
+      "current": {
+        "ackRPS": 490.31,
+        "meanTrialAckP95Ms": 144.56,
+        "meanTrialPushP95Ms": 4259.17,
+        "errors": 0,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          25,
+          25
+        ],
+        "sampleSuccessCounts": [
+          600,
+          600
+        ]
+      },
+      "throughputFactor": 9.76,
+      "ackP95ReductionPercent": 92.51
+    },
+    {
+      "name": "many-c50",
+      "conversations": 20,
+      "concurrency": 50,
+      "baseline": {
+        "ackRPS": 219.57,
+        "meanTrialAckP95Ms": 419.79,
+        "meanTrialPushP95Ms": 3901.4,
+        "errors": 0,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          596,
+          595
+        ],
+        "sampleSuccessCounts": [
+          600,
+          600
+        ]
+      },
+      "current": {
+        "ackRPS": 239.76,
+        "meanTrialAckP95Ms": 349.18,
+        "meanTrialPushP95Ms": 4052.3,
+        "errors": 0,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          326,
+          336
+        ],
+        "sampleSuccessCounts": [
+          600,
+          600
+        ]
+      },
+      "throughputFactor": 1.09,
+      "ackP95ReductionPercent": 16.82
+    },
+    {
+      "name": "hot-c100",
+      "conversations": 1,
+      "concurrency": 100,
+      "baseline": {
+        "ackRPS": 49.7,
+        "meanTrialAckP95Ms": 4525.41,
+        "meanTrialPushP95Ms": 4535.29,
+        "errors": 2,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          599,
+          599
+        ],
+        "sampleSuccessCounts": [
+          599,
+          599
+        ]
+      },
+      "current": {
+        "ackRPS": 659.59,
+        "meanTrialAckP95Ms": 197.14,
+        "meanTrialPushP95Ms": 4690.01,
+        "errors": 0,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          20,
+          20
+        ],
+        "sampleSuccessCounts": [
+          600,
+          600
+        ]
+      },
+      "throughputFactor": 13.27,
+      "ackP95ReductionPercent": 95.64
+    },
+    {
+      "name": "many-c100",
+      "conversations": 20,
+      "concurrency": 100,
+      "baseline": {
+        "ackRPS": 204.42,
+        "meanTrialAckP95Ms": 1106.43,
+        "meanTrialPushP95Ms": 4156.23,
+        "errors": 0,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          596,
+          593
+        ],
+        "sampleSuccessCounts": [
+          600,
+          600
+        ]
+      },
+      "current": {
+        "ackRPS": 375.55,
+        "meanTrialAckP95Ms": 400.82,
+        "meanTrialPushP95Ms": 4382.05,
+        "errors": 0,
+        "pushedMissing": 0,
+        "syncMissing": 0,
+        "observedCommitCounts": [
+          182,
+          182
+        ],
+        "sampleSuccessCounts": [
+          600,
+          600
+        ]
+      },
+      "throughputFactor": 1.84,
+      "ackP95ReductionPercent": 63.77
+    }
+  ],
+  "lowLoad": {
+    "baseline": {
+      "meanTrialAckP95Ms": 56.89,
+      "meanTrialPushP95Ms": 73.47
+    },
+    "current": {
+      "meanTrialAckP95Ms": 62.96,
+      "meanTrialPushP95Ms": 77.29
+    }
+  },
+  "verification": {
+    "measuredAttempts": 14400,
+    "measuredSuccesses": 14398,
+    "requestErrors": 2,
+    "pushedMissing": 0,
+    "syncMissing": 0,
+    "committedWithoutStoredAck": 0,
+    "checkedConversations": 252
+  },
+  "notes": [
+    "Averages are means of trial statistics. Mean trial P95 is not a pooled P95.",
+    "The fixed request count creates short bursts, not sustainable capacity measurements.",
+    "The load driver shares the host. SQL pool budgets, fsync settings, fanout, payload and publisher implementation were held constant.",
+    "Zero counterUpdates/messageInserts in raw trial data means prepared DML digests were unavailable. Do not interpret them as zero executions.",
+    "COMMIT digest observations can lag or be incomplete; they illustrate batching but are not exact DML counts.",
+    "Raw local fixtures/configs contain temporary credentials; this exported artifact excludes them."
+  ],
+  "trials": [
+    {
+      "name": "baseline-r1",
+      "variant": "baseline",
+      "database": "im_batch_perf_20261109_172551_baseline_1",
+      "startedAt": "2026-11-09T09:26:41.763Z",
+      "result": "COMPLETED_WITH_DELIVERY_OR_REQUEST_ERRORS",
+      "cases": [
+        {
+          "name": "hot-c10",
+          "concurrency": 10,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 11.324,
+          "ackRPS": 52.99,
+          "ack": {
+            "n": 600,
+            "p50Ms": 179.43,
+            "p95Ms": 245.61,
+            "p99Ms": 264.73,
+            "maxMs": 279.66
+          },
+          "statementCounts": {
+            "commits": 600,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 16.56,
+          "driverEventLoopP99Ms": 20.09,
+          "drainWaitSecs": 0.001,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 189.92,
+            "p95Ms": 258.53,
+            "p99Ms": 279.12,
+            "maxMs": 291.78
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942163964471000"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c10",
+          "concurrency": 10,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 4.798,
+          "ackRPS": 125.06,
+          "ack": {
+            "n": 600,
+            "p50Ms": 75.77,
+            "p95Ms": 117.37,
+            "p99Ms": 135.39,
+            "maxMs": 156.48
+          },
+          "statementCounts": {
+            "commits": 593,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 25.41,
+          "driverEventLoopP99Ms": 20.64,
+          "drainWaitSecs": 2.209,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2000.95,
+            "p95Ms": 2672.51,
+            "p99Ms": 2705.86,
+            "maxMs": 2736.88
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471001"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471002"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471003"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471004"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471005"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471006"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471007"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471008"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471009"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471010"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471011"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471012"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471013"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471014"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471015"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471016"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471017"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471018"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471019"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471020"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "hot-c50",
+          "concurrency": 50,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 12.078,
+          "ackRPS": 49.68,
+          "ack": {
+            "n": 600,
+            "p50Ms": 821.11,
+            "p95Ms": 1953.91,
+            "p99Ms": 2657.34,
+            "maxMs": 4849.2
+          },
+          "statementCounts": {
+            "commits": 600,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 17.08,
+          "driverEventLoopP99Ms": 19.92,
+          "drainWaitSecs": 0,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 831.65,
+            "p95Ms": 1971.43,
+            "p99Ms": 2666.84,
+            "maxMs": 4863.06
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942163964471021"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c50",
+          "concurrency": 50,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 3.02,
+          "ackRPS": 198.65,
+          "ack": {
+            "n": 600,
+            "p50Ms": 221.4,
+            "p95Ms": 462.19,
+            "p99Ms": 615.41,
+            "maxMs": 1140.13
+          },
+          "statementCounts": {
+            "commits": 596,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 27.38,
+          "driverEventLoopP99Ms": 22.61,
+          "drainWaitSecs": 3.847,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2662.87,
+            "p95Ms": 4137.04,
+            "p99Ms": 4301.35,
+            "maxMs": 4721.84
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471022"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471023"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471024"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471025"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471026"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471027"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471028"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471029"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471030"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471031"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471032"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471033"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471034"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471035"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471036"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471037"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471038"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471039"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471040"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471041"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "hot-c100",
+          "concurrency": 100,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 599,
+          "errors": {
+            "message_write_unavailable": 1
+          },
+          "errorCount": 1,
+          "durationSecs": 12.177,
+          "ackRPS": 49.19,
+          "ack": {
+            "n": 599,
+            "p50Ms": 1465.5,
+            "p95Ms": 4630.97,
+            "p99Ms": 6612.51,
+            "maxMs": 8662.42
+          },
+          "statementCounts": {
+            "commits": 599,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 20.02,
+          "driverEventLoopP99Ms": 19.25,
+          "drainWaitSecs": 0,
+          "pushed": 599,
+          "pushMissing": 0,
+          "push": {
+            "n": 599,
+            "p50Ms": 1482.34,
+            "p95Ms": 4639.74,
+            "p99Ms": 6621.62,
+            "maxMs": 8670.8
+          },
+          "databaseMessages": 699,
+          "sequenceChecks": [
+            {
+              "count": 699,
+              "maxSeq": 699,
+              "minSeq": 1,
+              "lastSeq": 699,
+              "sessionId": "17942163964471042"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c100",
+          "concurrency": 100,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 2.857,
+          "ackRPS": 209.98,
+          "ack": {
+            "n": 600,
+            "p50Ms": 366.16,
+            "p95Ms": 1051.49,
+            "p99Ms": 1499.5,
+            "maxMs": 2114.84
+          },
+          "statementCounts": {
+            "commits": 596,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 24.04,
+          "driverEventLoopP99Ms": 20.64,
+          "drainWaitSecs": 3.426,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2658.27,
+            "p95Ms": 4064.18,
+            "p99Ms": 4645.33,
+            "maxMs": 5024.46
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471043"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471044"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471045"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471046"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471047"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471048"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471049"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471050"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471051"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471052"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471053"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471054"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471055"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471056"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471057"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471058"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471059"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471060"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471061"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942163964471062"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        }
+      ],
+      "methodology": {
+        "messagesPerCase": 600,
+        "concurrency": [
+          10,
+          50,
+          100
+        ],
+        "conversations": [
+          1,
+          20
+        ],
+        "senders": 100,
+        "groupMembers": 101,
+        "messageBytes": 128,
+        "model": "closed loop, exactly one in-flight request per sender, fixed-count bursts",
+        "warmup": "100 messages per case, excluded from measurements, drain before measurement",
+        "note": "Same Windows host and shared local Docker resources. This is a bounded comparison, not sustainable capacity.",
+        "login": "Fixtures generated with project JWT/session functions; live WebSocket authentication and permission RPC remain enabled"
+      },
+      "lowLoad": {
+        "messages": 20,
+        "ack": {
+          "n": 20,
+          "p50Ms": 40.34,
+          "p95Ms": 56.31,
+          "p99Ms": 57.2,
+          "maxMs": 57.2
+        },
+        "push": {
+          "n": 20,
+          "p50Ms": 58.68,
+          "p95Ms": 72.19,
+          "p99Ms": 77.15,
+          "maxMs": 77.15
+        }
+      },
+      "finishedAt": "2026-11-09T09:28:03.530Z"
+    },
+    {
+      "name": "current-r1",
+      "variant": "current",
+      "database": "im_batch_perf_20261109_172551_current_1",
+      "startedAt": "2026-11-09T09:28:12.775Z",
+      "result": "PASS",
+      "cases": [
+        {
+          "name": "hot-c10",
+          "concurrency": 10,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 4.067,
+          "ackRPS": 147.55,
+          "ack": {
+            "n": 600,
+            "p50Ms": 64.23,
+            "p95Ms": 88.77,
+            "p99Ms": 108.59,
+            "maxMs": 109.85
+          },
+          "statementCounts": {
+            "commits": 120,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 39.59,
+          "driverEventLoopP99Ms": 17.91,
+          "drainWaitSecs": 1.058,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 765.41,
+            "p95Ms": 1332.96,
+            "p99Ms": 1355.57,
+            "maxMs": 1373.32
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942164896751000"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c10",
+          "concurrency": 10,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 4.886,
+          "ackRPS": 122.79,
+          "ack": {
+            "n": 600,
+            "p50Ms": 75.7,
+            "p95Ms": 132.37,
+            "p99Ms": 185.91,
+            "maxMs": 237.55
+          },
+          "statementCounts": {
+            "commits": 595,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 27.83,
+          "driverEventLoopP99Ms": 21.23,
+          "drainWaitSecs": 1.724,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 1114.87,
+            "p95Ms": 2002.89,
+            "p99Ms": 2030.39,
+            "maxMs": 2044.17
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751001"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751002"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751003"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751004"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751005"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751006"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751007"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751008"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751009"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751010"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751011"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751012"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751013"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751014"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751015"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751016"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751017"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751018"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751019"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751020"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "hot-c50",
+          "concurrency": 50,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 1.071,
+          "ackRPS": 560.47,
+          "ack": {
+            "n": 600,
+            "p50Ms": 82.89,
+            "p95Ms": 111.1,
+            "p99Ms": 137.38,
+            "maxMs": 138.6
+          },
+          "statementCounts": {
+            "commits": 25,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 40.82,
+          "driverEventLoopP99Ms": 22.36,
+          "drainWaitSecs": 4.121,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 1987.75,
+            "p95Ms": 4135.45,
+            "p99Ms": 4344.78,
+            "maxMs": 4409.85
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942164896751021"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c50",
+          "concurrency": 50,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 2.911,
+          "ackRPS": 206.12,
+          "ack": {
+            "n": 600,
+            "p50Ms": 216.47,
+            "p95Ms": 418.12,
+            "p99Ms": 492.3,
+            "maxMs": 558.57
+          },
+          "statementCounts": {
+            "commits": 326,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 20.41,
+          "driverEventLoopP99Ms": 23.45,
+          "drainWaitSecs": 3.679,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2278.99,
+            "p95Ms": 4146.99,
+            "p99Ms": 4258.46,
+            "maxMs": 4323.23
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751022"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751023"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751024"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751025"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751026"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751027"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751028"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751029"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751030"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751031"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751032"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751033"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751034"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751035"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751036"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751037"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751038"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751039"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751040"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751041"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "hot-c100",
+          "concurrency": 100,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 0.909,
+          "ackRPS": 659.83,
+          "ack": {
+            "n": 600,
+            "p50Ms": 136.74,
+            "p95Ms": 204.64,
+            "p99Ms": 229.35,
+            "maxMs": 236.89
+          },
+          "statementCounts": {
+            "commits": 20,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 27.49,
+          "driverEventLoopP99Ms": 20.41,
+          "drainWaitSecs": 4.608,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2307.78,
+            "p95Ms": 4641.66,
+            "p99Ms": 4871.31,
+            "maxMs": 4932.67
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942164896751042"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c100",
+          "concurrency": 100,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 1.553,
+          "ackRPS": 386.32,
+          "ack": {
+            "n": 600,
+            "p50Ms": 227.9,
+            "p95Ms": 394.04,
+            "p99Ms": 458.79,
+            "maxMs": 515.95
+          },
+          "statementCounts": {
+            "commits": 182,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 29.17,
+          "driverEventLoopP99Ms": 22.25,
+          "drainWaitSecs": 4.095,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2571.06,
+            "p95Ms": 4373.16,
+            "p99Ms": 4534.98,
+            "maxMs": 4588.85
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751043"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751044"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751045"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751046"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751047"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751048"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751049"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751050"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751051"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751052"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751053"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751054"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751055"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751056"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751057"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751058"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751059"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751060"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751061"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942164896751062"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        }
+      ],
+      "methodology": {
+        "messagesPerCase": 600,
+        "concurrency": [
+          10,
+          50,
+          100
+        ],
+        "conversations": [
+          1,
+          20
+        ],
+        "senders": 100,
+        "groupMembers": 101,
+        "messageBytes": 128,
+        "model": "closed loop, exactly one in-flight request per sender, fixed-count bursts",
+        "warmup": "100 messages per case, excluded from measurements, drain before measurement",
+        "note": "Same Windows host and shared local Docker resources. This is a bounded comparison, not sustainable capacity.",
+        "login": "Fixtures generated with project JWT/session functions; live WebSocket authentication and permission RPC remain enabled"
+      },
+      "lowLoad": {
+        "messages": 20,
+        "ack": {
+          "n": 20,
+          "p50Ms": 49.81,
+          "p95Ms": 58.64,
+          "p99Ms": 59.16,
+          "maxMs": 59.16
+        },
+        "push": {
+          "n": 20,
+          "p50Ms": 62.48,
+          "p95Ms": 72.96,
+          "p99Ms": 74.47,
+          "maxMs": 74.47
+        }
+      },
+      "finishedAt": "2026-11-09T09:29:10.628Z"
+    },
+    {
+      "name": "current-r2",
+      "variant": "current",
+      "database": "im_batch_perf_20261109_172551_current_2",
+      "startedAt": "2026-11-09T09:29:18.296Z",
+      "result": "PASS",
+      "cases": [
+        {
+          "name": "hot-c10",
+          "concurrency": 10,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 4.916,
+          "ackRPS": 122.05,
+          "ack": {
+            "n": 600,
+            "p50Ms": 64.61,
+            "p95Ms": 142.5,
+            "p99Ms": 524.4,
+            "maxMs": 569.26
+          },
+          "statementCounts": {
+            "commits": 120,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 27.03,
+          "driverEventLoopP99Ms": 26.23,
+          "drainWaitSecs": 0.576,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 579.19,
+            "p95Ms": 1676.67,
+            "p99Ms": 1696.72,
+            "maxMs": 1711.16
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942165563841000"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c10",
+          "concurrency": 10,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 4.669,
+          "ackRPS": 128.5,
+          "ack": {
+            "n": 600,
+            "p50Ms": 70.74,
+            "p95Ms": 125.74,
+            "p99Ms": 160.71,
+            "maxMs": 206.37
+          },
+          "statementCounts": {
+            "commits": 593,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 28.44,
+          "driverEventLoopP99Ms": 21.48,
+          "drainWaitSecs": 1.065,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 1131.07,
+            "p95Ms": 1514.98,
+            "p99Ms": 1585.87,
+            "maxMs": 1649.97
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841001"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841002"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841003"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841004"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841005"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841006"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841007"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841008"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841009"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841010"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841011"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841012"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841013"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841014"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841015"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841016"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841017"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841018"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841019"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841020"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "hot-c50",
+          "concurrency": 50,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 1.428,
+          "ackRPS": 420.15,
+          "ack": {
+            "n": 600,
+            "p50Ms": 107.71,
+            "p95Ms": 178.03,
+            "p99Ms": 184.7,
+            "maxMs": 187.39
+          },
+          "statementCounts": {
+            "commits": 25,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 19.75,
+          "driverEventLoopP99Ms": 22.95,
+          "drainWaitSecs": 4.267,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2443.21,
+            "p95Ms": 4382.9,
+            "p99Ms": 4592.02,
+            "maxMs": 4658.27
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942165563841021"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c50",
+          "concurrency": 50,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 2.195,
+          "ackRPS": 273.4,
+          "ack": {
+            "n": 600,
+            "p50Ms": 170.74,
+            "p95Ms": 280.23,
+            "p99Ms": 318.45,
+            "maxMs": 366.68
+          },
+          "statementCounts": {
+            "commits": 336,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 24.88,
+          "driverEventLoopP99Ms": 17.4,
+          "drainWaitSecs": 3.733,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2050.41,
+            "p95Ms": 3957.6,
+            "p99Ms": 4121.78,
+            "maxMs": 4219.33
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841022"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841023"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841024"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841025"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841026"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841027"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841028"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841029"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841030"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841031"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841032"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841033"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841034"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841035"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841036"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841037"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841038"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841039"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841040"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841041"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "hot-c100",
+          "concurrency": 100,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 0.91,
+          "ackRPS": 659.35,
+          "ack": {
+            "n": 600,
+            "p50Ms": 135.85,
+            "p95Ms": 189.65,
+            "p99Ms": 218.42,
+            "maxMs": 245.27
+          },
+          "statementCounts": {
+            "commits": 20,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 30.88,
+          "driverEventLoopP99Ms": 24.35,
+          "drainWaitSecs": 4.651,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2393.69,
+            "p95Ms": 4738.35,
+            "p99Ms": 4951.25,
+            "maxMs": 5011.02
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942165563841042"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c100",
+          "concurrency": 100,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 1.645,
+          "ackRPS": 364.78,
+          "ack": {
+            "n": 600,
+            "p50Ms": 246.69,
+            "p95Ms": 407.6,
+            "p99Ms": 470.93,
+            "maxMs": 518.04
+          },
+          "statementCounts": {
+            "commits": 182,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 21.83,
+          "driverEventLoopP99Ms": 22.89,
+          "drainWaitSecs": 4.07,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2568.72,
+            "p95Ms": 4390.94,
+            "p99Ms": 4508.73,
+            "maxMs": 4607.47
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841043"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841044"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841045"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841046"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841047"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841048"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841049"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841050"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841051"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841052"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841053"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841054"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841055"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841056"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841057"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841058"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841059"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841060"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841061"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942165563841062"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        }
+      ],
+      "methodology": {
+        "messagesPerCase": 600,
+        "concurrency": [
+          10,
+          50,
+          100
+        ],
+        "conversations": [
+          1,
+          20
+        ],
+        "senders": 100,
+        "groupMembers": 101,
+        "messageBytes": 128,
+        "model": "closed loop, exactly one in-flight request per sender, fixed-count bursts",
+        "warmup": "100 messages per case, excluded from measurements, drain before measurement",
+        "note": "Same Windows host and shared local Docker resources. This is a bounded comparison, not sustainable capacity.",
+        "login": "Fixtures generated with project JWT/session functions; live WebSocket authentication and permission RPC remain enabled"
+      },
+      "lowLoad": {
+        "messages": 20,
+        "ack": {
+          "n": 20,
+          "p50Ms": 51.74,
+          "p95Ms": 67.28,
+          "p99Ms": 68.8,
+          "maxMs": 68.8
+        },
+        "push": {
+          "n": 20,
+          "p50Ms": 66.44,
+          "p95Ms": 81.62,
+          "p99Ms": 89.45,
+          "maxMs": 89.45
+        }
+      },
+      "finishedAt": "2026-11-09T09:30:15.292Z"
+    },
+    {
+      "name": "baseline-r2",
+      "variant": "baseline",
+      "database": "im_batch_perf_20261109_172551_baseline_2",
+      "startedAt": "2026-11-09T09:30:23.721Z",
+      "result": "COMPLETED_WITH_DELIVERY_OR_REQUEST_ERRORS",
+      "cases": [
+        {
+          "name": "hot-c10",
+          "concurrency": 10,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 11.056,
+          "ackRPS": 54.27,
+          "ack": {
+            "n": 600,
+            "p50Ms": 176.73,
+            "p95Ms": 222.44,
+            "p99Ms": 279.43,
+            "maxMs": 296.5
+          },
+          "statementCounts": {
+            "commits": 600,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 24.17,
+          "driverEventLoopP99Ms": 19.66,
+          "drainWaitSecs": 0.001,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 185.73,
+            "p95Ms": 233.56,
+            "p99Ms": 295.12,
+            "maxMs": 306.63
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942166211521000"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c10",
+          "concurrency": 10,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 4.535,
+          "ackRPS": 132.29,
+          "ack": {
+            "n": 600,
+            "p50Ms": 69.71,
+            "p95Ms": 119.13,
+            "p99Ms": 151.83,
+            "maxMs": 167.73
+          },
+          "statementCounts": {
+            "commits": 597,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 26.55,
+          "driverEventLoopP99Ms": 21.95,
+          "drainWaitSecs": 2.544,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 1849.82,
+            "p95Ms": 2779.44,
+            "p99Ms": 2809.96,
+            "maxMs": 2827.74
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521001"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521002"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521003"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521004"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521005"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521006"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521007"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521008"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521009"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521010"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521011"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521012"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521013"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521014"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521015"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521016"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521017"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521018"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521019"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521020"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "hot-c50",
+          "concurrency": 50,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 11.809,
+          "ackRPS": 50.81,
+          "ack": {
+            "n": 600,
+            "p50Ms": 813.67,
+            "p95Ms": 1907.45,
+            "p99Ms": 2694.17,
+            "maxMs": 3275.52
+          },
+          "statementCounts": {
+            "commits": 600,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 20.11,
+          "driverEventLoopP99Ms": 19.69,
+          "drainWaitSecs": 0,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 824.47,
+            "p95Ms": 1919.73,
+            "p99Ms": 2702.56,
+            "maxMs": 3282.3
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942166211521021"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c50",
+          "concurrency": 50,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 2.495,
+          "ackRPS": 240.49,
+          "ack": {
+            "n": 600,
+            "p50Ms": 175.25,
+            "p95Ms": 377.39,
+            "p99Ms": 497.9,
+            "maxMs": 750.56
+          },
+          "statementCounts": {
+            "commits": 595,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 29.42,
+          "driverEventLoopP99Ms": 19.63,
+          "drainWaitSecs": 3.466,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2403.46,
+            "p95Ms": 3665.76,
+            "p99Ms": 3844.92,
+            "maxMs": 3992.21
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521022"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521023"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521024"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521025"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521026"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521027"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521028"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521029"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521030"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521031"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521032"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521033"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521034"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521035"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521036"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521037"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521038"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521039"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521040"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521041"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "hot-c100",
+          "concurrency": 100,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 599,
+          "errors": {
+            "message_write_unavailable": 1
+          },
+          "errorCount": 1,
+          "durationSecs": 11.926,
+          "ackRPS": 50.22,
+          "ack": {
+            "n": 599,
+            "p50Ms": 1423.05,
+            "p95Ms": 4419.85,
+            "p99Ms": 6948.33,
+            "maxMs": 8108.95
+          },
+          "statementCounts": {
+            "commits": 599,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 19.78,
+          "driverEventLoopP99Ms": 19.58,
+          "drainWaitSecs": 0,
+          "pushed": 599,
+          "pushMissing": 0,
+          "push": {
+            "n": 599,
+            "p50Ms": 1432.67,
+            "p95Ms": 4430.84,
+            "p99Ms": 6957.95,
+            "maxMs": 8117.87
+          },
+          "databaseMessages": 699,
+          "sequenceChecks": [
+            {
+              "count": 699,
+              "maxSeq": 699,
+              "minSeq": 1,
+              "lastSeq": 699,
+              "sessionId": "17942166211521042"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c100",
+          "concurrency": 100,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 3.017,
+          "ackRPS": 198.86,
+          "ack": {
+            "n": 600,
+            "p50Ms": 379.71,
+            "p95Ms": 1161.37,
+            "p99Ms": 1816.84,
+            "maxMs": 2614.79
+          },
+          "statementCounts": {
+            "commits": 593,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 22.27,
+          "driverEventLoopP99Ms": 20.64,
+          "drainWaitSecs": 3.513,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2904.54,
+            "p95Ms": 4248.29,
+            "p99Ms": 4960.91,
+            "maxMs": 5659.53
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521043"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521044"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521045"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521046"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521047"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521048"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521049"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521050"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521051"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521052"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521053"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521054"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521055"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521056"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521057"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521058"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521059"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521060"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521061"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942166211521062"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        }
+      ],
+      "methodology": {
+        "messagesPerCase": 600,
+        "concurrency": [
+          10,
+          50,
+          100
+        ],
+        "conversations": [
+          1,
+          20
+        ],
+        "senders": 100,
+        "groupMembers": 101,
+        "messageBytes": 128,
+        "model": "closed loop, exactly one in-flight request per sender, fixed-count bursts",
+        "warmup": "100 messages per case, excluded from measurements, drain before measurement",
+        "note": "Same Windows host and shared local Docker resources. This is a bounded comparison, not sustainable capacity.",
+        "login": "Fixtures generated with project JWT/session functions; live WebSocket authentication and permission RPC remain enabled"
+      },
+      "lowLoad": {
+        "messages": 20,
+        "ack": {
+          "n": 20,
+          "p50Ms": 48.53,
+          "p95Ms": 57.48,
+          "p99Ms": 59.35,
+          "maxMs": 59.35
+        },
+        "push": {
+          "n": 20,
+          "p50Ms": 61.31,
+          "p95Ms": 74.76,
+          "p99Ms": 75.48,
+          "maxMs": 75.48
+        }
+      },
+      "finishedAt": "2026-11-09T09:31:43.703Z"
+    }
+  ]
+}

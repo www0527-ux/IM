@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"infinitechatgo/common/txctx"
 
@@ -15,6 +16,8 @@ var ErrRowMissing = errors.New("conversation sequence row is missing")
 type Model interface {
 	EnsureTx(ctx context.Context, sessionID int64) error
 	LockAndIncrementTx(ctx context.Context, sessionID int64) (int64, error)
+	LockAndAddTx(ctx context.Context, sessionID, count int64) (int64, error)
+	LockAndAddManyTx(ctx context.Context, counts map[int64]int64) (map[int64]int64, error)
 }
 
 type model struct {
@@ -59,7 +62,15 @@ func (m *model) LockAndIncrementTx(
 	ctx context.Context,
 	sessionID int64,
 ) (int64, error) {
-	if sessionID <= 0 {
+	return m.LockAndAddTx(ctx, sessionID, 1)
+}
+
+// LockAndAddTx allocates count consecutive numbers and returns the last one.
+// The caller must insert all corresponding messages in this same transaction.
+// A rollback restores both the counter and messages; this is not an independent
+// range reservation. The conversation row stays locked until transaction end.
+func (m *model) LockAndAddTx(ctx context.Context, sessionID, count int64) (int64, error) {
+	if sessionID <= 0 || count <= 0 {
 		return 0, fmt.Errorf(
 			"lock conversation sequence: invalid session id %d",
 			sessionID,
@@ -90,7 +101,10 @@ SELECT last_seq FROM conversation_sequence WHERE session_id = ? FOR UPDATE`
 		)
 	}
 
-	nextSeq := lastSeq + 1
+	if lastSeq < 0 || lastSeq > math.MaxInt64-count {
+		return 0, fmt.Errorf("conversation sequence exhausted or invalid: session_id=%d", sessionID)
+	}
+	nextSeq := lastSeq + count
 
 	const incrementQuery = `
 UPDATE conversation_sequence SET last_seq = ? WHERE session_id = ?`

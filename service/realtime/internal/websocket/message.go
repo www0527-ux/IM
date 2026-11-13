@@ -8,6 +8,8 @@ import (
 	"log"
 	"time"
 
+	"infinitechatgo/common/messagetrace"
+
 	messageevent "infinitechatgo/common/model/event"
 	messageapplication "infinitechatgo/service/message/application"
 	"infinitechatgo/service/realtime/internal/protocol"
@@ -76,6 +78,7 @@ func handleMessage(
 		return
 	}
 
+	messagetrace.Intent(sender.userID, request.ClientMessageID, "ingress")
 	allowed, rejectReason, err :=
 		validateMessagePermission(
 			sender.userID,
@@ -133,6 +136,7 @@ func handleMessage(
 	}
 
 	writeCtx, cancelWrite := context.WithTimeout(context.Background(), writeTimeout)
+	messagetrace.Intent(sender.userID, request.ClientMessageID, "write_requested")
 	result, writeErr := svcCtx.MessageWriter.Send(
 		writeCtx,
 		messageapplication.Command{
@@ -158,7 +162,7 @@ func handleMessage(
 			))
 		default:
 			// TODO: distinguish retryable failures from unknown COMMIT results.
-			log.Printf("write message through outbox pipeline failed: %v", writeErr)
+			log.Printf("write message through batch pipeline failed: %v", writeErr)
 			sendJSON(sender, protocol.NewUnavailableError(
 				request.ClientMessageID,
 				"message_write_unavailable",
@@ -175,6 +179,7 @@ func handleMessage(
 			result.Message.Seq,
 		),
 	)
+	messagetrace.Message(result.Message, "ack_queued")
 }
 
 func validateMessagePermission(

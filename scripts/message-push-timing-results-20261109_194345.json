@@ -1,0 +1,4492 @@
+{
+  "environment": {
+    "MessageCount": 600,
+    "DockerResources": "8 CPU / 8212668416 bytes",
+    "OfflinePool": 16,
+    "Node": "v24.14.0",
+    "Method": "Current code only; identical config, trace enabled/disabled/enabled; one observer of 101 group members; closed-loop bursts, not sustained capacity",
+    "RPCPool": 16,
+    "KafkaReplicationFactor": 1,
+    "Docker": "29.4.3",
+    "RealtimePool": 24,
+    "KafkaPartitions": 3,
+    "Order": [
+      "trace-r1",
+      "control",
+      "trace-r2"
+    ],
+    "RunID": "20261109_194345",
+    "MySQLSettings": [
+      "innodb_flush_log_at_trx_commit\t1",
+      "max_connections\t151",
+      "sync_binlog\t1",
+      "transaction_isolation\tREPEATABLE-READ"
+    ],
+    "Go": "go version go1.26.5 windows/amd64"
+  },
+  "definitions": {
+    "permission": [
+      "ingress",
+      "write_requested"
+    ],
+    "batchWait": [
+      "write_requested",
+      "write_start"
+    ],
+    "databaseBatch": [
+      "write_start",
+      "committed"
+    ],
+    "commitToPublishEnqueue": [
+      "committed",
+      "publish_enqueue"
+    ],
+    "publisherQueue": [
+      "publish_enqueue",
+      "publish_dequeue"
+    ],
+    "kafkaWrite": [
+      "kafka_write_start",
+      "kafka_write_end"
+    ],
+    "kafkaReturnToFetchSigned": [
+      "kafka_write_end",
+      "push_fetched"
+    ],
+    "kafkaCallStartToFetch": [
+      "kafka_write_start",
+      "push_fetched"
+    ],
+    "fetchCall": [
+      "push_fetch_start",
+      "push_fetched"
+    ],
+    "pushHandler": [
+      "push_handler_start",
+      "push_handler_end"
+    ],
+    "groupRPC": [
+      "group_rpc_start",
+      "group_rpc_end"
+    ],
+    "fanoutEnqueue": [
+      "fanout_start",
+      "fanout_end"
+    ],
+    "offsetCommit": [
+      "push_commit_start",
+      "push_commit_end"
+    ],
+    "observerSocketQueue": [
+      "ws_enqueue",
+      "ws_dequeue"
+    ],
+    "observerSocketWrite": [
+      "ws_write_start",
+      "ws_write_end"
+    ],
+    "postCommitToSocketWrite": [
+      "committed",
+      "ws_write_end"
+    ],
+    "ingressToSocketWrite": [
+      "ingress",
+      "ws_write_end"
+    ],
+    "ingressToAckQueue": [
+      "ingress",
+      "ack_queued"
+    ]
+  },
+  "notes": [
+    "One realtime process monotonic clock, ns timestamps converted to ms; no cross-process clock subtraction.",
+    "databaseBatch includes the PersistBatch call (queries, SQL/lock/network/COMMIT), not just Seq or fsync; counted per participating message.",
+    "kafkaReturnToFetchSigned may be negative: consumer fetching and producer acknowledgement overlap. Do not clamp or add percentile columns.",
+    "offsetCommit happens after enqueue of current push; serial waiting delays following records.",
+    "observerSocketWrite is server WriteMessage completion, not client receipt. Client measurements are reported separately.",
+    "Bursts with identical sender concurrency do not fix the offered message rate. Two trace trials and one control do not establish causality or sustainable capacity.",
+    "Every measured success must have a complete trace. Failures or missing rows abort the timing summary."
+  ],
+  "trials": [
+    {
+      "name": "trace-r1",
+      "result": "PASS",
+      "lowLoad": {
+        "messages": 20,
+        "ack": {
+          "n": 20,
+          "p50Ms": 19.3,
+          "p95Ms": 25.05,
+          "p99Ms": 27.08,
+          "maxMs": 27.08
+        },
+        "push": {
+          "n": 20,
+          "p50Ms": 25.99,
+          "p95Ms": 31.14,
+          "p99Ms": 32.81,
+          "maxMs": 32.81
+        }
+      },
+      "cases": [
+        {
+          "name": "hot-c10",
+          "concurrency": 10,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 3.299,
+          "ackRPS": 181.88,
+          "ack": {
+            "n": 600,
+            "p50Ms": 50.81,
+            "p95Ms": 79.62,
+            "p99Ms": 91.07,
+            "maxMs": 98.58
+          },
+          "statementCounts": {
+            "commits": 119,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 30.31,
+          "driverEventLoopP99Ms": 16.77,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 0.771,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 703.08,
+            "p95Ms": 1114.81,
+            "p99Ms": 1136.46,
+            "maxMs": 1148.97
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942246566941000"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c10",
+          "concurrency": 10,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 3.967,
+          "ackRPS": 151.25,
+          "ack": {
+            "n": 600,
+            "p50Ms": 63.22,
+            "p95Ms": 101.73,
+            "p99Ms": 118.31,
+            "maxMs": 143.25
+          },
+          "statementCounts": {
+            "commits": 592,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 23.24,
+          "driverEventLoopP99Ms": 19.32,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 1.334,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 1424.23,
+            "p95Ms": 1620.93,
+            "p99Ms": 1640.91,
+            "maxMs": 1657.88
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941001"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941002"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941003"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941004"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941005"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941006"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941007"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941008"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941009"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941010"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941011"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941012"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941013"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941014"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941015"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941016"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941017"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941018"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941019"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941020"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "hot-c100",
+          "concurrency": 100,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 0.943,
+          "ackRPS": 636.02,
+          "ack": {
+            "n": 600,
+            "p50Ms": 148.53,
+            "p95Ms": 212.55,
+            "p99Ms": 233.05,
+            "maxMs": 289.39
+          },
+          "statementCounts": {
+            "commits": 20,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 31.48,
+          "driverEventLoopP99Ms": 19.3,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 2.451,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 1844.92,
+            "p95Ms": 2704.24,
+            "p99Ms": 2788.22,
+            "maxMs": 2806.29
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942246566941021"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c100",
+          "concurrency": 100,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 1.427,
+          "ackRPS": 420.5,
+          "ack": {
+            "n": 600,
+            "p50Ms": 215.53,
+            "p95Ms": 370.54,
+            "p99Ms": 432.07,
+            "maxMs": 460.11
+          },
+          "statementCounts": {
+            "commits": 183,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 26.28,
+          "driverEventLoopP99Ms": 20.15,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 2.863,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2239.47,
+            "p95Ms": 3307.86,
+            "p99Ms": 3411.55,
+            "maxMs": 3523.24
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941022"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941023"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941024"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941025"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941026"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941027"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941028"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941029"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941030"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941031"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941032"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941033"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941034"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941035"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941036"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941037"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941038"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941039"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941040"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246566941041"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        }
+      ],
+      "traceRows": 2825,
+      "expectedRows": 2825,
+      "timings": {
+        "low-load": {
+          "messages": 20,
+          "stages": {
+            "permission": {
+              "n": 20,
+              "meanMs": 3.8758,
+              "minMs": 2.6187,
+              "p50Ms": 3.6083,
+              "p95Ms": 5.2455,
+              "p99Ms": 5.5369,
+              "maxMs": 5.5369,
+              "negativeCount": 0
+            },
+            "batchWait": {
+              "n": 20,
+              "meanMs": 3.1718,
+              "minMs": 2.6398,
+              "p50Ms": 3.1323,
+              "p95Ms": 3.6747,
+              "p99Ms": 3.7919,
+              "maxMs": 3.7919,
+              "negativeCount": 0
+            },
+            "databaseBatch": {
+              "n": 20,
+              "meanMs": 11.8321,
+              "minMs": 10.0162,
+              "p50Ms": 10.8702,
+              "p95Ms": 16.6041,
+              "p99Ms": 17.5277,
+              "maxMs": 17.5277,
+              "negativeCount": 0
+            },
+            "commitToPublishEnqueue": {
+              "n": 20,
+              "meanMs": 0.0259,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5182,
+              "maxMs": 0.5182,
+              "negativeCount": 0
+            },
+            "publisherQueue": {
+              "n": 20,
+              "meanMs": 0,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0,
+              "maxMs": 0,
+              "negativeCount": 0
+            },
+            "kafkaWrite": {
+              "n": 20,
+              "meanMs": 1.9504,
+              "minMs": 1.0736,
+              "p50Ms": 2.0991,
+              "p95Ms": 2.2321,
+              "p99Ms": 2.8256,
+              "maxMs": 2.8256,
+              "negativeCount": 0
+            },
+            "kafkaReturnToFetchSigned": {
+              "n": 20,
+              "meanMs": 0.4156,
+              "minMs": 0,
+              "p50Ms": 0.5246,
+              "p95Ms": 1.0502,
+              "p99Ms": 1.0683,
+              "maxMs": 1.0683,
+              "negativeCount": 0
+            },
+            "kafkaCallStartToFetch": {
+              "n": 20,
+              "meanMs": 2.366,
+              "minMs": 1.0736,
+              "p50Ms": 2.4399,
+              "p95Ms": 2.8256,
+              "p99Ms": 3.1586,
+              "maxMs": 3.1586,
+              "negativeCount": 0
+            },
+            "fetchCall": {
+              "n": 20,
+              "meanMs": 179.8069,
+              "minMs": 164.306,
+              "p50Ms": 179.7702,
+              "p95Ms": 192.8749,
+              "p99Ms": 193.2022,
+              "maxMs": 193.2022,
+              "negativeCount": 0
+            },
+            "pushHandler": {
+              "n": 20,
+              "meanMs": 3.2141,
+              "minMs": 2.6333,
+              "p50Ms": 3.1465,
+              "p95Ms": 3.8469,
+              "p99Ms": 4.1637,
+              "maxMs": 4.1637,
+              "negativeCount": 0
+            },
+            "groupRPC": {
+              "n": 20,
+              "meanMs": 2.3848,
+              "minMs": 1.966,
+              "p50Ms": 2.1592,
+              "p95Ms": 2.7396,
+              "p99Ms": 3.638,
+              "maxMs": 3.638,
+              "negativeCount": 0
+            },
+            "fanoutEnqueue": {
+              "n": 20,
+              "meanMs": 0.1831,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5267,
+              "p99Ms": 0.5297,
+              "maxMs": 0.5297,
+              "negativeCount": 0
+            },
+            "offsetCommit": {
+              "n": 20,
+              "meanMs": 2.1933,
+              "minMs": 1.5755,
+              "p50Ms": 2.161,
+              "p95Ms": 2.6434,
+              "p99Ms": 3.2642,
+              "maxMs": 3.2642,
+              "negativeCount": 0
+            },
+            "observerSocketQueue": {
+              "n": 20,
+              "meanMs": 0.4453,
+              "minMs": 0,
+              "p50Ms": 0.5204,
+              "p95Ms": 0.5341,
+              "p99Ms": 0.5441,
+              "maxMs": 0.5441,
+              "negativeCount": 0
+            },
+            "observerSocketWrite": {
+              "n": 20,
+              "meanMs": 0.1266,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.4397,
+              "p99Ms": 0.5869,
+              "maxMs": 0.5869,
+              "negativeCount": 0
+            },
+            "postCommitToSocketWrite": {
+              "n": 20,
+              "meanMs": 5.6018,
+              "minMs": 4.7331,
+              "p50Ms": 5.4866,
+              "p95Ms": 6.4783,
+              "p99Ms": 6.8337,
+              "maxMs": 6.8337,
+              "negativeCount": 0
+            },
+            "ingressToSocketWrite": {
+              "n": 20,
+              "meanMs": 24.4815,
+              "minMs": 21.8837,
+              "p50Ms": 23.9182,
+              "p95Ms": 28.7264,
+              "p99Ms": 30.0552,
+              "maxMs": 30.0552,
+              "negativeCount": 0
+            },
+            "ingressToAckQueue": {
+              "n": 20,
+              "meanMs": 18.9322,
+              "minMs": 16.1837,
+              "p50Ms": 18.0429,
+              "p95Ms": 23.9933,
+              "p99Ms": 25.293,
+              "maxMs": 25.293,
+              "negativeCount": 0
+            }
+          }
+        },
+        "hot-c10": {
+          "messages": 600,
+          "stages": {
+            "permission": {
+              "n": 600,
+              "meanMs": 5.4083,
+              "minMs": 2.2889,
+              "p50Ms": 5.1929,
+              "p95Ms": 8.1274,
+              "p99Ms": 10.3874,
+              "maxMs": 15.0524,
+              "negativeCount": 0
+            },
+            "batchWait": {
+              "n": 600,
+              "meanMs": 21.9395,
+              "minMs": 1.7147,
+              "p50Ms": 20.9758,
+              "p95Ms": 32.5398,
+              "p99Ms": 41.6922,
+              "maxMs": 57.1914,
+              "negativeCount": 0
+            },
+            "databaseBatch": {
+              "n": 600,
+              "meanMs": 24.1539,
+              "minMs": 14.6057,
+              "p50Ms": 22.8939,
+              "p95Ms": 37.2441,
+              "p99Ms": 58.5249,
+              "maxMs": 58.5249,
+              "negativeCount": 0
+            },
+            "commitToPublishEnqueue": {
+              "n": 600,
+              "meanMs": 0.0176,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5295,
+              "maxMs": 0.5633,
+              "negativeCount": 0
+            },
+            "publisherQueue": {
+              "n": 600,
+              "meanMs": 8.83,
+              "minMs": 0,
+              "p50Ms": 7.819,
+              "p95Ms": 21.7268,
+              "p99Ms": 29.9547,
+              "maxMs": 36.4323,
+              "negativeCount": 0
+            },
+            "kafkaWrite": {
+              "n": 600,
+              "meanMs": 2.8141,
+              "minMs": 1.0496,
+              "p50Ms": 2.5891,
+              "p95Ms": 4.9878,
+              "p99Ms": 7.6401,
+              "maxMs": 10.9256,
+              "negativeCount": 0
+            },
+            "kafkaReturnToFetchSigned": {
+              "n": 600,
+              "meanMs": 632.6498,
+              "minMs": 1.0636,
+              "p50Ms": 620.8727,
+              "p95Ms": 1036.6737,
+              "p99Ms": 1054.1365,
+              "maxMs": 1058.8438,
+              "negativeCount": 0
+            },
+            "kafkaCallStartToFetch": {
+              "n": 600,
+              "meanMs": 635.4639,
+              "minMs": 3.1913,
+              "p50Ms": 624.3605,
+              "p95Ms": 1039.0417,
+              "p99Ms": 1056.6041,
+              "maxMs": 1064.6319,
+              "negativeCount": 0
+            },
+            "fetchCall": {
+              "n": 600,
+              "meanMs": 0.4651,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5369,
+              "maxMs": 270.4975,
+              "negativeCount": 0
+            },
+            "pushHandler": {
+              "n": 600,
+              "meanMs": 4.6101,
+              "minMs": 1.6615,
+              "p50Ms": 4.2252,
+              "p95Ms": 7.8368,
+              "p99Ms": 10.7013,
+              "maxMs": 20.9434,
+              "negativeCount": 0
+            },
+            "groupRPC": {
+              "n": 600,
+              "meanMs": 3.3317,
+              "minMs": 1.5204,
+              "p50Ms": 3.1687,
+              "p95Ms": 5.3982,
+              "p99Ms": 8.9805,
+              "maxMs": 18.6175,
+              "negativeCount": 0
+            },
+            "fanoutEnqueue": {
+              "n": 600,
+              "meanMs": 0.2199,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.6375,
+              "p99Ms": 1.0485,
+              "maxMs": 2.6466,
+              "negativeCount": 0
+            },
+            "offsetCommit": {
+              "n": 600,
+              "meanMs": 2.3912,
+              "minMs": 0.5122,
+              "p50Ms": 2.139,
+              "p95Ms": 3.8148,
+              "p99Ms": 6.5985,
+              "maxMs": 31.3927,
+              "negativeCount": 0
+            },
+            "observerSocketQueue": {
+              "n": 600,
+              "meanMs": 0.6058,
+              "minMs": 0,
+              "p50Ms": 0.5336,
+              "p95Ms": 1.2498,
+              "p99Ms": 1.9136,
+              "maxMs": 3.6115,
+              "negativeCount": 0
+            },
+            "observerSocketWrite": {
+              "n": 600,
+              "meanMs": 0.0731,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5614,
+              "p99Ms": 0.7689,
+              "maxMs": 1.0615,
+              "negativeCount": 0
+            },
+            "postCommitToSocketWrite": {
+              "n": 600,
+              "meanMs": 648.6479,
+              "minMs": 9.3745,
+              "p50Ms": 639.3941,
+              "p95Ms": 1051.5077,
+              "p99Ms": 1073.8062,
+              "maxMs": 1090.5449,
+              "negativeCount": 0
+            },
+            "ingressToSocketWrite": {
+              "n": 600,
+              "meanMs": 700.1496,
+              "minMs": 30.4777,
+              "p50Ms": 699.8328,
+              "p95Ms": 1112.5683,
+              "p99Ms": 1132.0898,
+              "maxMs": 1144.6509,
+              "negativeCount": 0
+            },
+            "ingressToAckQueue": {
+              "n": 600,
+              "meanMs": 51.5975,
+              "minMs": 20.0087,
+              "p50Ms": 48.6091,
+              "p95Ms": 75.9899,
+              "p99Ms": 86.0565,
+              "maxMs": 97.6383,
+              "negativeCount": 0
+            }
+          },
+          "consumerLoop": {
+            "measuredSpanMs": 4240.3004,
+            "handlerSumMs": 2766.065799999996,
+            "commitSumMs": 1434.7174000000007,
+            "fetchSumExcludingFirstMs": 8.5494,
+            "commitShareOfSerialSpanPercent": 33.83527733082309,
+            "handlerShareOfSerialSpanPercent": 65.23277926252574,
+            "fetchStartedBeforePreviousCommitCompleted": 0,
+            "previousCommitEndToNextFetchStart": {
+              "n": 599,
+              "meanMs": 0.0378,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5256,
+              "p99Ms": 0.6409,
+              "maxMs": 1.4983,
+              "negativeCount": 0
+            }
+          }
+        },
+        "many-c10": {
+          "messages": 600,
+          "stages": {
+            "permission": {
+              "n": 600,
+              "meanMs": 9.2237,
+              "minMs": 3.1669,
+              "p50Ms": 7.5752,
+              "p95Ms": 16.9943,
+              "p99Ms": 20.2112,
+              "maxMs": 26.5592,
+              "negativeCount": 0
+            },
+            "batchWait": {
+              "n": 600,
+              "meanMs": 14.0797,
+              "minMs": 2.473,
+              "p50Ms": 6.0295,
+              "p95Ms": 39.864,
+              "p99Ms": 54.4324,
+              "maxMs": 84.1411,
+              "negativeCount": 0
+            },
+            "databaseBatch": {
+              "n": 600,
+              "meanMs": 41.0159,
+              "minMs": 20.3152,
+              "p50Ms": 39.5093,
+              "p95Ms": 56.668,
+              "p99Ms": 70.9185,
+              "maxMs": 95.1445,
+              "negativeCount": 0
+            },
+            "commitToPublishEnqueue": {
+              "n": 600,
+              "meanMs": 0.0058,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0,
+              "maxMs": 0.7368,
+              "negativeCount": 0
+            },
+            "publisherQueue": {
+              "n": 600,
+              "meanMs": 5.693,
+              "minMs": 0,
+              "p50Ms": 2.7165,
+              "p95Ms": 21.7911,
+              "p99Ms": 34.6762,
+              "maxMs": 43.0344,
+              "negativeCount": 0
+            },
+            "kafkaWrite": {
+              "n": 600,
+              "meanMs": 4.6089,
+              "minMs": 1.5735,
+              "p50Ms": 3.8574,
+              "p95Ms": 9.7299,
+              "p99Ms": 14.2769,
+              "maxMs": 20.5734,
+              "negativeCount": 0
+            },
+            "kafkaReturnToFetchSigned": {
+              "n": 600,
+              "meanMs": 1146.8251,
+              "minMs": 0,
+              "p50Ms": 1337.1379,
+              "p95Ms": 1550.0419,
+              "p99Ms": 1572.3826,
+              "maxMs": 1581.8677,
+              "negativeCount": 0
+            },
+            "kafkaCallStartToFetch": {
+              "n": 600,
+              "meanMs": 1151.434,
+              "minMs": 3.1633,
+              "p50Ms": 1341.5967,
+              "p95Ms": 1553.0711,
+              "p99Ms": 1575.6855,
+              "maxMs": 1588.7132,
+              "negativeCount": 0
+            },
+            "fetchCall": {
+              "n": 600,
+              "meanMs": 0.479,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5452,
+              "maxMs": 277.3317,
+              "negativeCount": 0
+            },
+            "pushHandler": {
+              "n": 600,
+              "meanMs": 5.5647,
+              "minMs": 2.6129,
+              "p50Ms": 5.1135,
+              "p95Ms": 9.6501,
+              "p99Ms": 12.3041,
+              "maxMs": 17.6644,
+              "negativeCount": 0
+            },
+            "groupRPC": {
+              "n": 600,
+              "meanMs": 4.2667,
+              "minMs": 1.7376,
+              "p50Ms": 3.8079,
+              "p95Ms": 8.0862,
+              "p99Ms": 10.0338,
+              "maxMs": 16.6064,
+              "negativeCount": 0
+            },
+            "fanoutEnqueue": {
+              "n": 600,
+              "meanMs": 0.1978,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.6041,
+              "p99Ms": 1.0739,
+              "maxMs": 1.6801,
+              "negativeCount": 0
+            },
+            "offsetCommit": {
+              "n": 600,
+              "meanMs": 3.4367,
+              "minMs": 0.5093,
+              "p50Ms": 2.6297,
+              "p95Ms": 8.3552,
+              "p99Ms": 13.1993,
+              "maxMs": 19.1563,
+              "negativeCount": 0
+            },
+            "observerSocketQueue": {
+              "n": 600,
+              "meanMs": 0.7084,
+              "minMs": 0,
+              "p50Ms": 0.5454,
+              "p95Ms": 1.4064,
+              "p99Ms": 2.2538,
+              "maxMs": 3.0794,
+              "negativeCount": 0
+            },
+            "observerSocketWrite": {
+              "n": 600,
+              "meanMs": 0.0829,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5745,
+              "p99Ms": 0.9969,
+              "maxMs": 1.5988,
+              "negativeCount": 0
+            },
+            "postCommitToSocketWrite": {
+              "n": 600,
+              "meanMs": 1162.5103,
+              "minMs": 11.5122,
+              "p50Ms": 1351.3125,
+              "p95Ms": 1557.9282,
+              "p99Ms": 1578.9174,
+              "maxMs": 1597.2545,
+              "negativeCount": 0
+            },
+            "ingressToSocketWrite": {
+              "n": 600,
+              "meanMs": 1226.8297,
+              "minMs": 57.8732,
+              "p50Ms": 1422.0959,
+              "p95Ms": 1619.1739,
+              "p99Ms": 1640.0026,
+              "maxMs": 1657.0997,
+              "negativeCount": 0
+            },
+            "ingressToAckQueue": {
+              "n": 600,
+              "meanMs": 64.3569,
+              "minMs": 35.7382,
+              "p50Ms": 62.0215,
+              "p95Ms": 98.4667,
+              "p99Ms": 115.7014,
+              "maxMs": 142.0912,
+              "negativeCount": 0
+            }
+          },
+          "consumerLoop": {
+            "measuredSpanMs": 5448.4595,
+            "handlerSumMs": 3338.8298999999993,
+            "commitSumMs": 2062.025599999998,
+            "fetchSumExcludingFirstMs": 10.0391,
+            "commitShareOfSerialSpanPercent": 37.84602968967647,
+            "handlerShareOfSerialSpanPercent": 61.28025545569347,
+            "fetchStartedBeforePreviousCommitCompleted": 0,
+            "previousCommitEndToNextFetchStart": {
+              "n": 599,
+              "meanMs": 0.0341,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5201,
+              "p99Ms": 0.5637,
+              "maxMs": 1.523,
+              "negativeCount": 0
+            }
+          }
+        },
+        "hot-c100": {
+          "messages": 600,
+          "stages": {
+            "permission": {
+              "n": 600,
+              "meanMs": 11.5361,
+              "minMs": 2.3145,
+              "p50Ms": 8.1682,
+              "p95Ms": 38.4465,
+              "p99Ms": 56.5711,
+              "maxMs": 58.8301,
+              "negativeCount": 0
+            },
+            "batchWait": {
+              "n": 600,
+              "meanMs": 79.4173,
+              "minMs": 1.5969,
+              "p50Ms": 81.8191,
+              "p95Ms": 123.5526,
+              "p99Ms": 150.1374,
+              "maxMs": 161.6006,
+              "negativeCount": 0
+            },
+            "databaseBatch": {
+              "n": 600,
+              "meanMs": 48.0067,
+              "minMs": 20.5295,
+              "p50Ms": 45.5433,
+              "p95Ms": 72.1526,
+              "p99Ms": 72.1526,
+              "maxMs": 72.7539,
+              "negativeCount": 0
+            },
+            "commitToPublishEnqueue": {
+              "n": 600,
+              "meanMs": 0.0397,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5235,
+              "p99Ms": 0.5347,
+              "maxMs": 0.5347,
+              "negativeCount": 0
+            },
+            "publisherQueue": {
+              "n": 600,
+              "meanMs": 375.2505,
+              "minMs": 0,
+              "p50Ms": 414.4042,
+              "p95Ms": 561.2091,
+              "p99Ms": 585.5583,
+              "maxMs": 590.3822,
+              "negativeCount": 0
+            },
+            "kafkaWrite": {
+              "n": 600,
+              "meanMs": 2.4477,
+              "minMs": 0.5312,
+              "p50Ms": 2.0595,
+              "p95Ms": 5.4794,
+              "p99Ms": 9.1207,
+              "maxMs": 13.1661,
+              "negativeCount": 0
+            },
+            "kafkaReturnToFetchSigned": {
+              "n": 600,
+              "meanMs": 1223.9252,
+              "minMs": 0.5277,
+              "p50Ms": 1275.303,
+              "p95Ms": 2032.678,
+              "p99Ms": 2110.3166,
+              "maxMs": 2127.4967,
+              "negativeCount": 0
+            },
+            "kafkaCallStartToFetch": {
+              "n": 600,
+              "meanMs": 1226.3729,
+              "minMs": 3.4675,
+              "p50Ms": 1277.4753,
+              "p95Ms": 2034.4229,
+              "p99Ms": 2112.059,
+              "maxMs": 2129.3686,
+              "negativeCount": 0
+            },
+            "fetchCall": {
+              "n": 600,
+              "meanMs": 0.3873,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5487,
+              "maxMs": 221.3754,
+              "negativeCount": 0
+            },
+            "pushHandler": {
+              "n": 600,
+              "meanMs": 4.2636,
+              "minMs": 2.2555,
+              "p50Ms": 3.7317,
+              "p95Ms": 7.3857,
+              "p99Ms": 15.6126,
+              "maxMs": 22.1745,
+              "negativeCount": 0
+            },
+            "groupRPC": {
+              "n": 600,
+              "meanMs": 3.0399,
+              "minMs": 1.5468,
+              "p50Ms": 2.675,
+              "p95Ms": 4.8871,
+              "p99Ms": 10.1651,
+              "maxMs": 13.7248,
+              "negativeCount": 0
+            },
+            "fanoutEnqueue": {
+              "n": 600,
+              "meanMs": 0.2168,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5572,
+              "p99Ms": 0.9076,
+              "maxMs": 1.9051,
+              "negativeCount": 0
+            },
+            "offsetCommit": {
+              "n": 600,
+              "meanMs": 1.7207,
+              "minMs": 0,
+              "p50Ms": 1.5827,
+              "p95Ms": 2.9664,
+              "p99Ms": 5.9327,
+              "maxMs": 15.215,
+              "negativeCount": 0
+            },
+            "observerSocketQueue": {
+              "n": 600,
+              "meanMs": 0.5677,
+              "minMs": 0,
+              "p50Ms": 0.5318,
+              "p95Ms": 1.153,
+              "p99Ms": 1.5997,
+              "maxMs": 2.2439,
+              "negativeCount": 0
+            },
+            "observerSocketWrite": {
+              "n": 600,
+              "meanMs": 0.0858,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5439,
+              "p99Ms": 0.7108,
+              "maxMs": 1.5249,
+              "negativeCount": 0
+            },
+            "postCommitToSocketWrite": {
+              "n": 600,
+              "meanMs": 1605.6618,
+              "minMs": 17.7783,
+              "p50Ms": 1693.3247,
+              "p95Ms": 2598.7047,
+              "p99Ms": 2695.2649,
+              "maxMs": 2722.4018,
+              "negativeCount": 0
+            },
+            "ingressToSocketWrite": {
+              "n": 600,
+              "meanMs": 1744.6218,
+              "minMs": 46.8097,
+              "p50Ms": 1837.0345,
+              "p95Ms": 2693.8514,
+              "p99Ms": 2782.959,
+              "maxMs": 2803.1996,
+              "negativeCount": 0
+            },
+            "ingressToAckQueue": {
+              "n": 600,
+              "meanMs": 139.3776,
+              "minMs": 26.9116,
+              "p50Ms": 140.6327,
+              "p95Ms": 187.895,
+              "p99Ms": 217.1812,
+              "maxMs": 275.0723,
+              "negativeCount": 0
+            }
+          },
+          "consumerLoop": {
+            "measuredSpanMs": 3632.0435,
+            "handlerSumMs": 2558.1587000000036,
+            "commitSumMs": 1032.4484000000007,
+            "fetchSumExcludingFirstMs": 11.0215,
+            "commitShareOfSerialSpanPercent": 28.426102275482126,
+            "handlerShareOfSerialSpanPercent": 70.43304134435624,
+            "fetchStartedBeforePreviousCommitCompleted": 0,
+            "previousCommitEndToNextFetchStart": {
+              "n": 599,
+              "meanMs": 0.0309,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.506,
+              "p99Ms": 0.5558,
+              "maxMs": 1.0456,
+              "negativeCount": 0
+            }
+          }
+        },
+        "many-c100": {
+          "messages": 600,
+          "stages": {
+            "permission": {
+              "n": 600,
+              "meanMs": 21.0667,
+              "minMs": 2.7733,
+              "p50Ms": 20.2972,
+              "p95Ms": 40.5635,
+              "p99Ms": 48.3242,
+              "maxMs": 56.8244,
+              "negativeCount": 0
+            },
+            "batchWait": {
+              "n": 600,
+              "meanMs": 130.1977,
+              "minMs": 2.7408,
+              "p50Ms": 121.2603,
+              "p95Ms": 270.8772,
+              "p99Ms": 325.7616,
+              "maxMs": 363.4314,
+              "negativeCount": 0
+            },
+            "databaseBatch": {
+              "n": 600,
+              "meanMs": 61.085,
+              "minMs": 25.4531,
+              "p50Ms": 60.332,
+              "p95Ms": 91.291,
+              "p99Ms": 103.0369,
+              "maxMs": 108.5584,
+              "negativeCount": 0
+            },
+            "commitToPublishEnqueue": {
+              "n": 600,
+              "meanMs": 0.0171,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.6344,
+              "maxMs": 0.6441,
+              "negativeCount": 0
+            },
+            "publisherQueue": {
+              "n": 600,
+              "meanMs": 537.6971,
+              "minMs": 0,
+              "p50Ms": 645.7386,
+              "p95Ms": 706.7016,
+              "p99Ms": 724.7684,
+              "maxMs": 740.1982,
+              "negativeCount": 0
+            },
+            "kafkaWrite": {
+              "n": 600,
+              "meanMs": 3.3471,
+              "minMs": 0.5062,
+              "p50Ms": 2.2872,
+              "p95Ms": 8.8234,
+              "p99Ms": 14.0168,
+              "maxMs": 18.3147,
+              "negativeCount": 0
+            },
+            "kafkaReturnToFetchSigned": {
+              "n": 600,
+              "meanMs": 1392.9147,
+              "minMs": 0.5164,
+              "p50Ms": 1313.5697,
+              "p95Ms": 2463.0556,
+              "p99Ms": 2504.6583,
+              "maxMs": 2519.5787,
+              "negativeCount": 0
+            },
+            "kafkaCallStartToFetch": {
+              "n": 600,
+              "meanMs": 1396.2618,
+              "minMs": 2.6511,
+              "p50Ms": 1316.4574,
+              "p95Ms": 2464.6858,
+              "p99Ms": 2506.2769,
+              "maxMs": 2521.1915,
+              "negativeCount": 0
+            },
+            "fetchCall": {
+              "n": 600,
+              "meanMs": 0.4248,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5412,
+              "maxMs": 246.8139,
+              "negativeCount": 0
+            },
+            "pushHandler": {
+              "n": 600,
+              "meanMs": 5.2163,
+              "minMs": 2.6119,
+              "p50Ms": 4.5884,
+              "p95Ms": 10.479,
+              "p99Ms": 15.4202,
+              "maxMs": 18.8237,
+              "negativeCount": 0
+            },
+            "groupRPC": {
+              "n": 600,
+              "meanMs": 3.8034,
+              "minMs": 1.9685,
+              "p50Ms": 3.244,
+              "p95Ms": 7.7429,
+              "p99Ms": 12.4635,
+              "maxMs": 17.0203,
+              "negativeCount": 0
+            },
+            "fanoutEnqueue": {
+              "n": 600,
+              "meanMs": 0.2275,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.6055,
+              "p99Ms": 1.0418,
+              "maxMs": 1.4862,
+              "negativeCount": 0
+            },
+            "offsetCommit": {
+              "n": 600,
+              "meanMs": 2.23,
+              "minMs": 0.5056,
+              "p50Ms": 1.7199,
+              "p95Ms": 4.9245,
+              "p99Ms": 10.1378,
+              "maxMs": 20.7674,
+              "negativeCount": 0
+            },
+            "observerSocketQueue": {
+              "n": 600,
+              "meanMs": 0.7401,
+              "minMs": 0,
+              "p50Ms": 0.546,
+              "p95Ms": 1.6297,
+              "p99Ms": 2.2609,
+              "maxMs": 3.0956,
+              "negativeCount": 0
+            },
+            "observerSocketWrite": {
+              "n": 600,
+              "meanMs": 0.0807,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5447,
+              "p99Ms": 0.7354,
+              "maxMs": 1.9448,
+              "negativeCount": 0
+            },
+            "postCommitToSocketWrite": {
+              "n": 600,
+              "meanMs": 1938.9204,
+              "minMs": 9.9476,
+              "p50Ms": 2004.2883,
+              "p95Ms": 3101.2593,
+              "p99Ms": 3161.8707,
+              "maxMs": 3183.1909,
+              "negativeCount": 0
+            },
+            "ingressToSocketWrite": {
+              "n": 600,
+              "meanMs": 2151.2698,
+              "minMs": 46.7282,
+              "p50Ms": 2237.8131,
+              "p95Ms": 3303.9871,
+              "p99Ms": 3405.7278,
+              "maxMs": 3516.8967,
+              "negativeCount": 0
+            },
+            "ingressToAckQueue": {
+              "n": 600,
+              "meanMs": 212.4604,
+              "minMs": 36.7806,
+              "p50Ms": 205.9019,
+              "p95Ms": 365.4922,
+              "p99Ms": 410.9567,
+              "maxMs": 451.2213,
+              "negativeCount": 0
+            }
+          },
+          "consumerLoop": {
+            "measuredSpanMs": 4512.0869,
+            "handlerSumMs": 3129.7891000000004,
+            "commitSumMs": 1337.9887999999992,
+            "fetchSumExcludingFirstMs": 8.084200000000001,
+            "commitShareOfSerialSpanPercent": 29.65343597438248,
+            "handlerShareOfSerialSpanPercent": 69.36455722960478,
+            "fetchStartedBeforePreviousCommitCompleted": 0,
+            "previousCommitEndToNextFetchStart": {
+              "n": 599,
+              "meanMs": 0.0425,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.537,
+              "p99Ms": 0.6494,
+              "maxMs": 1.3824,
+              "negativeCount": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "control",
+      "result": "PASS",
+      "lowLoad": {
+        "messages": 20,
+        "ack": {
+          "n": 20,
+          "p50Ms": 19.96,
+          "p95Ms": 22.54,
+          "p99Ms": 24.47,
+          "maxMs": 24.47
+        },
+        "push": {
+          "n": 20,
+          "p50Ms": 24.93,
+          "p95Ms": 27.23,
+          "p99Ms": 29.2,
+          "maxMs": 29.2
+        }
+      },
+      "cases": [
+        {
+          "name": "hot-c10",
+          "concurrency": 10,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 3.089,
+          "ackRPS": 194.27,
+          "ack": {
+            "n": 600,
+            "p50Ms": 48.82,
+            "p95Ms": 69.2,
+            "p99Ms": 96.89,
+            "maxMs": 99.99
+          },
+          "statementCounts": {
+            "commits": 120,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 28.82,
+          "driverEventLoopP99Ms": 20.35,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 0.422,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 525.72,
+            "p95Ms": 785.9,
+            "p99Ms": 805.84,
+            "maxMs": 815.38
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942246978271000"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c10",
+          "concurrency": 10,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 4.163,
+          "ackRPS": 144.12,
+          "ack": {
+            "n": 600,
+            "p50Ms": 66.49,
+            "p95Ms": 98.81,
+            "p99Ms": 113.52,
+            "maxMs": 136.62
+          },
+          "statementCounts": {
+            "commits": 594,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 27.41,
+          "driverEventLoopP99Ms": 17.76,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 1.038,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 1101.59,
+            "p95Ms": 1622.84,
+            "p99Ms": 1659.47,
+            "maxMs": 1714.71
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271001"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271002"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271003"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271004"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271005"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271006"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271007"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271008"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271009"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271010"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271011"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271012"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271013"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271014"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271015"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271016"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271017"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271018"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271019"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271020"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "hot-c100",
+          "concurrency": 100,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 1.181,
+          "ackRPS": 507.99,
+          "ack": {
+            "n": 600,
+            "p50Ms": 166.63,
+            "p95Ms": 299.51,
+            "p99Ms": 356.99,
+            "maxMs": 359.11
+          },
+          "statementCounts": {
+            "commits": 20,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 25.06,
+          "driverEventLoopP99Ms": 24.85,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 2.768,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2255.63,
+            "p95Ms": 3191.01,
+            "p99Ms": 3235.6,
+            "maxMs": 3256.31
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942246978271021"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c100",
+          "concurrency": 100,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 1.521,
+          "ackRPS": 394.37,
+          "ack": {
+            "n": 600,
+            "p50Ms": 228.12,
+            "p95Ms": 370.19,
+            "p99Ms": 429.2,
+            "maxMs": 477.05
+          },
+          "statementCounts": {
+            "commits": 180,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 22.61,
+          "driverEventLoopP99Ms": 21.99,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 2.617,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 2382.29,
+            "p95Ms": 3135.47,
+            "p99Ms": 3203.94,
+            "maxMs": 3258.48
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271022"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271023"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271024"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271025"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271026"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271027"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271028"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271029"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271030"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271031"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271032"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271033"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271034"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271035"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271036"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271037"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271038"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271039"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271040"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942246978271041"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        }
+      ]
+    },
+    {
+      "name": "trace-r2",
+      "result": "PASS",
+      "lowLoad": {
+        "messages": 20,
+        "ack": {
+          "n": 20,
+          "p50Ms": 20.51,
+          "p95Ms": 31.4,
+          "p99Ms": 232.74,
+          "maxMs": 232.74
+        },
+        "push": {
+          "n": 20,
+          "p50Ms": 26.12,
+          "p95Ms": 43.43,
+          "p99Ms": 239.11,
+          "maxMs": 239.11
+        }
+      },
+      "cases": [
+        {
+          "name": "hot-c10",
+          "concurrency": 10,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 2.99,
+          "ackRPS": 200.69,
+          "ack": {
+            "n": 600,
+            "p50Ms": 47.92,
+            "p95Ms": 59.79,
+            "p99Ms": 67.19,
+            "maxMs": 69.09
+          },
+          "statementCounts": {
+            "commits": 120,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 33.48,
+          "driverEventLoopP99Ms": 15.72,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 0.413,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 469.83,
+            "p95Ms": 708.16,
+            "p99Ms": 721.22,
+            "maxMs": 729.99
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942247360331000"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c10",
+          "concurrency": 10,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 4.016,
+          "ackRPS": 149.4,
+          "ack": {
+            "n": 600,
+            "p50Ms": 63.27,
+            "p95Ms": 102.37,
+            "p99Ms": 125.7,
+            "maxMs": 153.77
+          },
+          "statementCounts": {
+            "commits": 599,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 26.07,
+          "driverEventLoopP99Ms": 18.04,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 0.823,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 1059.9,
+            "p95Ms": 1390.14,
+            "p99Ms": 1410.43,
+            "maxMs": 1421.81
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331001"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331002"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331003"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331004"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331005"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331006"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331007"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331008"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331009"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331010"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331011"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331012"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331013"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331014"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331015"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331016"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331017"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331018"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331019"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331020"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "hot-c100",
+          "concurrency": 100,
+          "groupCount": 1,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 0.759,
+          "ackRPS": 790.64,
+          "ack": {
+            "n": 600,
+            "p50Ms": 113.85,
+            "p95Ms": 156.21,
+            "p99Ms": 184.6,
+            "maxMs": 186.66
+          },
+          "statementCounts": {
+            "commits": 20,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 33.07,
+          "driverEventLoopP99Ms": 19.55,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 2.438,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 1626.17,
+            "p95Ms": 2606.09,
+            "p99Ms": 2718.6,
+            "maxMs": 2735.55
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 700,
+              "maxSeq": 700,
+              "minSeq": 1,
+              "lastSeq": 700,
+              "sessionId": "17942247360331021"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-c100",
+          "concurrency": 100,
+          "groupCount": 20,
+          "requests": 600,
+          "succeeded": 600,
+          "errors": {},
+          "errorCount": 0,
+          "durationSecs": 1.375,
+          "ackRPS": 436.35,
+          "ack": {
+            "n": 600,
+            "p50Ms": 206.7,
+            "p95Ms": 349.31,
+            "p99Ms": 393.48,
+            "maxMs": 429.05
+          },
+          "statementCounts": {
+            "commits": 179,
+            "counterUpdates": 0,
+            "messageInserts": 0
+          },
+          "driverCPUPercentOneCore": 14.76,
+          "driverEventLoopP99Ms": 22.38,
+          "statementCountCoverage": "Prepared DML not visible in this digest table; zero DML counts are unavailable, not zero executions. COMMIT observations are approximate.",
+          "drainWaitSecs": 2.594,
+          "pushed": 600,
+          "pushMissing": 0,
+          "push": {
+            "n": 600,
+            "p50Ms": 1951.71,
+            "p95Ms": 3000.47,
+            "p99Ms": 3096.27,
+            "maxMs": 3204.05
+          },
+          "databaseMessages": 700,
+          "sequenceChecks": [
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331022"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331023"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331024"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331025"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331026"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331027"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331028"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331029"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331030"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331031"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331032"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331033"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331034"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331035"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331036"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331037"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331038"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331039"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331040"
+            },
+            {
+              "count": 35,
+              "maxSeq": 35,
+              "minSeq": 1,
+              "lastSeq": 35,
+              "sessionId": "17942247360331041"
+            }
+          ],
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        }
+      ],
+      "traceRows": 2825,
+      "expectedRows": 2825,
+      "timings": {
+        "low-load": {
+          "messages": 20,
+          "stages": {
+            "permission": {
+              "n": 20,
+              "meanMs": 8.9968,
+              "minMs": 2.0464,
+              "p50Ms": 3.308,
+              "p95Ms": 5.805,
+              "p99Ms": 113.6927,
+              "maxMs": 113.6927,
+              "negativeCount": 0
+            },
+            "batchWait": {
+              "n": 20,
+              "meanMs": 4.4743,
+              "minMs": 2.6319,
+              "p50Ms": 3.2374,
+              "p95Ms": 3.7074,
+              "p99Ms": 26.8858,
+              "maxMs": 26.8858,
+              "negativeCount": 0
+            },
+            "databaseBatch": {
+              "n": 20,
+              "meanMs": 16.9083,
+              "minMs": 9.956,
+              "p50Ms": 12.7156,
+              "p95Ms": 21.5869,
+              "p99Ms": 86.5481,
+              "maxMs": 86.5481,
+              "negativeCount": 0
+            },
+            "commitToPublishEnqueue": {
+              "n": 20,
+              "meanMs": 0,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0,
+              "maxMs": 0,
+              "negativeCount": 0
+            },
+            "publisherQueue": {
+              "n": 20,
+              "meanMs": 0,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0,
+              "maxMs": 0,
+              "negativeCount": 0
+            },
+            "kafkaWrite": {
+              "n": 20,
+              "meanMs": 1.7014,
+              "minMs": 1.048,
+              "p50Ms": 1.574,
+              "p95Ms": 2.1149,
+              "p99Ms": 4.2024,
+              "maxMs": 4.2024,
+              "negativeCount": 0
+            },
+            "kafkaReturnToFetchSigned": {
+              "n": 20,
+              "meanMs": 0.1049,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5279,
+              "p99Ms": 0.5281,
+              "maxMs": 0.5281,
+              "negativeCount": 0
+            },
+            "kafkaCallStartToFetch": {
+              "n": 20,
+              "meanMs": 1.8064,
+              "minMs": 1.4375,
+              "p50Ms": 1.5812,
+              "p95Ms": 2.1149,
+              "p99Ms": 4.2024,
+              "maxMs": 4.2024,
+              "negativeCount": 0
+            },
+            "fetchCall": {
+              "n": 20,
+              "meanMs": 190.8508,
+              "minMs": 168.7683,
+              "p50Ms": 177.8299,
+              "p95Ms": 197.9106,
+              "p99Ms": 402.58,
+              "maxMs": 402.58,
+              "negativeCount": 0
+            },
+            "pushHandler": {
+              "n": 20,
+              "meanMs": 3.4488,
+              "minMs": 2.6039,
+              "p50Ms": 3.1539,
+              "p95Ms": 5.4588,
+              "p99Ms": 6.505,
+              "maxMs": 6.505,
+              "negativeCount": 0
+            },
+            "groupRPC": {
+              "n": 20,
+              "meanMs": 2.7112,
+              "minMs": 2.0081,
+              "p50Ms": 2.6176,
+              "p95Ms": 3.8388,
+              "p99Ms": 5.4649,
+              "maxMs": 5.4649,
+              "negativeCount": 0
+            },
+            "fanoutEnqueue": {
+              "n": 20,
+              "meanMs": 0.0803,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5359,
+              "p99Ms": 0.5442,
+              "maxMs": 0.5442,
+              "negativeCount": 0
+            },
+            "offsetCommit": {
+              "n": 20,
+              "meanMs": 1.3376,
+              "minMs": 1.0341,
+              "p50Ms": 1.2384,
+              "p95Ms": 1.8112,
+              "p99Ms": 1.8145,
+              "maxMs": 1.8145,
+              "negativeCount": 0
+            },
+            "observerSocketQueue": {
+              "n": 20,
+              "meanMs": 0.4627,
+              "minMs": 0,
+              "p50Ms": 0.5236,
+              "p95Ms": 0.5493,
+              "p99Ms": 0.8163,
+              "maxMs": 0.8163,
+              "negativeCount": 0
+            },
+            "observerSocketWrite": {
+              "n": 20,
+              "meanMs": 0.0675,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5143,
+              "p99Ms": 0.5193,
+              "maxMs": 0.5193,
+              "negativeCount": 0
+            },
+            "postCommitToSocketWrite": {
+              "n": 20,
+              "meanMs": 5.2541,
+              "minMs": 4.18,
+              "p50Ms": 4.7324,
+              "p95Ms": 6.9998,
+              "p99Ms": 11.2578,
+              "maxMs": 11.2578,
+              "negativeCount": 0
+            },
+            "ingressToSocketWrite": {
+              "n": 20,
+              "meanMs": 35.6335,
+              "minMs": 20.0994,
+              "p50Ms": 24.0214,
+              "p95Ms": 40.4128,
+              "p99Ms": 232.7138,
+              "maxMs": 232.7138,
+              "negativeCount": 0
+            },
+            "ingressToAckQueue": {
+              "n": 20,
+              "meanMs": 30.3794,
+              "minMs": 15.4106,
+              "p50Ms": 19.4267,
+              "p95Ms": 29.155,
+              "p99Ms": 227.1266,
+              "maxMs": 227.1266,
+              "negativeCount": 0
+            }
+          }
+        },
+        "hot-c10": {
+          "messages": 600,
+          "stages": {
+            "permission": {
+              "n": 600,
+              "meanMs": 5.1919,
+              "minMs": 2.2395,
+              "p50Ms": 5.0275,
+              "p95Ms": 7.8896,
+              "p99Ms": 9.3006,
+              "maxMs": 10.2288,
+              "negativeCount": 0
+            },
+            "batchWait": {
+              "n": 600,
+              "meanMs": 19.7213,
+              "minMs": 2.0312,
+              "p50Ms": 19.5771,
+              "p95Ms": 24.6458,
+              "p99Ms": 28.7971,
+              "maxMs": 30.8698,
+              "negativeCount": 0
+            },
+            "databaseBatch": {
+              "n": 600,
+              "meanMs": 21.3899,
+              "minMs": 12.9762,
+              "p50Ms": 20.3584,
+              "p95Ms": 28.8373,
+              "p99Ms": 30.3191,
+              "maxMs": 34.0613,
+              "negativeCount": 0
+            },
+            "commitToPublishEnqueue": {
+              "n": 600,
+              "meanMs": 0.018,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5827,
+              "maxMs": 0.5827,
+              "negativeCount": 0
+            },
+            "publisherQueue": {
+              "n": 600,
+              "meanMs": 6.1034,
+              "minMs": 0,
+              "p50Ms": 5.1718,
+              "p95Ms": 14.5976,
+              "p99Ms": 18.7978,
+              "maxMs": 23.9631,
+              "negativeCount": 0
+            },
+            "kafkaWrite": {
+              "n": 600,
+              "meanMs": 1.9141,
+              "minMs": 0.6439,
+              "p50Ms": 1.7592,
+              "p95Ms": 3.1128,
+              "p99Ms": 4.1658,
+              "maxMs": 6.6546,
+              "negativeCount": 0
+            },
+            "kafkaReturnToFetchSigned": {
+              "n": 600,
+              "meanMs": 393.0429,
+              "minMs": 0,
+              "p50Ms": 402.6969,
+              "p95Ms": 649.1019,
+              "p99Ms": 660.3388,
+              "maxMs": 665.5929,
+              "negativeCount": 0
+            },
+            "kafkaCallStartToFetch": {
+              "n": 600,
+              "meanMs": 394.957,
+              "minMs": 1.6596,
+              "p50Ms": 404.6948,
+              "p95Ms": 650.7232,
+              "p99Ms": 662.1739,
+              "maxMs": 667.4735,
+              "negativeCount": 0
+            },
+            "fetchCall": {
+              "n": 600,
+              "meanMs": 0.3703,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5416,
+              "maxMs": 215.0151,
+              "negativeCount": 0
+            },
+            "pushHandler": {
+              "n": 600,
+              "meanMs": 4.4472,
+              "minMs": 2.5603,
+              "p50Ms": 4.1006,
+              "p95Ms": 7.6526,
+              "p99Ms": 9.8321,
+              "maxMs": 14.2695,
+              "negativeCount": 0
+            },
+            "groupRPC": {
+              "n": 600,
+              "meanMs": 3.1026,
+              "minMs": 1.5398,
+              "p50Ms": 2.9079,
+              "p95Ms": 4.5463,
+              "p99Ms": 6.1673,
+              "maxMs": 9.0272,
+              "negativeCount": 0
+            },
+            "fanoutEnqueue": {
+              "n": 600,
+              "meanMs": 0.2212,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.6255,
+              "p99Ms": 1.0223,
+              "maxMs": 1.965,
+              "negativeCount": 0
+            },
+            "offsetCommit": {
+              "n": 600,
+              "meanMs": 1.4991,
+              "minMs": 0.3617,
+              "p50Ms": 1.5355,
+              "p95Ms": 2.2772,
+              "p99Ms": 2.8439,
+              "maxMs": 3.907,
+              "negativeCount": 0
+            },
+            "observerSocketQueue": {
+              "n": 600,
+              "meanMs": 0.6138,
+              "minMs": 0,
+              "p50Ms": 0.5354,
+              "p95Ms": 1.2702,
+              "p99Ms": 2.0093,
+              "maxMs": 3.3711,
+              "negativeCount": 0
+            },
+            "observerSocketWrite": {
+              "n": 600,
+              "meanMs": 0.0814,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5471,
+              "p99Ms": 0.7713,
+              "maxMs": 1.0482,
+              "negativeCount": 0
+            },
+            "postCommitToSocketWrite": {
+              "n": 600,
+              "meanMs": 405.1907,
+              "minMs": 8.1666,
+              "p50Ms": 414.4611,
+              "p95Ms": 660.0051,
+              "p99Ms": 674.0233,
+              "maxMs": 683.7772,
+              "negativeCount": 0
+            },
+            "ingressToSocketWrite": {
+              "n": 600,
+              "meanMs": 451.4938,
+              "minMs": 26.4754,
+              "p50Ms": 465.1109,
+              "p95Ms": 705.2797,
+              "p99Ms": 719.5544,
+              "maxMs": 725.8109,
+              "negativeCount": 0
+            },
+            "ingressToAckQueue": {
+              "n": 600,
+              "meanMs": 46.3811,
+              "minMs": 17.7767,
+              "p50Ms": 45.4447,
+              "p95Ms": 57.1637,
+              "p99Ms": 61.265,
+              "maxMs": 67.0743,
+              "negativeCount": 0
+            }
+          },
+          "consumerLoop": {
+            "measuredSpanMs": 3597.7987,
+            "handlerSumMs": 2668.3072999999977,
+            "commitSumMs": 899.4408000000001,
+            "fetchSumExcludingFirstMs": 7.1536,
+            "commitShareOfSerialSpanPercent": 24.999753321385104,
+            "handlerShareOfSerialSpanPercent": 74.16499705778418,
+            "fetchStartedBeforePreviousCommitCompleted": 0,
+            "previousCommitEndToNextFetchStart": {
+              "n": 599,
+              "meanMs": 0.0222,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5585,
+              "maxMs": 0.7799,
+              "negativeCount": 0
+            }
+          }
+        },
+        "many-c10": {
+          "messages": 600,
+          "stages": {
+            "permission": {
+              "n": 600,
+              "meanMs": 9.7694,
+              "minMs": 3.229,
+              "p50Ms": 7.752,
+              "p95Ms": 20.7676,
+              "p99Ms": 24.4235,
+              "maxMs": 37.9252,
+              "negativeCount": 0
+            },
+            "batchWait": {
+              "n": 600,
+              "meanMs": 13.7306,
+              "minMs": 2.5859,
+              "p50Ms": 7.1172,
+              "p95Ms": 39.0569,
+              "p99Ms": 50.3949,
+              "maxMs": 72.7948,
+              "negativeCount": 0
+            },
+            "databaseBatch": {
+              "n": 600,
+              "meanMs": 41.5465,
+              "minMs": 19.6478,
+              "p50Ms": 39.218,
+              "p95Ms": 61.6492,
+              "p99Ms": 71.8417,
+              "maxMs": 82.1174,
+              "negativeCount": 0
+            },
+            "commitToPublishEnqueue": {
+              "n": 600,
+              "meanMs": 0.0162,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.531,
+              "maxMs": 0.7496,
+              "negativeCount": 0
+            },
+            "publisherQueue": {
+              "n": 600,
+              "meanMs": 2.132,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 9.6623,
+              "p99Ms": 17.7003,
+              "maxMs": 29.4631,
+              "negativeCount": 0
+            },
+            "kafkaWrite": {
+              "n": 600,
+              "meanMs": 3.6798,
+              "minMs": 0.9629,
+              "p50Ms": 3.1617,
+              "p95Ms": 8.1485,
+              "p99Ms": 11.6271,
+              "maxMs": 19.1077,
+              "negativeCount": 0
+            },
+            "kafkaReturnToFetchSigned": {
+              "n": 600,
+              "meanMs": 891.5109,
+              "minMs": 0,
+              "p50Ms": 960.3111,
+              "p95Ms": 1325.2724,
+              "p99Ms": 1334.8343,
+              "maxMs": 1341.7853,
+              "negativeCount": 0
+            },
+            "kafkaCallStartToFetch": {
+              "n": 600,
+              "meanMs": 895.1907,
+              "minMs": 2.1214,
+              "p50Ms": 965.9351,
+              "p95Ms": 1328.2852,
+              "p99Ms": 1337.0728,
+              "maxMs": 1345.1069,
+              "negativeCount": 0
+            },
+            "fetchCall": {
+              "n": 600,
+              "meanMs": 0.4251,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5436,
+              "maxMs": 243.0478,
+              "negativeCount": 0
+            },
+            "pushHandler": {
+              "n": 600,
+              "meanMs": 5.6048,
+              "minMs": 2.1081,
+              "p50Ms": 5.3335,
+              "p95Ms": 9.83,
+              "p99Ms": 13.2972,
+              "maxMs": 23.0737,
+              "negativeCount": 0
+            },
+            "groupRPC": {
+              "n": 600,
+              "meanMs": 4.2932,
+              "minMs": 1.4401,
+              "p50Ms": 3.9476,
+              "p95Ms": 8.0799,
+              "p99Ms": 11.6758,
+              "maxMs": 21.9873,
+              "negativeCount": 0
+            },
+            "fanoutEnqueue": {
+              "n": 600,
+              "meanMs": 0.2254,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5951,
+              "p99Ms": 1.0105,
+              "maxMs": 2.0498,
+              "negativeCount": 0
+            },
+            "offsetCommit": {
+              "n": 600,
+              "meanMs": 2.6605,
+              "minMs": 0.5034,
+              "p50Ms": 2.0943,
+              "p95Ms": 6.8208,
+              "p99Ms": 11.4306,
+              "maxMs": 15.5159,
+              "negativeCount": 0
+            },
+            "observerSocketQueue": {
+              "n": 600,
+              "meanMs": 0.7414,
+              "minMs": 0,
+              "p50Ms": 0.5432,
+              "p95Ms": 1.6188,
+              "p99Ms": 2.3634,
+              "maxMs": 4.3968,
+              "negativeCount": 0
+            },
+            "observerSocketWrite": {
+              "n": 600,
+              "meanMs": 0.0681,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5364,
+              "p99Ms": 0.7327,
+              "maxMs": 0.8807,
+              "negativeCount": 0
+            },
+            "postCommitToSocketWrite": {
+              "n": 600,
+              "meanMs": 902.7876,
+              "minMs": 7.5655,
+              "p50Ms": 976.4493,
+              "p95Ms": 1332.7425,
+              "p99Ms": 1341.6404,
+              "maxMs": 1350.3916,
+              "negativeCount": 0
+            },
+            "ingressToSocketWrite": {
+              "n": 600,
+              "meanMs": 967.8341,
+              "minMs": 45.3896,
+              "p50Ms": 1057.6163,
+              "p95Ms": 1387.2137,
+              "p99Ms": 1408.6963,
+              "maxMs": 1421.1187,
+              "negativeCount": 0
+            },
+            "ingressToAckQueue": {
+              "n": 600,
+              "meanMs": 65.1035,
+              "minMs": 36.2132,
+              "p50Ms": 62.0375,
+              "p95Ms": 99.9516,
+              "p99Ms": 124.7827,
+              "maxMs": 153.0805,
+              "negativeCount": 0
+            }
+          },
+          "consumerLoop": {
+            "measuredSpanMs": 5002.2314,
+            "handlerSumMs": 3362.885200000001,
+            "commitSumMs": 1596.315700000001,
+            "fetchSumExcludingFirstMs": 12.0015,
+            "commitShareOfSerialSpanPercent": 31.91207228038273,
+            "handlerShareOfSerialSpanPercent": 67.22770162132046,
+            "fetchStartedBeforePreviousCommitCompleted": 0,
+            "previousCommitEndToNextFetchStart": {
+              "n": 599,
+              "meanMs": 0.0342,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5234,
+              "p99Ms": 0.7038,
+              "maxMs": 1.1714,
+              "negativeCount": 0
+            }
+          }
+        },
+        "hot-c100": {
+          "messages": 600,
+          "stages": {
+            "permission": {
+              "n": 600,
+              "meanMs": 6.4093,
+              "minMs": 2.2138,
+              "p50Ms": 5.8889,
+              "p95Ms": 11.3151,
+              "p99Ms": 17.6626,
+              "maxMs": 19.146,
+              "negativeCount": 0
+            },
+            "batchWait": {
+              "n": 600,
+              "meanMs": 63.2027,
+              "minMs": 1.7012,
+              "p50Ms": 60.3761,
+              "p95Ms": 102.9728,
+              "p99Ms": 127.6057,
+              "maxMs": 132.7924,
+              "negativeCount": 0
+            },
+            "databaseBatch": {
+              "n": 600,
+              "meanMs": 38.2053,
+              "minMs": 21.6167,
+              "p50Ms": 35.897,
+              "p95Ms": 74.5557,
+              "p99Ms": 74.5557,
+              "maxMs": 74.5557,
+              "negativeCount": 0
+            },
+            "commitToPublishEnqueue": {
+              "n": 600,
+              "meanMs": 0.009,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5374,
+              "maxMs": 0.5374,
+              "negativeCount": 0
+            },
+            "publisherQueue": {
+              "n": 600,
+              "meanMs": 214.2628,
+              "minMs": 0,
+              "p50Ms": 254.7871,
+              "p95Ms": 336.4795,
+              "p99Ms": 349.0351,
+              "maxMs": 354.9102,
+              "negativeCount": 0
+            },
+            "kafkaWrite": {
+              "n": 600,
+              "meanMs": 1.7523,
+              "minMs": 0.5051,
+              "p50Ms": 1.6159,
+              "p95Ms": 3.2308,
+              "p99Ms": 4.8356,
+              "maxMs": 10.0098,
+              "negativeCount": 0
+            },
+            "kafkaReturnToFetchSigned": {
+              "n": 600,
+              "meanMs": 1240.9928,
+              "minMs": 0.5433,
+              "p50Ms": 1240.8511,
+              "p95Ms": 2170.1027,
+              "p99Ms": 2270.5117,
+              "maxMs": 2291.1028,
+              "negativeCount": 0
+            },
+            "kafkaCallStartToFetch": {
+              "n": 600,
+              "meanMs": 1242.745,
+              "minMs": 3.447,
+              "p50Ms": 1243.6943,
+              "p95Ms": 2171.7769,
+              "p99Ms": 2271.5889,
+              "maxMs": 2292.1686,
+              "negativeCount": 0
+            },
+            "fetchCall": {
+              "n": 600,
+              "meanMs": 0.3647,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.535,
+              "maxMs": 209.203,
+              "negativeCount": 0
+            },
+            "pushHandler": {
+              "n": 600,
+              "meanMs": 4.172,
+              "minMs": 2.0923,
+              "p50Ms": 3.7743,
+              "p95Ms": 6.3185,
+              "p99Ms": 14.7375,
+              "maxMs": 21.0248,
+              "negativeCount": 0
+            },
+            "groupRPC": {
+              "n": 600,
+              "meanMs": 2.8658,
+              "minMs": 1.5503,
+              "p50Ms": 2.6929,
+              "p95Ms": 4.2459,
+              "p99Ms": 5.9737,
+              "maxMs": 10.3168,
+              "negativeCount": 0
+            },
+            "fanoutEnqueue": {
+              "n": 600,
+              "meanMs": 0.2563,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.6014,
+              "p99Ms": 0.8778,
+              "maxMs": 1.4965,
+              "negativeCount": 0
+            },
+            "offsetCommit": {
+              "n": 600,
+              "meanMs": 1.3926,
+              "minMs": 0.5074,
+              "p50Ms": 1.2352,
+              "p95Ms": 2.235,
+              "p99Ms": 3.2191,
+              "maxMs": 4.2434,
+              "negativeCount": 0
+            },
+            "observerSocketQueue": {
+              "n": 600,
+              "meanMs": 0.559,
+              "minMs": 0,
+              "p50Ms": 0.5326,
+              "p95Ms": 1.1556,
+              "p99Ms": 1.6538,
+              "maxMs": 4.7395,
+              "negativeCount": 0
+            },
+            "observerSocketWrite": {
+              "n": 600,
+              "meanMs": 0.076,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5711,
+              "p99Ms": 0.7199,
+              "maxMs": 1.0206,
+              "negativeCount": 0
+            },
+            "postCommitToSocketWrite": {
+              "n": 600,
+              "meanMs": 1460.8698,
+              "minMs": 12.6544,
+              "p50Ms": 1504.3093,
+              "p95Ms": 2503.8987,
+              "p99Ms": 2619.3115,
+              "maxMs": 2649.5379,
+              "negativeCount": 0
+            },
+            "ingressToSocketWrite": {
+              "n": 600,
+              "meanMs": 1568.6869,
+              "minMs": 44.1239,
+              "p50Ms": 1619.2785,
+              "p95Ms": 2593.1724,
+              "p99Ms": 2712.2218,
+              "maxMs": 2731.0813,
+              "negativeCount": 0
+            },
+            "ingressToAckQueue": {
+              "n": 600,
+              "meanMs": 108.0294,
+              "minMs": 26.8767,
+              "p50Ms": 105.3406,
+              "p95Ms": 150.5869,
+              "p99Ms": 171.6807,
+              "maxMs": 176.5159,
+              "negativeCount": 0
+            }
+          },
+          "consumerLoop": {
+            "measuredSpanMs": 3372.763,
+            "handlerSumMs": 2503.1932000000015,
+            "commitSumMs": 835.5665999999999,
+            "fetchSumExcludingFirstMs": 9.607000000000001,
+            "commitShareOfSerialSpanPercent": 24.773949429592292,
+            "handlerShareOfSerialSpanPercent": 74.21788011787373,
+            "fetchStartedBeforePreviousCommitCompleted": 0,
+            "previousCommitEndToNextFetchStart": {
+              "n": 599,
+              "meanMs": 0.0325,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5197,
+              "p99Ms": 0.6771,
+              "maxMs": 1.2727,
+              "negativeCount": 0
+            }
+          }
+        },
+        "many-c100": {
+          "messages": 600,
+          "stages": {
+            "permission": {
+              "n": 600,
+              "meanMs": 20.0828,
+              "minMs": 2.9529,
+              "p50Ms": 19.2542,
+              "p95Ms": 41.4901,
+              "p99Ms": 50.5973,
+              "maxMs": 65.1842,
+              "negativeCount": 0
+            },
+            "batchWait": {
+              "n": 600,
+              "meanMs": 122.9853,
+              "minMs": 1.7263,
+              "p50Ms": 116.3967,
+              "p95Ms": 260.4817,
+              "p99Ms": 299.7592,
+              "maxMs": 327.4923,
+              "negativeCount": 0
+            },
+            "databaseBatch": {
+              "n": 600,
+              "meanMs": 60.1827,
+              "minMs": 23.235,
+              "p50Ms": 58.2927,
+              "p95Ms": 88.8002,
+              "p99Ms": 97.1355,
+              "maxMs": 111.3891,
+              "negativeCount": 0
+            },
+            "commitToPublishEnqueue": {
+              "n": 600,
+              "meanMs": 0.0192,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5582,
+              "maxMs": 0.6176,
+              "negativeCount": 0
+            },
+            "publisherQueue": {
+              "n": 600,
+              "meanMs": 460.6965,
+              "minMs": 0,
+              "p50Ms": 499.4296,
+              "p95Ms": 659.0269,
+              "p99Ms": 672.2997,
+              "maxMs": 676.2381,
+              "negativeCount": 0
+            },
+            "kafkaWrite": {
+              "n": 600,
+              "meanMs": 2.9112,
+              "minMs": 0.508,
+              "p50Ms": 1.8967,
+              "p95Ms": 7.7423,
+              "p99Ms": 11.9352,
+              "maxMs": 21.2697,
+              "negativeCount": 0
+            },
+            "kafkaReturnToFetchSigned": {
+              "n": 600,
+              "meanMs": 1282.8831,
+              "minMs": 0.5209,
+              "p50Ms": 1127.5992,
+              "p95Ms": 2292.4007,
+              "p99Ms": 2367.8901,
+              "maxMs": 2375.9126,
+              "negativeCount": 0
+            },
+            "kafkaCallStartToFetch": {
+              "n": 600,
+              "meanMs": 1285.7943,
+              "minMs": 2.243,
+              "p50Ms": 1129.4005,
+              "p95Ms": 2293.4856,
+              "p99Ms": 2368.9496,
+              "maxMs": 2378.8164,
+              "negativeCount": 0
+            },
+            "fetchCall": {
+              "n": 600,
+              "meanMs": 0.4516,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0,
+              "p99Ms": 0.5424,
+              "maxMs": 257.8794,
+              "negativeCount": 0
+            },
+            "pushHandler": {
+              "n": 600,
+              "meanMs": 4.8898,
+              "minMs": 2.4548,
+              "p50Ms": 4.0785,
+              "p95Ms": 10.3278,
+              "p99Ms": 15.2335,
+              "maxMs": 30.0239,
+              "negativeCount": 0
+            },
+            "groupRPC": {
+              "n": 600,
+              "meanMs": 3.6398,
+              "minMs": 1.5091,
+              "p50Ms": 2.9694,
+              "p95Ms": 7.9552,
+              "p99Ms": 12.5646,
+              "maxMs": 23.3548,
+              "negativeCount": 0
+            },
+            "fanoutEnqueue": {
+              "n": 600,
+              "meanMs": 0.211,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5989,
+              "p99Ms": 0.9825,
+              "maxMs": 3.1602,
+              "negativeCount": 0
+            },
+            "offsetCommit": {
+              "n": 600,
+              "meanMs": 1.9266,
+              "minMs": 0.506,
+              "p50Ms": 1.5333,
+              "p95Ms": 5.0211,
+              "p99Ms": 10.384,
+              "maxMs": 17.2354,
+              "negativeCount": 0
+            },
+            "observerSocketQueue": {
+              "n": 600,
+              "meanMs": 0.6314,
+              "minMs": 0,
+              "p50Ms": 0.5377,
+              "p95Ms": 1.352,
+              "p99Ms": 2.0892,
+              "maxMs": 2.8123,
+              "negativeCount": 0
+            },
+            "observerSocketWrite": {
+              "n": 600,
+              "meanMs": 0.0981,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5836,
+              "p99Ms": 0.7158,
+              "maxMs": 1.0098,
+              "negativeCount": 0
+            },
+            "postCommitToSocketWrite": {
+              "n": 600,
+              "meanMs": 1751.1925,
+              "minMs": 7.3534,
+              "p50Ms": 1765.4297,
+              "p95Ms": 2790.6449,
+              "p99Ms": 2837.1479,
+              "maxMs": 2845.5076,
+              "negativeCount": 0
+            },
+            "ingressToSocketWrite": {
+              "n": 600,
+              "meanMs": 1954.4433,
+              "minMs": 48.4905,
+              "p50Ms": 1949.3162,
+              "p95Ms": 2993.9015,
+              "p99Ms": 3094.1133,
+              "maxMs": 3202.2287,
+              "negativeCount": 0
+            },
+            "ingressToAckQueue": {
+              "n": 600,
+              "meanMs": 203.4257,
+              "minMs": 41.1371,
+              "p50Ms": 201.0119,
+              "p95Ms": 345.0449,
+              "p99Ms": 389.0402,
+              "maxMs": 414.1316,
+              "negativeCount": 0
+            }
+          },
+          "consumerLoop": {
+            "measuredSpanMs": 4126.9605,
+            "handlerSumMs": 2933.8766000000005,
+            "commitSumMs": 1155.9857000000002,
+            "fetchSumExcludingFirstMs": 13.103100000000001,
+            "commitShareOfSerialSpanPercent": 28.010583091357432,
+            "handlerShareOfSerialSpanPercent": 71.09049383923109,
+            "fetchStartedBeforePreviousCommitCompleted": 0,
+            "previousCommitEndToNextFetchStart": {
+              "n": 599,
+              "meanMs": 0.0303,
+              "minMs": 0,
+              "p50Ms": 0,
+              "p95Ms": 0.5071,
+              "p99Ms": 0.6154,
+              "maxMs": 1.0234,
+              "negativeCount": 0
+            }
+          }
+        }
+      }
+    }
+  ],
+  "pooled": {
+    "low-load": {
+      "messages": 40,
+      "stages": {
+        "permission": {
+          "n": 40,
+          "meanMs": 6.4363,
+          "minMs": 2.0464,
+          "p50Ms": 3.3839,
+          "p95Ms": 5.5369,
+          "p99Ms": 113.6927,
+          "maxMs": 113.6927,
+          "negativeCount": 0
+        },
+        "batchWait": {
+          "n": 40,
+          "meanMs": 3.823,
+          "minMs": 2.6319,
+          "p50Ms": 3.152,
+          "p95Ms": 3.7074,
+          "p99Ms": 26.8858,
+          "maxMs": 26.8858,
+          "negativeCount": 0
+        },
+        "databaseBatch": {
+          "n": 40,
+          "meanMs": 14.3702,
+          "minMs": 9.956,
+          "p50Ms": 11.6775,
+          "p95Ms": 17.5277,
+          "p99Ms": 86.5481,
+          "maxMs": 86.5481,
+          "negativeCount": 0
+        },
+        "commitToPublishEnqueue": {
+          "n": 40,
+          "meanMs": 0.013,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.5182,
+          "maxMs": 0.5182,
+          "negativeCount": 0
+        },
+        "publisherQueue": {
+          "n": 40,
+          "meanMs": 0,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0,
+          "maxMs": 0,
+          "negativeCount": 0
+        },
+        "kafkaWrite": {
+          "n": 40,
+          "meanMs": 1.8259,
+          "minMs": 1.048,
+          "p50Ms": 1.6222,
+          "p95Ms": 2.2321,
+          "p99Ms": 4.2024,
+          "maxMs": 4.2024,
+          "negativeCount": 0
+        },
+        "kafkaReturnToFetchSigned": {
+          "n": 40,
+          "meanMs": 0.2603,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0.8723,
+          "p99Ms": 1.0683,
+          "maxMs": 1.0683,
+          "negativeCount": 0
+        },
+        "kafkaCallStartToFetch": {
+          "n": 40,
+          "meanMs": 2.0862,
+          "minMs": 1.0736,
+          "p50Ms": 2.0757,
+          "p95Ms": 2.8256,
+          "p99Ms": 4.2024,
+          "maxMs": 4.2024,
+          "negativeCount": 0
+        },
+        "fetchCall": {
+          "n": 40,
+          "meanMs": 185.3288,
+          "minMs": 164.306,
+          "p50Ms": 178.9939,
+          "p95Ms": 196.3079,
+          "p99Ms": 402.58,
+          "maxMs": 402.58,
+          "negativeCount": 0
+        },
+        "pushHandler": {
+          "n": 40,
+          "meanMs": 3.3315,
+          "minMs": 2.6039,
+          "p50Ms": 3.1539,
+          "p95Ms": 4.1637,
+          "p99Ms": 6.505,
+          "maxMs": 6.505,
+          "negativeCount": 0
+        },
+        "groupRPC": {
+          "n": 40,
+          "meanMs": 2.548,
+          "minMs": 1.966,
+          "p50Ms": 2.1761,
+          "p95Ms": 3.638,
+          "p99Ms": 5.4649,
+          "maxMs": 5.4649,
+          "negativeCount": 0
+        },
+        "fanoutEnqueue": {
+          "n": 40,
+          "meanMs": 0.1317,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0.5297,
+          "p99Ms": 0.5442,
+          "maxMs": 0.5442,
+          "negativeCount": 0
+        },
+        "offsetCommit": {
+          "n": 40,
+          "meanMs": 1.7654,
+          "minMs": 1.0341,
+          "p50Ms": 1.6953,
+          "p95Ms": 2.6424,
+          "p99Ms": 3.2642,
+          "maxMs": 3.2642,
+          "negativeCount": 0
+        },
+        "observerSocketQueue": {
+          "n": 40,
+          "meanMs": 0.454,
+          "minMs": 0,
+          "p50Ms": 0.5224,
+          "p95Ms": 0.5441,
+          "p99Ms": 0.8163,
+          "maxMs": 0.8163,
+          "negativeCount": 0
+        },
+        "observerSocketWrite": {
+          "n": 40,
+          "meanMs": 0.097,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0.5143,
+          "p99Ms": 0.5869,
+          "maxMs": 0.5869,
+          "negativeCount": 0
+        },
+        "postCommitToSocketWrite": {
+          "n": 40,
+          "meanMs": 5.428,
+          "minMs": 4.18,
+          "p50Ms": 5.2464,
+          "p95Ms": 6.8337,
+          "p99Ms": 11.2578,
+          "maxMs": 11.2578,
+          "negativeCount": 0
+        },
+        "ingressToSocketWrite": {
+          "n": 40,
+          "meanMs": 30.0575,
+          "minMs": 20.0994,
+          "p50Ms": 24.0048,
+          "p95Ms": 31.6349,
+          "p99Ms": 232.7138,
+          "maxMs": 232.7138,
+          "negativeCount": 0
+        },
+        "ingressToAckQueue": {
+          "n": 40,
+          "meanMs": 24.6558,
+          "minMs": 15.4106,
+          "p50Ms": 18.3768,
+          "p95Ms": 25.293,
+          "p99Ms": 227.1266,
+          "maxMs": 227.1266,
+          "negativeCount": 0
+        }
+      }
+    },
+    "hot-c10": {
+      "messages": 1200,
+      "stages": {
+        "permission": {
+          "n": 1200,
+          "meanMs": 5.3001,
+          "minMs": 2.2395,
+          "p50Ms": 5.1014,
+          "p95Ms": 8.0396,
+          "p99Ms": 9.9904,
+          "maxMs": 15.0524,
+          "negativeCount": 0
+        },
+        "batchWait": {
+          "n": 1200,
+          "meanMs": 20.8304,
+          "minMs": 1.7147,
+          "p50Ms": 20.2182,
+          "p95Ms": 29.274,
+          "p99Ms": 37.3585,
+          "maxMs": 57.1914,
+          "negativeCount": 0
+        },
+        "databaseBatch": {
+          "n": 1200,
+          "meanMs": 22.7719,
+          "minMs": 12.9762,
+          "p50Ms": 21.545,
+          "p95Ms": 30.4216,
+          "p99Ms": 39.5211,
+          "maxMs": 58.5249,
+          "negativeCount": 0
+        },
+        "commitToPublishEnqueue": {
+          "n": 1200,
+          "meanMs": 0.0178,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.5443,
+          "maxMs": 0.5827,
+          "negativeCount": 0
+        },
+        "publisherQueue": {
+          "n": 1200,
+          "meanMs": 7.4667,
+          "minMs": 0,
+          "p50Ms": 6.208,
+          "p95Ms": 19.1325,
+          "p99Ms": 26.3757,
+          "maxMs": 36.4323,
+          "negativeCount": 0
+        },
+        "kafkaWrite": {
+          "n": 1200,
+          "meanMs": 2.3641,
+          "minMs": 0.6439,
+          "p50Ms": 2.1374,
+          "p95Ms": 4.3024,
+          "p99Ms": 6.5423,
+          "maxMs": 10.9256,
+          "negativeCount": 0
+        },
+        "kafkaReturnToFetchSigned": {
+          "n": 1200,
+          "meanMs": 512.8463,
+          "minMs": 0,
+          "p50Ms": 568.8266,
+          "p95Ms": 993.3724,
+          "p99Ms": 1048.4961,
+          "maxMs": 1058.8438,
+          "negativeCount": 0
+        },
+        "kafkaCallStartToFetch": {
+          "n": 1200,
+          "meanMs": 515.2104,
+          "minMs": 1.6596,
+          "p50Ms": 572.1581,
+          "p95Ms": 994.9802,
+          "p99Ms": 1050.4187,
+          "maxMs": 1064.6319,
+          "negativeCount": 0
+        },
+        "fetchCall": {
+          "n": 1200,
+          "meanMs": 0.4177,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.5403,
+          "maxMs": 270.4975,
+          "negativeCount": 0
+        },
+        "pushHandler": {
+          "n": 1200,
+          "meanMs": 4.5286,
+          "minMs": 1.6615,
+          "p50Ms": 4.1794,
+          "p95Ms": 7.8152,
+          "p99Ms": 10.1371,
+          "maxMs": 20.9434,
+          "negativeCount": 0
+        },
+        "groupRPC": {
+          "n": 1200,
+          "meanMs": 3.2171,
+          "minMs": 1.5204,
+          "p50Ms": 3.0481,
+          "p95Ms": 4.9348,
+          "p99Ms": 6.9417,
+          "maxMs": 18.6175,
+          "negativeCount": 0
+        },
+        "fanoutEnqueue": {
+          "n": 1200,
+          "meanMs": 0.2205,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0.6359,
+          "p99Ms": 1.0485,
+          "maxMs": 2.6466,
+          "negativeCount": 0
+        },
+        "offsetCommit": {
+          "n": 1200,
+          "meanMs": 1.9451,
+          "minMs": 0.3617,
+          "p50Ms": 1.6983,
+          "p95Ms": 3.242,
+          "p99Ms": 4.7626,
+          "maxMs": 31.3927,
+          "negativeCount": 0
+        },
+        "observerSocketQueue": {
+          "n": 1200,
+          "meanMs": 0.6098,
+          "minMs": 0,
+          "p50Ms": 0.5344,
+          "p95Ms": 1.2702,
+          "p99Ms": 1.99,
+          "maxMs": 3.6115,
+          "negativeCount": 0
+        },
+        "observerSocketWrite": {
+          "n": 1200,
+          "meanMs": 0.0772,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0.5601,
+          "p99Ms": 0.7713,
+          "maxMs": 1.0615,
+          "negativeCount": 0
+        },
+        "postCommitToSocketWrite": {
+          "n": 1200,
+          "meanMs": 526.9193,
+          "minMs": 8.1666,
+          "p50Ms": 581.81,
+          "p95Ms": 1010.22,
+          "p99Ms": 1067.0355,
+          "maxMs": 1090.5449,
+          "negativeCount": 0
+        },
+        "ingressToSocketWrite": {
+          "n": 1200,
+          "meanMs": 575.8217,
+          "minMs": 26.4754,
+          "p50Ms": 635.7416,
+          "p95Ms": 1083.6202,
+          "p99Ms": 1126.1325,
+          "maxMs": 1144.6509,
+          "negativeCount": 0
+        },
+        "ingressToAckQueue": {
+          "n": 1200,
+          "meanMs": 48.9893,
+          "minMs": 17.7767,
+          "p50Ms": 46.6248,
+          "p95Ms": 65.3209,
+          "p99Ms": 83.692,
+          "maxMs": 97.6383,
+          "negativeCount": 0
+        }
+      }
+    },
+    "many-c10": {
+      "messages": 1200,
+      "stages": {
+        "permission": {
+          "n": 1200,
+          "meanMs": 9.4966,
+          "minMs": 3.1669,
+          "p50Ms": 7.6217,
+          "p95Ms": 18.6719,
+          "p99Ms": 23.8787,
+          "maxMs": 37.9252,
+          "negativeCount": 0
+        },
+        "batchWait": {
+          "n": 1200,
+          "meanMs": 13.9051,
+          "minMs": 2.473,
+          "p50Ms": 6.451,
+          "p95Ms": 39.5278,
+          "p99Ms": 54.3694,
+          "maxMs": 84.1411,
+          "negativeCount": 0
+        },
+        "databaseBatch": {
+          "n": 1200,
+          "meanMs": 41.2812,
+          "minMs": 19.6478,
+          "p50Ms": 39.4786,
+          "p95Ms": 59.4357,
+          "p99Ms": 71.8417,
+          "maxMs": 95.1445,
+          "negativeCount": 0
+        },
+        "commitToPublishEnqueue": {
+          "n": 1200,
+          "meanMs": 0.011,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.5271,
+          "maxMs": 0.7496,
+          "negativeCount": 0
+        },
+        "publisherQueue": {
+          "n": 1200,
+          "meanMs": 3.9125,
+          "minMs": 0,
+          "p50Ms": 0.5503,
+          "p95Ms": 18.1299,
+          "p99Ms": 27.8452,
+          "maxMs": 43.0344,
+          "negativeCount": 0
+        },
+        "kafkaWrite": {
+          "n": 1200,
+          "meanMs": 4.1443,
+          "minMs": 0.9629,
+          "p50Ms": 3.3931,
+          "p95Ms": 8.9715,
+          "p99Ms": 13.4276,
+          "maxMs": 20.5734,
+          "negativeCount": 0
+        },
+        "kafkaReturnToFetchSigned": {
+          "n": 1200,
+          "meanMs": 1019.168,
+          "minMs": 0,
+          "p50Ms": 1100.1951,
+          "p95Ms": 1539.3646,
+          "p99Ms": 1558.5392,
+          "maxMs": 1581.8677,
+          "negativeCount": 0
+        },
+        "kafkaCallStartToFetch": {
+          "n": 1200,
+          "meanMs": 1023.3124,
+          "minMs": 2.1214,
+          "p50Ms": 1105.7508,
+          "p95Ms": 1543.3122,
+          "p99Ms": 1562.9374,
+          "maxMs": 1588.7132,
+          "negativeCount": 0
+        },
+        "fetchCall": {
+          "n": 1200,
+          "meanMs": 0.452,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.5452,
+          "maxMs": 277.3317,
+          "negativeCount": 0
+        },
+        "pushHandler": {
+          "n": 1200,
+          "meanMs": 5.5848,
+          "minMs": 2.1081,
+          "p50Ms": 5.2651,
+          "p95Ms": 9.7117,
+          "p99Ms": 12.8091,
+          "maxMs": 23.0737,
+          "negativeCount": 0
+        },
+        "groupRPC": {
+          "n": 1200,
+          "meanMs": 4.2799,
+          "minMs": 1.4401,
+          "p50Ms": 3.869,
+          "p95Ms": 8.0862,
+          "p99Ms": 11.2591,
+          "maxMs": 21.9873,
+          "negativeCount": 0
+        },
+        "fanoutEnqueue": {
+          "n": 1200,
+          "meanMs": 0.2116,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0.597,
+          "p99Ms": 1.0515,
+          "maxMs": 2.0498,
+          "negativeCount": 0
+        },
+        "offsetCommit": {
+          "n": 1200,
+          "meanMs": 3.0486,
+          "minMs": 0.5034,
+          "p50Ms": 2.2322,
+          "p95Ms": 7.6105,
+          "p99Ms": 12.0164,
+          "maxMs": 19.1563,
+          "negativeCount": 0
+        },
+        "observerSocketQueue": {
+          "n": 1200,
+          "meanMs": 0.7249,
+          "minMs": 0,
+          "p50Ms": 0.544,
+          "p95Ms": 1.5728,
+          "p99Ms": 2.309,
+          "maxMs": 4.3968,
+          "negativeCount": 0
+        },
+        "observerSocketWrite": {
+          "n": 1200,
+          "meanMs": 0.0755,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0.5513,
+          "p99Ms": 0.8063,
+          "maxMs": 1.5988,
+          "negativeCount": 0
+        },
+        "postCommitToSocketWrite": {
+          "n": 1200,
+          "meanMs": 1032.649,
+          "minMs": 7.5655,
+          "p50Ms": 1116.3878,
+          "p95Ms": 1551.2988,
+          "p99Ms": 1567.1891,
+          "maxMs": 1597.2545,
+          "negativeCount": 0
+        },
+        "ingressToSocketWrite": {
+          "n": 1200,
+          "meanMs": 1097.3319,
+          "minMs": 45.3896,
+          "p50Ms": 1178.03,
+          "p95Ms": 1607.3354,
+          "p99Ms": 1630.5756,
+          "maxMs": 1657.0997,
+          "negativeCount": 0
+        },
+        "ingressToAckQueue": {
+          "n": 1200,
+          "meanMs": 64.7302,
+          "minMs": 35.7382,
+          "p50Ms": 62.024,
+          "p95Ms": 99.9516,
+          "p99Ms": 121.5356,
+          "maxMs": 153.0805,
+          "negativeCount": 0
+        }
+      }
+    },
+    "hot-c100": {
+      "messages": 1200,
+      "stages": {
+        "permission": {
+          "n": 1200,
+          "meanMs": 8.9727,
+          "minMs": 2.2138,
+          "p50Ms": 6.58,
+          "p95Ms": 20.5655,
+          "p99Ms": 55.2602,
+          "maxMs": 58.8301,
+          "negativeCount": 0
+        },
+        "batchWait": {
+          "n": 1200,
+          "meanMs": 71.31,
+          "minMs": 1.5969,
+          "p50Ms": 66.7788,
+          "p95Ms": 114.5825,
+          "p99Ms": 134.9446,
+          "maxMs": 161.6006,
+          "negativeCount": 0
+        },
+        "databaseBatch": {
+          "n": 1200,
+          "meanMs": 43.106,
+          "minMs": 20.5295,
+          "p50Ms": 39.6448,
+          "p95Ms": 72.1526,
+          "p99Ms": 74.5557,
+          "maxMs": 74.5557,
+          "negativeCount": 0
+        },
+        "commitToPublishEnqueue": {
+          "n": 1200,
+          "meanMs": 0.0243,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.5347,
+          "maxMs": 0.5374,
+          "negativeCount": 0
+        },
+        "publisherQueue": {
+          "n": 1200,
+          "meanMs": 294.7567,
+          "minMs": 0,
+          "p50Ms": 300.0766,
+          "p95Ms": 530.5719,
+          "p99Ms": 579.9697,
+          "maxMs": 590.3822,
+          "negativeCount": 0
+        },
+        "kafkaWrite": {
+          "n": 1200,
+          "meanMs": 2.1,
+          "minMs": 0.5051,
+          "p50Ms": 1.6994,
+          "p95Ms": 4.1078,
+          "p99Ms": 8.44,
+          "maxMs": 13.1661,
+          "negativeCount": 0
+        },
+        "kafkaReturnToFetchSigned": {
+          "n": 1200,
+          "meanMs": 1232.459,
+          "minMs": 0.5277,
+          "p50Ms": 1261.3209,
+          "p95Ms": 2080.5421,
+          "p99Ms": 2252.1235,
+          "maxMs": 2291.1028,
+          "negativeCount": 0
+        },
+        "kafkaCallStartToFetch": {
+          "n": 1200,
+          "meanMs": 1234.559,
+          "minMs": 3.447,
+          "p50Ms": 1263.3059,
+          "p95Ms": 2082.1187,
+          "p99Ms": 2253.7614,
+          "maxMs": 2292.1686,
+          "negativeCount": 0
+        },
+        "fetchCall": {
+          "n": 1200,
+          "meanMs": 0.376,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.5427,
+          "maxMs": 221.3754,
+          "negativeCount": 0
+        },
+        "pushHandler": {
+          "n": 1200,
+          "meanMs": 4.2178,
+          "minMs": 2.0923,
+          "p50Ms": 3.7541,
+          "p95Ms": 6.5931,
+          "p99Ms": 15.0608,
+          "maxMs": 22.1745,
+          "negativeCount": 0
+        },
+        "groupRPC": {
+          "n": 1200,
+          "meanMs": 2.9528,
+          "minMs": 1.5468,
+          "p50Ms": 2.6847,
+          "p95Ms": 4.4553,
+          "p99Ms": 8.4124,
+          "maxMs": 13.7248,
+          "negativeCount": 0
+        },
+        "fanoutEnqueue": {
+          "n": 1200,
+          "meanMs": 0.2365,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0.5802,
+          "p99Ms": 0.9076,
+          "maxMs": 1.9051,
+          "negativeCount": 0
+        },
+        "offsetCommit": {
+          "n": 1200,
+          "meanMs": 1.5567,
+          "minMs": 0,
+          "p50Ms": 1.4495,
+          "p95Ms": 2.6149,
+          "p99Ms": 4.5126,
+          "maxMs": 15.215,
+          "negativeCount": 0
+        },
+        "observerSocketQueue": {
+          "n": 1200,
+          "meanMs": 0.5633,
+          "minMs": 0,
+          "p50Ms": 0.5322,
+          "p95Ms": 1.155,
+          "p99Ms": 1.6163,
+          "maxMs": 4.7395,
+          "negativeCount": 0
+        },
+        "observerSocketWrite": {
+          "n": 1200,
+          "meanMs": 0.0809,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0.5545,
+          "p99Ms": 0.7199,
+          "maxMs": 1.5249,
+          "negativeCount": 0
+        },
+        "postCommitToSocketWrite": {
+          "n": 1200,
+          "meanMs": 1533.2658,
+          "minMs": 12.6544,
+          "p50Ms": 1603.9195,
+          "p95Ms": 2563.4789,
+          "p99Ms": 2670.0109,
+          "maxMs": 2722.4018,
+          "negativeCount": 0
+        },
+        "ingressToSocketWrite": {
+          "n": 1200,
+          "meanMs": 1656.6544,
+          "minMs": 44.1239,
+          "p50Ms": 1734.5765,
+          "p95Ms": 2672.3714,
+          "p99Ms": 2767.2954,
+          "maxMs": 2803.1996,
+          "negativeCount": 0
+        },
+        "ingressToAckQueue": {
+          "n": 1200,
+          "meanMs": 123.7035,
+          "minMs": 26.8767,
+          "p50Ms": 122.7903,
+          "p95Ms": 178.6343,
+          "p99Ms": 212.3131,
+          "maxMs": 275.0723,
+          "negativeCount": 0
+        }
+      }
+    },
+    "many-c100": {
+      "messages": 1200,
+      "stages": {
+        "permission": {
+          "n": 1200,
+          "meanMs": 20.5747,
+          "minMs": 2.7733,
+          "p50Ms": 19.8608,
+          "p95Ms": 40.8219,
+          "p99Ms": 49.2809,
+          "maxMs": 65.1842,
+          "negativeCount": 0
+        },
+        "batchWait": {
+          "n": 1200,
+          "meanMs": 126.5915,
+          "minMs": 1.7263,
+          "p50Ms": 119.4385,
+          "p95Ms": 264.8335,
+          "p99Ms": 320.0102,
+          "maxMs": 363.4314,
+          "negativeCount": 0
+        },
+        "databaseBatch": {
+          "n": 1200,
+          "meanMs": 60.6338,
+          "minMs": 23.235,
+          "p50Ms": 59.5221,
+          "p95Ms": 90.095,
+          "p99Ms": 101.0726,
+          "maxMs": 111.3891,
+          "negativeCount": 0
+        },
+        "commitToPublishEnqueue": {
+          "n": 1200,
+          "meanMs": 0.0182,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.6125,
+          "maxMs": 0.6441,
+          "negativeCount": 0
+        },
+        "publisherQueue": {
+          "n": 1200,
+          "meanMs": 499.1968,
+          "minMs": 0,
+          "p50Ms": 602.3889,
+          "p95Ms": 691.3866,
+          "p99Ms": 717.9694,
+          "maxMs": 740.1982,
+          "negativeCount": 0
+        },
+        "kafkaWrite": {
+          "n": 1200,
+          "meanMs": 3.1291,
+          "minMs": 0.5062,
+          "p50Ms": 2.1598,
+          "p95Ms": 8.3622,
+          "p99Ms": 13.0418,
+          "maxMs": 21.2697,
+          "negativeCount": 0
+        },
+        "kafkaReturnToFetchSigned": {
+          "n": 1200,
+          "meanMs": 1337.8989,
+          "minMs": 0.5164,
+          "p50Ms": 1206.6781,
+          "p95Ms": 2359.5307,
+          "p99Ms": 2499.5579,
+          "maxMs": 2519.5787,
+          "negativeCount": 0
+        },
+        "kafkaCallStartToFetch": {
+          "n": 1200,
+          "meanMs": 1341.028,
+          "minMs": 2.243,
+          "p50Ms": 1208.9831,
+          "p95Ms": 2361.2765,
+          "p99Ms": 2502.6372,
+          "maxMs": 2521.1915,
+          "negativeCount": 0
+        },
+        "fetchCall": {
+          "n": 1200,
+          "meanMs": 0.4382,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0,
+          "p99Ms": 0.5424,
+          "maxMs": 257.8794,
+          "negativeCount": 0
+        },
+        "pushHandler": {
+          "n": 1200,
+          "meanMs": 5.0531,
+          "minMs": 2.4548,
+          "p50Ms": 4.3,
+          "p95Ms": 10.3916,
+          "p99Ms": 15.3963,
+          "maxMs": 30.0239,
+          "negativeCount": 0
+        },
+        "groupRPC": {
+          "n": 1200,
+          "meanMs": 3.7216,
+          "minMs": 1.5091,
+          "p50Ms": 3.1968,
+          "p95Ms": 7.8263,
+          "p99Ms": 12.4906,
+          "maxMs": 23.3548,
+          "negativeCount": 0
+        },
+        "fanoutEnqueue": {
+          "n": 1200,
+          "meanMs": 0.2193,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0.6027,
+          "p99Ms": 1.0232,
+          "maxMs": 3.1602,
+          "negativeCount": 0
+        },
+        "offsetCommit": {
+          "n": 1200,
+          "meanMs": 2.0783,
+          "minMs": 0.5056,
+          "p50Ms": 1.6164,
+          "p95Ms": 4.9808,
+          "p99Ms": 10.1472,
+          "maxMs": 20.7674,
+          "negativeCount": 0
+        },
+        "observerSocketQueue": {
+          "n": 1200,
+          "meanMs": 0.6857,
+          "minMs": 0,
+          "p50Ms": 0.5397,
+          "p95Ms": 1.5241,
+          "p99Ms": 2.1554,
+          "maxMs": 3.0956,
+          "negativeCount": 0
+        },
+        "observerSocketWrite": {
+          "n": 1200,
+          "meanMs": 0.0894,
+          "minMs": 0,
+          "p50Ms": 0,
+          "p95Ms": 0.558,
+          "p99Ms": 0.7292,
+          "maxMs": 1.9448,
+          "negativeCount": 0
+        },
+        "postCommitToSocketWrite": {
+          "n": 1200,
+          "meanMs": 1845.0565,
+          "minMs": 7.3534,
+          "p50Ms": 1871.1353,
+          "p95Ms": 2983.921,
+          "p99Ms": 3156.3567,
+          "maxMs": 3183.1909,
+          "negativeCount": 0
+        },
+        "ingressToSocketWrite": {
+          "n": 1200,
+          "meanMs": 2052.8565,
+          "minMs": 46.7282,
+          "p50Ms": 2102.8905,
+          "p95Ms": 3222.9029,
+          "p99Ms": 3365.6837,
+          "maxMs": 3516.8967,
+          "negativeCount": 0
+        },
+        "ingressToAckQueue": {
+          "n": 1200,
+          "meanMs": 207.9431,
+          "minMs": 36.7806,
+          "p50Ms": 202.8804,
+          "p95Ms": 350.0706,
+          "p99Ms": 403.0444,
+          "maxMs": 451.2213,
+          "negativeCount": 0
+        }
+      }
+    }
+  }
+}

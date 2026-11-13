@@ -15,6 +15,7 @@ import (
 
 type KafkaConfig struct {
 	Brokers                     []string
+	PersistedTopic              string `json:",default=message-persisted-topic"`
 	MessageCreateRequestedTopic string
 	CacheBuildTopic             string
 }

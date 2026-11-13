@@ -30,6 +30,7 @@ UserRpc:
 Kafka:
   Brokers:
     - 127.0.0.1:9092
+  PersistedTopic: message-persisted-topic
   MessageCreateRequestedTopic: message-create-requested-topic
   CacheBuildTopic: redpacket-cache-build-topic
 

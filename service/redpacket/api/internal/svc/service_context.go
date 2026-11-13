@@ -7,12 +7,15 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 	"infinitechatgo/common/auth"
 	"infinitechatgo/common/idgen"
+	"infinitechatgo/common/messagepublish"
 	"infinitechatgo/common/mysqlpool"
+	sequencemodel "infinitechatgo/service/message/model/conversation_sequence"
+	messagemodel "infinitechatgo/service/message/model/message"
+	messagepersistence "infinitechatgo/service/message/persistence"
 	"infinitechatgo/service/redpacket/api/internal/config"
 	"infinitechatgo/service/redpacket/api/internal/middleware"
 	"infinitechatgo/service/redpacket/application"
 	balancelogmodel "infinitechatgo/service/redpacket/model/balance_log"
-	outboxmodel "infinitechatgo/service/redpacket/model/outbox_event"
 	redpacketmodel "infinitechatgo/service/redpacket/model/red_packet"
 	receivemodel "infinitechatgo/service/redpacket/model/red_packet_receive"
 	sharemodel "infinitechatgo/service/redpacket/model/red_packet_share"
@@ -38,7 +41,6 @@ type ServiceContext struct {
 	RedPacketReceiveModel receivemodel.RedPacketReceiveModel
 	UserBalanceModel      balancemodel.UserBalanceModel
 	BalanceLogModel       balancelogmodel.BalanceLogModel
-	OutboxEventModel      outboxmodel.OutboxEventModel
 
 	SendService    *application.SendService
 	ReceiveService *application.ReceiveService
@@ -57,7 +59,14 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	receiveModel := receivemodel.NewRedPacketReceiveModel(conn)
 	userBalanceModel := balancemodel.NewUserBalanceModel(conn)
 	balanceLogModel := balancelogmodel.NewBalanceLogModel(conn)
-	outboxEventModel := outboxmodel.NewOutboxEventModel(conn)
+	messageWriter, err := messagepersistence.NewWriter(messagepersistence.Dependencies{
+		SqlConn: conn, IDGenerator: idGenerator, Messages: messagemodel.NewModel(conn),
+		Sequences: sequencemodel.NewModel(conn),
+	})
+	if err != nil {
+		panic(err)
+	}
+	publisher := messagepublish.New(c.Kafka.Brokers, c.Kafka.PersistedTopic)
 
 	sendService := application.NewSendService(application.SendDependencies{
 		SqlConn:          conn,
@@ -68,11 +77,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ShareModel:       shareModel,
 		UserBalanceModel: userBalanceModel,
 		BalanceLogModel:  balanceLogModel,
-		OutboxEventModel: outboxEventModel,
-		Topics: application.OutboxTopics{
-			MessageCreateRequested: c.Kafka.MessageCreateRequestedTopic,
-			CacheBuild:             c.Kafka.CacheBuildTopic,
-		},
+		MessageWriter:    messageWriter,
+		Publisher:        publisher,
 	})
 	candidatePool := application.NewRedisCandidatePool(rds, conn)
 	receiveService := application.NewReceiveService(application.ReceiveDependencies{
@@ -94,7 +100,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		RedPacketReceiveModel: receiveModel,
 		UserBalanceModel:      userBalanceModel,
 		BalanceLogModel:       balanceLogModel,
-		OutboxEventModel:      outboxEventModel,
 		SendService:           sendService,
 		ReceiveService:        receiveService,
 		QueryService:          queryService,

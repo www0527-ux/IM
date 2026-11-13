@@ -23,7 +23,7 @@ const messageColumns = "message_id, client_message_id, sender_id, session_id, " 
 	"seq, session_type, message_type, red_packet_id, content, reply_id, created_time"
 
 // Model is the transaction-aware boundary required by MessageWriteService.
-// Both methods must use the sqlx.Session carried by txctx; they must never
+// All methods must use the sqlx.Session carried by txctx; they must never
 // open an independent transaction.
 type Model interface {
 	FindByIdempotencyTx(
@@ -32,6 +32,8 @@ type Model interface {
 		clientMessageID string,
 	) (messageevent.ChatMessage, error)
 	InsertTx(ctx context.Context, message messageevent.ChatMessage) error
+	FindByIdempotencyBatchTx(ctx context.Context, keys []IdempotencyKey) (map[IdempotencyKey]messageevent.ChatMessage, error)
+	InsertBatchTx(ctx context.Context, messages []messageevent.ChatMessage) error
 }
 
 type model struct {

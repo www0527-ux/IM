@@ -1,9 +1,12 @@
 package websocket
 
 import (
+	"github.com/zeromicro/go-zero/core/logx"
 	"log"
 	"sync"
 	"time"
+
+	"infinitechatgo/common/messagetrace"
 
 	ws "github.com/gorilla/websocket"
 )
@@ -108,7 +111,7 @@ func (c *Client) readLoop(
 		if messageType != ws.TextMessage {
 			continue
 		}
-		log.Printf("received:%s", string(message))
+		logx.Debugf("received websocket frame userId=%d bytes=%d", c.userID, len(message))
 		select {
 		case requests <- message:
 		case <-c.done:
@@ -120,6 +123,7 @@ func (c *Client) readLoop(
 	}
 }
 func (c *Client) sendMessage(message []byte) bool {
+	messagetrace.Outgoing(c.userID, message, "ws_enqueue")
 	select {
 	case <-c.done:
 		return false
@@ -145,6 +149,7 @@ func (c *Client) writeLoop() {
 	for {
 		select {
 		case message := <-c.send:
+			messagetrace.Outgoing(c.userID, message, "ws_dequeue")
 			if err := c.conn.SetWriteDeadline(
 				time.Now().Add(writeWait),
 			); err != nil {
@@ -155,6 +160,7 @@ func (c *Client) writeLoop() {
 				return
 			}
 
+			messagetrace.Outgoing(c.userID, message, "ws_write_start")
 			if err := c.conn.WriteMessage(
 				ws.TextMessage,
 				message,
@@ -165,6 +171,7 @@ func (c *Client) writeLoop() {
 				)
 				return
 			}
+			messagetrace.Outgoing(c.userID, message, "ws_write_end")
 		case <-ticker.C:
 			if err := c.conn.SetWriteDeadline(
 				time.Now().Add(writeWait),

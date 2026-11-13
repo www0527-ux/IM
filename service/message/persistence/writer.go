@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
 	"infinitechatgo/common/idgen"
@@ -14,18 +12,15 @@ import (
 	messageapplication "infinitechatgo/service/message/application"
 	sequencemodel "infinitechatgo/service/message/model/conversation_sequence"
 	messagemodel "infinitechatgo/service/message/model/message"
-	outboxmodel "infinitechatgo/service/message/model/outbox_event"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 type Dependencies struct {
-	SqlConn        sqlx.SqlConn
-	IDGenerator    *idgen.Generator
-	Messages       messagemodel.Model
-	Sequences      sequencemodel.Model
-	Outbox         outboxmodel.Model
-	PersistedTopic string
+	SqlConn     sqlx.SqlConn
+	IDGenerator *idgen.Generator
+	Messages    messagemodel.Model
+	Sequences   sequencemodel.Model
 }
 
 type Writer struct {
@@ -34,9 +29,7 @@ type Writer struct {
 
 func NewWriter(dependencies Dependencies) (*Writer, error) {
 	if dependencies.SqlConn == nil || dependencies.IDGenerator == nil ||
-		dependencies.Messages == nil || dependencies.Sequences == nil ||
-		dependencies.Outbox == nil ||
-		strings.TrimSpace(dependencies.PersistedTopic) == "" {
+		dependencies.Messages == nil || dependencies.Sequences == nil {
 		return nil, fmt.Errorf("invalid message persistence dependencies")
 	}
 	return &Writer{dependencies: dependencies}, nil
@@ -66,6 +59,9 @@ func (w *Writer) Persist(
 	case err == nil:
 		return result, nil
 	case errors.Is(err, errDuplicateRow):
+		if txctx.GetSession(ctx) != nil {
+			return messageapplication.Result{}, err
+		}
 		return w.reloadPersisted(ctx, command)
 	default:
 		return messageapplication.Result{}, err
@@ -138,27 +134,6 @@ func (w *Writer) persistInTransaction(
 				err,
 			)
 		}
-		return messageapplication.Result{}, err
-	}
-	eventID, err := w.dependencies.IDGenerator.NextID()
-	if err != nil {
-		return messageapplication.Result{}, fmt.Errorf(
-			"generate outbox event id: %w",
-			err,
-		)
-	}
-	event := messageevent.NewChatMessagePersistedEventWithIdentity(
-		eventID,
-		message,
-		command.Fingerprint,
-		message.CreatedAt,
-	)
-	if err := w.dependencies.Outbox.InsertPersistedTx(
-		ctx,
-		event,
-		w.dependencies.PersistedTopic,
-		strconv.FormatInt(message.SessionID, 10),
-	); err != nil {
 		return messageapplication.Result{}, err
 	}
 	return messageapplication.Result{Message: message, Created: true}, nil

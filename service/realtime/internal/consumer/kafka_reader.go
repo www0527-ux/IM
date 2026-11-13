@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/segmentio/kafka-go"
+	"infinitechatgo/common/messagetrace"
 )
 
 type KafkaConsumer interface {
@@ -34,12 +35,22 @@ func RunKafkaConsumer(
 		return fmt.Errorf("Kafka reader, consumer, group and DLQ publisher are required")
 	}
 
+	_, pushHandler := handler.(*MessagePushConsumer)
+	tracePush := messagetrace.Enabled() && pushHandler
 	for {
 		var message kafka.Message
 		for attempts := 0; ; attempts++ {
+			var fetchStart int64
+			if tracePush {
+				fetchStart = messagetrace.Stamp()
+			}
 			fetched, err := reader.FetchMessage(ctx)
 			if err == nil {
 				message = fetched
+				if tracePush {
+					messagetrace.Event(message.Value, "push_fetch_start", fetchStart)
+					messagetrace.Event(message.Value, "push_fetched", messagetrace.Stamp())
+				}
 				break
 			}
 			if ctx.Err() != nil {
@@ -96,7 +107,13 @@ func RunKafkaConsumer(
 
 		for attempts := 0; ; attempts++ {
 			//message包含着topic，partition，offset等字段
+			if tracePush {
+				messagetrace.Event(message.Value, "push_commit_start", messagetrace.Stamp())
+			}
 			err := reader.CommitMessages(ctx, message)
+			if tracePush {
+				messagetrace.Event(message.Value, "push_commit_end", messagetrace.Stamp())
+			}
 			if err == nil {
 				break
 			}

@@ -9,9 +9,11 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+	redisclient "github.com/redis/go-redis/v9"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest"
+	"infinitechatgo/common/groupmembercache"
 	"infinitechatgo/common/idgen"
 	"infinitechatgo/common/mysqlpool"
 	"infinitechatgo/service/user/api/internal/config"
@@ -28,20 +30,22 @@ import (
 )
 
 type ServiceContext struct {
-	Config           config.Config
-	SqlConn          sqlx.SqlConn
-	Redis            *redis.Redis
-	IDGenerator      *idgen.Generator
-	UserModel        user.UserModel
-	UserBalanceModel userBalanceModel.UserBalanceModel
-	TokenService     *userService.TokenService
-	AccessAuth       rest.Middleware
-	MinIOClient      *minio.Client
-	BalanceLogModel  balanceLogModel.BalanceLogModel
-	FriendModel      friendModel.FriendModel
-	ApplyFriendModel applyFriendModel.ApplyFriendModel
-	SessionModel     sessionModel.SessionModel
-	UserSessionModel userSessionModel.UserSessionModel
+	Config                 config.Config
+	SqlConn                sqlx.SqlConn
+	Redis                  *redis.Redis
+	IDGenerator            *idgen.Generator
+	UserModel              user.UserModel
+	UserBalanceModel       userBalanceModel.UserBalanceModel
+	TokenService           *userService.TokenService
+	AccessAuth             rest.Middleware
+	MinIOClient            *minio.Client
+	BalanceLogModel        balanceLogModel.BalanceLogModel
+	FriendModel            friendModel.FriendModel
+	ApplyFriendModel       applyFriendModel.ApplyFriendModel
+	SessionModel           sessionModel.SessionModel
+	UserSessionModel       userSessionModel.UserSessionModel
+	GroupMemberInvalidator groupmembercache.Invalidator
+	memberCacheRedis       redisclient.UniversalClient
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -92,20 +96,32 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	applyFriend := applyFriendModel.NewApplyFriendModel(conn, c.Cache)
 	chatSession := sessionModel.NewSessionModel(conn, c.Cache)
 	userSession := userSessionModel.NewUserSessionModel(conn, c.Cache)
+	memberCacheRedis, err := groupmembercache.NewRedisClient(c.Redis)
+	if err != nil {
+		panic(err)
+	}
 	return &ServiceContext{
-		Config:           c,
-		SqlConn:          conn,
-		Redis:            rds,
-		IDGenerator:      idGenerator,
-		UserModel:        userModel,
-		UserBalanceModel: userBalance,
-		TokenService:     tokenService,
-		AccessAuth:       accessAuth.Handle,
-		MinIOClient:      minioClient,
-		BalanceLogModel:  balanceLog,
-		FriendModel:      friend,
-		ApplyFriendModel: applyFriend,
-		SessionModel:     chatSession,
-		UserSessionModel: userSession,
+		Config:                 c,
+		SqlConn:                conn,
+		Redis:                  rds,
+		IDGenerator:            idGenerator,
+		UserModel:              userModel,
+		UserBalanceModel:       userBalance,
+		TokenService:           tokenService,
+		AccessAuth:             accessAuth.Handle,
+		MinIOClient:            minioClient,
+		BalanceLogModel:        balanceLog,
+		FriendModel:            friend,
+		ApplyFriendModel:       applyFriend,
+		SessionModel:           chatSession,
+		UserSessionModel:       userSession,
+		GroupMemberInvalidator: groupmembercache.NewNotifier(memberCacheRedis, c.GroupMemberCache),
+		memberCacheRedis:       memberCacheRedis,
+	}
+}
+
+func (s *ServiceContext) Close() {
+	if s.memberCacheRedis != nil {
+		_ = s.memberCacheRedis.Close()
 	}
 }

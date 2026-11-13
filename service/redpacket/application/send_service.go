@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -13,8 +14,8 @@ import (
 	"infinitechatgo/common/messageidentity"
 	messageevent "infinitechatgo/common/model/event"
 	"infinitechatgo/common/txctx"
+	messageapplication "infinitechatgo/service/message/application"
 	balancelogmodel "infinitechatgo/service/redpacket/model/balance_log"
-	outboxmodel "infinitechatgo/service/redpacket/model/outbox_event"
 	redpacketmodel "infinitechatgo/service/redpacket/model/red_packet"
 	sharemodel "infinitechatgo/service/redpacket/model/red_packet_share"
 	balancemodel "infinitechatgo/service/redpacket/model/user_balance"
@@ -43,11 +44,6 @@ const (
 	permissionTimeout             = 3 * time.Second
 )
 
-type OutboxTopics struct {
-	MessageCreateRequested string
-	CacheBuild             string
-}
-
 type SendDependencies struct {
 	SqlConn          sqlx.SqlConn
 	Redis            *redis.Redis
@@ -57,8 +53,12 @@ type SendDependencies struct {
 	ShareModel       sharemodel.RedPacketShareModel
 	UserBalanceModel balancemodel.UserBalanceModel
 	BalanceLogModel  balancelogmodel.BalanceLogModel
-	OutboxEventModel outboxmodel.OutboxEventModel
-	Topics           OutboxTopics
+	MessageWriter    messageapplication.PersistentWriter
+	Publisher        MessagePublisher
+}
+
+type MessagePublisher interface {
+	TryPublish(messageevent.ChatMessage, string) bool
 }
 
 type SendService struct {
@@ -134,14 +134,6 @@ func (s *SendService) Send(ctx context.Context, command SendCommand) (SendResult
 	if err != nil {
 		return SendResult{}, err
 	}
-	messageEventID, err := s.nextID()
-	if err != nil {
-		return SendResult{}, err
-	}
-	cacheEventID, err := s.nextID()
-	if err != nil {
-		return SendResult{}, err
-	}
 
 	now := time.Now()
 	//ReceivedAmount等默认为0
@@ -198,20 +190,7 @@ func (s *SendService) Send(ctx context.Context, command SendCommand) (SendResult
 	if err != nil {
 		return SendResult{}, fmt.Errorf("fingerprint red packet message: %w", err)
 	}
-	messageOutbox, err := s.newOutboxEvent(
-		messageEventID, messageevent.NewChatMessageCreateRequestedEvent(messageEventID, message, fingerprint),
-		messageevent.ChatMessageCreateRequestedEventType, redPacketID,
-		strconv.FormatInt(command.SessionID, 10), s.dependencies.Topics.MessageCreateRequested, now)
-	if err != nil {
-		return SendResult{}, err
-	}
-	cacheOutbox, err := s.newOutboxEvent(
-		cacheEventID, messageevent.NewRedPacketCacheBuildEvent(cacheEventID, redPacketID),
-		messageevent.RedPacketCacheBuildEventType, redPacketID,
-		strconv.FormatInt(redPacketID, 10), s.dependencies.Topics.CacheBuild, now)
-	if err != nil {
-		return SendResult{}, err
-	}
+	var persisted messageapplication.Result
 
 	err = txctx.WithTransaction(ctx, s.dependencies.SqlConn, func(txCtx context.Context) error {
 		//扣款
@@ -237,11 +216,14 @@ func (s *SendService) Send(ctx context.Context, command SendCommand) (SendResult
 		}); err != nil {
 			return fmt.Errorf("insert red packet debit log: %w", err)
 		}
-		if _, err := s.dependencies.OutboxEventModel.InsertTx(txCtx, messageOutbox); err != nil {
-			return fmt.Errorf("insert red packet message outbox: %w", err)
+		persisted, err = s.dependencies.MessageWriter.Persist(txCtx, messageapplication.Command{
+			Source: messageapplication.SourceRedPacket, Message: message, Fingerprint: fingerprint,
+		})
+		if err != nil {
+			return fmt.Errorf("persist red packet message: %w", err)
 		}
-		if _, err := s.dependencies.OutboxEventModel.InsertTx(txCtx, cacheOutbox); err != nil {
-			return fmt.Errorf("insert red packet cache outbox: %w", err)
+		if !persisted.Created {
+			return fmt.Errorf("%w: message already exists", ErrSendInvariantViolation)
 		}
 		return nil
 	})
@@ -267,6 +249,9 @@ func (s *SendService) Send(ctx context.Context, command SendCommand) (SendResult
 			return SendResult{}, fmt.Errorf("%w: transaction: %v", ErrSendUnknownOutcome, err)
 		}
 	}
+	if s.dependencies.Publisher != nil && !s.dependencies.Publisher.TryPublish(persisted.Message, fingerprint) {
+		log.Printf("best-effort red packet message publish queue full messageId=%d", persisted.Message.MessageID)
+	}
 	result := SendResult{RedPacketID: redPacketID, MessageID: messageID, Status: redPacketActiveStatus}
 	return result, nil
 }
@@ -275,8 +260,7 @@ func (s *SendService) dependenciesReady() bool {
 	d := s.dependencies
 	return d.SqlConn != nil && d.IDGenerator != nil && d.UserRPC != nil &&
 		d.RedPacketModel != nil && d.ShareModel != nil && d.UserBalanceModel != nil &&
-		d.BalanceLogModel != nil && d.OutboxEventModel != nil &&
-		d.Topics.MessageCreateRequested != "" && d.Topics.CacheBuild != ""
+		d.BalanceLogModel != nil && d.MessageWriter != nil
 }
 
 func normalizeSendCommand(command SendCommand) SendCommand {
@@ -353,25 +337,6 @@ func (s *SendService) nextID() (int64, error) {
 		return 0, fmt.Errorf("generate red packet ID: %w", err)
 	}
 	return id, nil
-}
-
-func (s *SendService) newOutboxEvent(
-	id int64, event any, eventType string, redPacketID int64, key, topic string, now time.Time,
-) (*outboxmodel.OutboxEvent, error) {
-	payload, err := json.Marshal(event)
-	if err != nil {
-		return nil, fmt.Errorf("encode red packet outbox %d: %w", id, err)
-	}
-	return &outboxmodel.OutboxEvent{
-		EventId:       id,
-		EventType:     eventType,
-		AggregateType: "red_packet",
-		AggregateId:   redPacketID,
-		Topic:         topic,
-		MessageKey:    key,
-		Payload:       string(payload),
-		NextRetryAt:   now,
-	}, nil
 }
 
 type sendCacheEntry struct {

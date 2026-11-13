@@ -171,6 +171,9 @@ func (l *InviteGroupMembersLogic) InviteGroupMembers(
 		return nil, err
 	}
 
+	if len(changedMembers) > 0 {
+		notifyGroupMembersChanged(l.ctx, l.svcCtx, req.SessionId)
+	}
 	for _, member := range changedMembers {
 		if cacheErr := l.svcCtx.UserSessionModel.ClearCache(
 			l.ctx,

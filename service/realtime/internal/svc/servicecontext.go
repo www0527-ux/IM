@@ -5,12 +5,13 @@ import (
 
 	"infinitechatgo/common/auth"
 	"infinitechatgo/common/idgen"
+	"infinitechatgo/common/messagepublish"
 	"infinitechatgo/common/mysqlpool"
 	messageapplication "infinitechatgo/service/message/application"
+	"infinitechatgo/service/message/batching"
 	messagecache "infinitechatgo/service/message/cache"
 	sequencemodel "infinitechatgo/service/message/model/conversation_sequence"
 	messagemodel "infinitechatgo/service/message/model/message"
-	outboxmodel "infinitechatgo/service/message/model/outbox_event"
 	messagepersistence "infinitechatgo/service/message/persistence"
 	"infinitechatgo/service/realtime/internal/config"
 	"infinitechatgo/service/user/rpc/userrpc"
@@ -29,6 +30,8 @@ type ServiceContext struct {
 	UserRPC       userrpc.UserRpc
 
 	MessageWriter *messageapplication.MessageWriteService
+	BatchWriter   *batching.Writer
+	Publisher     *messagepublish.Publisher
 }
 
 func NewServiceContext(
@@ -59,20 +62,26 @@ func NewServiceContext(
 	}
 	persistentWriter, err := messagepersistence.NewWriter(
 		messagepersistence.Dependencies{
-			SqlConn:        ctx.SqlConn,
-			IDGenerator:    idGenerator,
-			Messages:       messagemodel.NewModel(ctx.SqlConn),
-			Sequences:      sequencemodel.NewModel(ctx.SqlConn),
-			Outbox:         outboxmodel.NewModel(ctx.SqlConn),
-			PersistedTopic: c.Kafka.PersistedTopic,
+			SqlConn:     ctx.SqlConn,
+			IDGenerator: idGenerator,
+			Messages:    messagemodel.NewModel(ctx.SqlConn),
+			Sequences:   sequencemodel.NewModel(ctx.SqlConn),
 		},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create message persistent writer: %w", err)
 	}
+	ctx.Publisher, err = messagepublish.NewWithConfig(c.Kafka.Brokers, c.Kafka.PersistedTopic, c.MessagePipeline.Publishing)
+	if err != nil {
+		return nil, fmt.Errorf("create message publisher: %w", err)
+	}
+	ctx.BatchWriter, err = batching.New(persistentWriter, ctx.Publisher, c.MessagePipeline.Batching)
+	if err != nil {
+		return nil, fmt.Errorf("create message batch writer: %w", err)
+	}
 	ctx.MessageWriter = messageapplication.NewMessageWriteService(
 		messagecache.NewRedisResultCache(rds),
-		persistentWriter,
+		ctx.BatchWriter,
 	)
 	return ctx, nil
 }

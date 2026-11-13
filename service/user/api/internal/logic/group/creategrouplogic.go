@@ -154,6 +154,7 @@ func (l *CreateGroupLogic) CreateGroup(
 		return nil, err
 	}
 
+	notifyGroupMembersChanged(l.ctx, l.svcCtx, sessionId)
 	if cacheErr := l.svcCtx.SessionModel.ClearCache(
 		l.ctx,
 		groupSession,

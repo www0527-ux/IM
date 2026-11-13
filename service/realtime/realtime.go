@@ -9,7 +9,9 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
+	"infinitechatgo/common/groupmembercache"
 	"infinitechatgo/common/kafkareader"
 
 	"infinitechatgo/service/realtime/internal/config"
@@ -19,6 +21,7 @@ import (
 
 	"github.com/segmentio/kafka-go"
 	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 var configFile = flag.String(
@@ -42,11 +45,25 @@ func run() error {
 		&c,
 		conf.UseEnv(),
 	)
+	if c.Log.ServiceName == "" {
+		c.Log.ServiceName = c.Name
+	}
+	if err := logx.SetUp(c.Log); err != nil {
+		return fmt.Errorf("initialize realtime logging: %w", err)
+	}
 
 	svcCtx, err := svc.NewServiceContext(c)
 	if err != nil {
 		return fmt.Errorf("initialize realtime service: %w", err)
 	}
+	defer func() {
+		svcCtx.BatchWriter.Close()
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := svcCtx.Publisher.Close(ctx); err != nil {
+			log.Printf("drain committed message notifications: %v", err)
+		}
+	}()
 	dlqPublisher, err := consumer.NewKafkaDeadLetterPublisher(c.Kafka.Brokers, c.Kafka.DLQTopic)
 	if err != nil {
 		return fmt.Errorf("initialize Kafka DLQ publisher: %w", err)
@@ -83,7 +100,7 @@ func run() error {
 		consumerWorkers.Add(1)
 		go func() {
 			defer consumerWorkers.Done()
-			if err := consumer.RunKafkaConsumer(ctx, reader, handler, group, dlqPublisher); err != nil {
+			if err := consumer.RunKafkaConsumerBatched(ctx, reader, handler, group, dlqPublisher, c.MessagePipeline.ConsumerCommits); err != nil {
 				consumerErrors <- fmt.Errorf("Kafka consumer group=%s topic=%s stopped: %w", group, topic, err)
 			}
 		}()
@@ -93,7 +110,24 @@ func run() error {
 	manager := realtimews.NewManager()
 	//创建handler
 	pushConsumer := consumer.NewMessagePushConsumer(manager, svcCtx.UserRPC)
-	writerConsumer := consumer.NewMessageWriterConsumer(svcCtx.MessageWriter)
+	memberCacheConfig, _ := c.GroupMemberCache.WithDefaults() // validated by ServiceContext
+	if !memberCacheConfig.Disabled {
+		local, err := groupmembercache.NewLocal(memberCacheConfig)
+		if err != nil {
+			return err
+		}
+		client, err := groupmembercache.NewRedisClient(c.Redis)
+		if err != nil {
+			return err
+		}
+		defer client.Close()
+		subscription := groupmembercache.Subscribe(ctx, client, memberCacheConfig.Channel, local)
+		defer func() {
+			subscription.Close()
+			log.Printf("group member push cache stats: %+v", local.Stats())
+		}()
+		pushConsumer = consumer.NewMessagePushConsumer(manager, consumer.NewCachedGroupMembers(svcCtx.UserRPC, local))
+	}
 	cacheConsumer, err := consumer.NewMessageCacheConsumer(
 		svcCtx.Redis,
 		c.MessagePipeline.ContentCacheTTLSeconds,
@@ -107,11 +141,6 @@ func run() error {
 		c.Kafka.PersistedTopic,
 		c.Kafka.PushGroup,
 		pushConsumer,
-	)
-	startConsumer(
-		c.Kafka.CreateRequestedTopic,
-		c.Kafka.MessageWriterGroup,
-		writerConsumer,
 	)
 	startConsumer(
 		c.Kafka.PersistedTopic,

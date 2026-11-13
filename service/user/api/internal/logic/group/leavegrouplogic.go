@@ -104,6 +104,7 @@ func (l *LeaveGroupLogic) LeaveGroup(
 	}
 
 	if changedMember != nil {
+		notifyGroupMembersChanged(l.ctx, l.svcCtx, req.SessionId)
 		if cacheErr := l.svcCtx.UserSessionModel.ClearCache(
 			l.ctx,
 			changedMember,

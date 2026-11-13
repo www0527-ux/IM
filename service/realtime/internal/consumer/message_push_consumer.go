@@ -4,15 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"time"
+
+	"infinitechatgo/common/messagetrace"
 
 	messageevent "infinitechatgo/common/model/event"
 	"infinitechatgo/service/realtime/internal/protocol"
 	realtimews "infinitechatgo/service/realtime/internal/websocket"
 	"infinitechatgo/service/user/rpc/userrpc"
 
+	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc"
 )
 
@@ -37,7 +39,7 @@ type MessagePushConsumer struct {
 
 func NewMessagePushConsumer(
 	manager *realtimews.Manager,
-	groupMembers userrpc.UserRpc,
+	groupMembers groupMemberProvider,
 ) *MessagePushConsumer {
 	return &MessagePushConsumer{
 		manager:      manager,
@@ -50,6 +52,7 @@ func (c *MessagePushConsumer) Consume(
 	key string,
 	value string,
 ) error {
+	started := messagetrace.Stamp()
 	if c == nil || c.manager == nil || c.groupMembers == nil {
 		return &FatalError{Err: fmt.Errorf("push consumer dependencies are required")}
 	}
@@ -69,6 +72,10 @@ func (c *MessagePushConsumer) Consume(
 	}
 
 	message := event.Message
+	if messagetrace.Enabled() {
+		messagetrace.MessageAt(message, "push_handler_start", started)
+		defer func() { messagetrace.Message(message, "push_handler_end") }()
+	}
 	if message.MessageID <= 0 || message.Seq <= 0 || message.SenderID <= 0 ||
 		message.SessionID <= 0 || strings.TrimSpace(message.ClientMessageID) == "" {
 		return permanent("invalid_message", fmt.Errorf(
@@ -116,7 +123,7 @@ func (c *MessagePushConsumer) pushSingle(
 	//记录输入的数目
 	receiverQueued := c.manager.SendToUser(*message.ReceiverID, payload)
 
-	log.Printf(
+	logx.Debugf(
 		"realtime push attempted: messageId=%d, sessionId=%d, seq=%d, receiverQueued=%d",
 		message.MessageID,
 		message.SessionID,
@@ -134,10 +141,12 @@ func (c *MessagePushConsumer) pushGroup(
 	lookupCtx, cancel := context.WithTimeout(ctx, groupMemberLookupTimeout)
 	defer cancel()
 
+	messagetrace.Message(message, "group_rpc_start")
 	result, err := c.groupMembers.GetGroupMemberIds(
 		lookupCtx,
 		&userrpc.SessionIdReq{SessionId: message.SessionID},
 	)
+	messagetrace.Message(message, "group_rpc_end")
 	if err != nil {
 		return fmt.Errorf(
 			"load group members for message %d: %w",
@@ -152,6 +161,7 @@ func (c *MessagePushConsumer) pushGroup(
 		)
 	}
 
+	messagetrace.Message(message, "fanout_start")
 	seen := make(map[int64]struct{}, len(result.UserIds))
 	memberCount := 0
 	queued := 0
@@ -166,8 +176,9 @@ func (c *MessagePushConsumer) pushGroup(
 		memberCount++
 		queued += c.manager.SendToUser(userID, payload)
 	}
+	messagetrace.Message(message, "fanout_end")
 
-	log.Printf(
+	logx.Debugf(
 		"group realtime push attempted: messageId=%d, sessionId=%d, seq=%d, members=%d, queued=%d",
 		message.MessageID,
 		message.SessionID,

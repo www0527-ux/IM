@@ -6,8 +6,12 @@
 
 `IM-learn` 是我的后端面试项目，也是我学习 Go 后端的主线项目。目标不是堆功能，而是把几个核心机制写对、讲清楚：
 
-- 消息主线：旧版链路已完成并有端到端验证；目标链路改为统一 `MessageWriteService` + MySQL事务内Seq + Outbox，机械骨架已完成，核心事务待开发者实现
-- 红包模块：MySQL 事务 + Redis 候选池 + 两段 Outbox + 幂等消费（设计已冻结，机械骨架已完成，核心事务待实现）
+- 消息主线：MySQL 事务内分配 Seq 并持久化消息，提交后尽力发布 Kafka，客户端按 Seq 同步补漏；2026-10-30 的去 Outbox 改造尚需完成故障及迁移验收。
+- 2026-11-09 普通消息增加按会话分组、分片的批处理：Seq 范围与批量消息同事务提交，提交后返回 stored ACK 并尽力发布；红包仍使用独立资金事务。参数与失败语义见 `message-batching-design.md`；用户随后授权的本机性能对照见 `message-batch-performance-report.md`，写入收益不等于实时推送容量收益。
+- 2026-11-09 推送分段测量见 `message-push-timing-report.md`：本机群聊突发主要积压在消费侧串行处理，其次是发布队列；仅增加默认关闭的诊断计时，未调整发布并发、offset 或失败语义。
+- 2026-11-09 群推送参考 OpenIM 增加本地成员名单缓存、提交后 Redis 失效广播与绝对 TTL 5 秒兜底，见 `group-member-cache-design.md`；只用于推送接收人，发送/同步/红包领取鉴权仍走原有路径。功能验收和缓存开关对照见 `group-member-cache-performance-report.md`，未调整 offset 或 Publisher。
+- 2026-11-09 后续链路优化：Publisher 小批量发布、Consumer 有界预取和已完成 offset 批量确认，Realtime 正式应用日志配置。普通消息默认按分片批次共用事务，多会话计数器升序加锁、批量 SQL 分配各自连续 Seq；红包资金仍走原独立事务。`Batching.SeparateConversations: true` 可回退到每会话独立提交。设计与本机实测见 `message-push-pipeline-design.md`、`message-push-pipeline-performance-report.md`；先前“未调整 offset/Publisher”是历史阶段范围。
+- 红包模块：扣款、红包、份额、流水、Seq 和红包消息在同一 MySQL 事务内提交；Redis 候选池可回源 MySQL，旧环境切换需先处理 Outbox 和 Kafka 积压。
 - 网关模块（后续）：服务发现、负载均衡、认证与限流
 
 ## 唯一事实源
@@ -29,7 +33,7 @@
 - 核心逻辑我自己写：Lua 脚本、发送/领取/退款事务、关键 SQL、幂等键设计、错误分类。
 - AI 负责机械部分：goctl 脚手架、model 层、DTO、config/wiring、日志、测试骨架、文档和图。
 - 生成脚手架时把核心逻辑留成 TODO，并列出函数签名、前置/后置条件、失败语义；不要一次生成整个模块。
-- 消息链路只保留 Outbox 目标实现；旧版 Accepted/Transfer/Sequenced/Offline Store 已按用户 2026-09-23 的明确要求移除。未完成组件必须明确报错，不得对外返回假成功。现有数据库启用前要完成 Seq 回填与删列迁移。
+- 消息链路按用户 2026-10-30 决策移除新写入的 Outbox；旧版 Accepted/Transfer/Sequenced/Offline Store 已移除。未完成组件必须明确报错，不得对外返回假成功。旧环境启用前应完成 Seq 迁移及 `outbox-removal-migration.md` 中的积压核查。
 - 每个阶段先验收，再进入下一阶段。
 - 每阶段结束补一段「做了什么决策 / 为什么 / 失败边界是什么」，这是我面试的素材。
 - 不要改 `note/readme.md` 和未提交的实验代码，不要顺手重构无关代码。

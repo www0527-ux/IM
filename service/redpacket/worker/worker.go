@@ -12,13 +12,10 @@ import (
 	"time"
 
 	"infinitechatgo/common/idgen"
-	"infinitechatgo/common/kafkareader"
 	"infinitechatgo/common/mysqlpool"
 	"infinitechatgo/service/redpacket/application"
 	balancelogmodel "infinitechatgo/service/redpacket/model/balance_log"
-	redpacketmodel "infinitechatgo/service/redpacket/model/red_packet"
 
-	"github.com/segmentio/kafka-go"
 	"github.com/zeromicro/go-zero/core/conf"
 	zeroredis "github.com/zeromicro/go-zero/core/stores/redis"
 )
@@ -51,10 +48,7 @@ func run() error {
 	flag.Parse()
 	var c workerConfig
 	conf.MustLoad(*workerConfigFile, &c, conf.UseEnv())
-	if c.DataSource == "" || len(c.Kafka.Brokers) == 0 ||
-		c.Kafka.CacheBuildTopic == "" || c.Kafka.CacheBuildGroup == "" ||
-		c.Kafka.DLQTopic == "" ||
-		c.ExpiryPollMillis <= 0 || c.RebuildPollSeconds <= 0 ||
+	if c.DataSource == "" || c.ExpiryPollMillis <= 0 || c.RebuildPollSeconds <= 0 ||
 		c.BatchSize <= 0 || c.BatchSize > 1000 {
 		return fmt.Errorf("red packet worker configuration is incomplete")
 	}
@@ -65,22 +59,10 @@ func run() error {
 	rds := zeroredis.MustNewRedis(c.Redis)
 	ids := idgen.MustNew(c.Snowflake)
 	pool := application.NewRedisCandidatePool(rds, db)
-	sendResults := application.NewSendResultCacheProjector(rds, redpacketmodel.NewRedPacketModel(db))
 	expiry := application.NewExpireService(application.ExpireDependencies{
 		SqlConn: db, IDGenerator: ids, CandidatePool: pool,
 		BalanceLogModel: balancelogmodel.NewBalanceLogModel(db),
 	})
-	reader := kafkareader.New(kafka.ReaderConfig{
-		Brokers: c.Kafka.Brokers, GroupID: c.Kafka.CacheBuildGroup,
-		Topic: c.Kafka.CacheBuildTopic, StartOffset: kafka.FirstOffset,
-		CommitInterval: 0,
-	})
-	dlq := &kafka.Writer{
-		Addr: kafka.TCP(c.Kafka.Brokers...), Topic: c.Kafka.DLQTopic,
-		Balancer: &kafka.Hash{}, RequiredAcks: kafka.RequireAll,
-		Async: false, AllowAutoTopicCreation: false,
-	}
-	defer func() { _ = dlq.Close() }()
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	var workers sync.WaitGroup
@@ -94,9 +76,6 @@ func run() error {
 			}
 		}()
 	}
-	start(func(ctx context.Context) error {
-		return consumeCacheBuild(ctx, reader, dlq, pool, sendResults, c.Kafka.CacheBuildGroup)
-	})
 	start(func(ctx context.Context) error {
 		ticker := time.NewTicker(time.Duration(c.ExpiryPollMillis) * time.Millisecond)
 		defer ticker.Stop()
@@ -151,11 +130,9 @@ func run() error {
 	select {
 	case err := <-errors:
 		stop()
-		_ = reader.Close()
 		workers.Wait()
 		return err
 	case <-ctx.Done():
-		_ = reader.Close()
 		workers.Wait()
 		return nil
 	}

@@ -5,9 +5,31 @@ Mode: dev
 
 ListenOn: 0.0.0.0:9101
 
+# Push recipients only; send and red packet authorization still use live RPC.
+GroupMemberCache:
+  Disabled: false
+  TTLSeconds: 5
+  Capacity: 1024
+  Channel: im:group-members:invalidate:v1
+
 MessagePipeline:
   ContentCacheTTLSeconds: 604800
   IdempotencyCacheTTLSeconds: 604800
+  Batching:
+    Workers: 8
+    QueueCapacity: 256
+    BatchSize: 32
+    FlushMillis: 2
+    TimeoutMillis: 10000
+    SeparateConversations: false
+  Publishing:
+    BatchSize: 32
+    FlushMillis: 1
+    QueueCapacity: 512
+  ConsumerCommits:
+    Disabled: false
+    BatchSize: 32
+    IntervalMillis: 10
 
 DataSource: root:YOUR_MYSQL_PASSWORD@tcp(127.0.0.1:3306)/infiniteChat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
 MySQLPool:

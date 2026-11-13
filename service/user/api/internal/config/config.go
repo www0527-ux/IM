@@ -5,6 +5,7 @@ package config
 
 import (
 	"infinitechatgo/common/auth"
+	"infinitechatgo/common/groupmembercache"
 	"infinitechatgo/common/idgen"
 	"infinitechatgo/common/mysqlpool"
 
@@ -30,12 +31,13 @@ type MinioConf struct {
 }
 type Config struct {
 	rest.RestConf
-	DataSource string
-	MySQLPool  mysqlpool.Config
-	Cache      cache.CacheConf
-	Redis      redis.RedisConf
-	Email      EmailConf
-	Auth       auth.Config
-	Snowflake  idgen.Config
-	Minio      MinioConf
+	DataSource       string
+	MySQLPool        mysqlpool.Config
+	Cache            cache.CacheConf
+	Redis            redis.RedisConf
+	Email            EmailConf
+	Auth             auth.Config
+	Snowflake        idgen.Config
+	Minio            MinioConf
+	GroupMemberCache groupmembercache.InvalidationConfig `json:",optional"`
 }

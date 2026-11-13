@@ -1,0 +1,1026 @@
+{
+  "environment": {
+    "MessageCount": 600,
+    "DockerResources": "8 CPU / 8212668416 bytes",
+    "CurrentWriterBatchSize": 64,
+    "Node": "v24.14.0",
+    "Method": "Matched pre-optimization source vs current; mode=Sustained; identical configuration and infrastructure; group recipient cache enabled in both",
+    "RPCPool": 16,
+    "KafkaReplicationFactor": 1,
+    "Docker": "29.4.3",
+    "MySQLSettings": [
+      "innodb_flush_log_at_trx_commit\t1",
+      "max_connections\t151",
+      "sync_binlog\t1",
+      "transaction_isolation\tREPEATABLE-READ"
+    ],
+    "RealtimePool": 24,
+    "KafkaPartitions": 3,
+    "Order": [
+      "current-r1"
+    ],
+    "RunID": "20261109_215613",
+    "OfflinePool": 16,
+    "BaselineWriterBatchSize": 32,
+    "Go": "go version go1.26.5 windows/amd64"
+  },
+  "notes": [
+    "Source baseline is im-push-pipeline-backup-20261109-204320, including member cache and the original per-conversation batching.",
+    "Current combines publishing, offset commit, logging and ordinary-message SQL changes; results do not isolate any individual change.",
+    "Push latency is sender actual send to observer client receipt. One observer measures latency; each group has 101 members.",
+    "Push percentiles contain received messages only: inspect errorCount, pushMissing and syncMissing before interpreting them.",
+    "Sustained input is open-loop; burst input waits for stored ACK before that worker sends again. Neither is production capacity certification.",
+    "Seq recovery checks content through a separate HTTP pull, not replay of Kafka business handlers or automatic missing-final-notification discovery.",
+    "Only these summary fields are exported. Private fixtures, YAML, login tokens and DSNs are not read."
+  ],
+  "trials": [
+    {
+      "name": "current-r1",
+      "result": "COMPLETED_WITH_DELIVERY_OR_REQUEST_ERRORS",
+      "methodology": {
+        "messagesPerCase": "rate * durationSeconds",
+        "concurrency": "not fixed; observed in-flight ACKs",
+        "conversations": [
+          1,
+          20
+        ],
+        "senders": 100,
+        "groupMembers": 101,
+        "messageBytes": 128,
+        "model": "open-loop fixed-rate sends, round-robin across 100 clients; ACK does not pace sending",
+        "warmup": "100 messages per case, excluded from measurements, drain before measurement",
+        "note": "Same Windows host and shared local Docker resources. This is a bounded comparison, not sustainable capacity.",
+        "login": "Fixtures generated with project JWT/session functions; live WebSocket authentication and permission RPC remain enabled",
+        "rates": [
+          600
+        ],
+        "durationSeconds": 60,
+        "tracing": false,
+        "profiling": false
+      },
+      "lowLoad": {
+        "messages": 20,
+        "ack": {
+          "n": 20,
+          "p50Ms": 46.89,
+          "p95Ms": 51.49,
+          "p99Ms": 53.58,
+          "maxMs": 53.58
+        },
+        "push": {
+          "n": 20,
+          "p50Ms": 53.06,
+          "p95Ms": 60.48,
+          "p99Ms": 139.89,
+          "maxMs": 139.89
+        }
+      },
+      "cases": [
+        {
+          "name": "hot-r600",
+          "rate": 600,
+          "groupCount": 1,
+          "requests": 36000,
+          "succeeded": 26674,
+          "errorCount": 9326,
+          "errors": {
+            "driver_inflight_cap": 9123,
+            "validation_unavailable": 203
+          },
+          "targetDurationSecs": 60,
+          "durationSecs": 60.053,
+          "sendDurationSecs": 60.007,
+          "actualSendRPS": 599.93,
+          "ackRPS": 444.17,
+          "ack": {
+            "n": 26674,
+            "p50Ms": 330.72,
+            "p95Ms": 4129.09,
+            "p99Ms": 10826.69,
+            "maxMs": 12328.39
+          },
+          "push": {
+            "n": 26674,
+            "p50Ms": 387.71,
+            "p95Ms": 4435.13,
+            "p99Ms": 10921.57,
+            "maxMs": 12440.49
+          },
+          "pushed": 26674,
+          "duringSendDelivered": 26628,
+          "maxInflight": 1000,
+          "backlog": [
+            {
+              "second": 1.03,
+              "sent": 614,
+              "awaitingAck": 167,
+              "awaitingPush": 214
+            },
+            {
+              "second": 2.18,
+              "sent": 1292,
+              "awaitingAck": 262,
+              "awaitingPush": 231
+            },
+            {
+              "second": 3.33,
+              "sent": 1995,
+              "awaitingAck": 300,
+              "awaitingPush": 268
+            },
+            {
+              "second": 4.34,
+              "sent": 2597,
+              "awaitingAck": 324,
+              "awaitingPush": 302
+            },
+            {
+              "second": 5.44,
+              "sent": 3253,
+              "awaitingAck": 385,
+              "awaitingPush": 414
+            },
+            {
+              "second": 6.49,
+              "sent": 3883,
+              "awaitingAck": 409,
+              "awaitingPush": 388
+            },
+            {
+              "second": 7.55,
+              "sent": 4502,
+              "awaitingAck": 424,
+              "awaitingPush": 307
+            },
+            {
+              "second": 8.99,
+              "sent": 5373,
+              "awaitingAck": 449,
+              "awaitingPush": 586
+            },
+            {
+              "second": 10.14,
+              "sent": 6049,
+              "awaitingAck": 506,
+              "awaitingPush": 597
+            },
+            {
+              "second": 11.39,
+              "sent": 6824,
+              "awaitingAck": 572,
+              "awaitingPush": 572
+            },
+            {
+              "second": 12.66,
+              "sent": 7553,
+              "awaitingAck": 622,
+              "awaitingPush": 434
+            },
+            {
+              "second": 14.09,
+              "sent": 8431,
+              "awaitingAck": 571,
+              "awaitingPush": 814
+            },
+            {
+              "second": 18.29,
+              "sent": 9583,
+              "awaitingAck": 1000,
+              "awaitingPush": 1064
+            },
+            {
+              "second": 18.35,
+              "sent": 10982,
+              "awaitingAck": 1000,
+              "awaitingPush": 1064
+            },
+            {
+              "second": 19.34,
+              "sent": 11600,
+              "awaitingAck": 1000,
+              "awaitingPush": 1064
+            },
+            {
+              "second": 20.34,
+              "sent": 12205,
+              "awaitingAck": 1000,
+              "awaitingPush": 1100
+            },
+            {
+              "second": 21.4,
+              "sent": 12840,
+              "awaitingAck": 1000,
+              "awaitingPush": 1071
+            },
+            {
+              "second": 22.4,
+              "sent": 13441,
+              "awaitingAck": 1000,
+              "awaitingPush": 1000
+            },
+            {
+              "second": 23.41,
+              "sent": 14045,
+              "awaitingAck": 1000,
+              "awaitingPush": 1000
+            },
+            {
+              "second": 24.61,
+              "sent": 14768,
+              "awaitingAck": 1000,
+              "awaitingPush": 1016
+            },
+            {
+              "second": 25.62,
+              "sent": 15369,
+              "awaitingAck": 1000,
+              "awaitingPush": 1000
+            },
+            {
+              "second": 26.65,
+              "sent": 15986,
+              "awaitingAck": 1000,
+              "awaitingPush": 1064
+            },
+            {
+              "second": 27.65,
+              "sent": 16589,
+              "awaitingAck": 1000,
+              "awaitingPush": 1006
+            },
+            {
+              "second": 28.67,
+              "sent": 17200,
+              "awaitingAck": 1000,
+              "awaitingPush": 1000
+            },
+            {
+              "second": 29.73,
+              "sent": 17839,
+              "awaitingAck": 1000,
+              "awaitingPush": 1000
+            },
+            {
+              "second": 30.74,
+              "sent": 18445,
+              "awaitingAck": 985,
+              "awaitingPush": 1021
+            },
+            {
+              "second": 31.74,
+              "sent": 19046,
+              "awaitingAck": 973,
+              "awaitingPush": 1005
+            },
+            {
+              "second": 32.75,
+              "sent": 19648,
+              "awaitingAck": 994,
+              "awaitingPush": 994
+            },
+            {
+              "second": 33.76,
+              "sent": 20253,
+              "awaitingAck": 1000,
+              "awaitingPush": 1000
+            },
+            {
+              "second": 34.75,
+              "sent": 20853,
+              "awaitingAck": 972,
+              "awaitingPush": 1036
+            },
+            {
+              "second": 35.76,
+              "sent": 21454,
+              "awaitingAck": 1000,
+              "awaitingPush": 1002
+            },
+            {
+              "second": 36.76,
+              "sent": 22056,
+              "awaitingAck": 973,
+              "awaitingPush": 1009
+            },
+            {
+              "second": 37.76,
+              "sent": 22659,
+              "awaitingAck": 981,
+              "awaitingPush": 982
+            },
+            {
+              "second": 38.76,
+              "sent": 23259,
+              "awaitingAck": 785,
+              "awaitingPush": 817
+            },
+            {
+              "second": 39.77,
+              "sent": 23862,
+              "awaitingAck": 500,
+              "awaitingPush": 560
+            },
+            {
+              "second": 40.77,
+              "sent": 24464,
+              "awaitingAck": 388,
+              "awaitingPush": 389
+            },
+            {
+              "second": 41.78,
+              "sent": 25068,
+              "awaitingAck": 270,
+              "awaitingPush": 334
+            },
+            {
+              "second": 42.78,
+              "sent": 25669,
+              "awaitingAck": 101,
+              "awaitingPush": 139
+            },
+            {
+              "second": 43.79,
+              "sent": 26271,
+              "awaitingAck": 57,
+              "awaitingPush": 57
+            },
+            {
+              "second": 44.79,
+              "sent": 26874,
+              "awaitingAck": 48,
+              "awaitingPush": 50
+            },
+            {
+              "second": 45.8,
+              "sent": 27479,
+              "awaitingAck": 72,
+              "awaitingPush": 72
+            },
+            {
+              "second": 46.8,
+              "sent": 28082,
+              "awaitingAck": 83,
+              "awaitingPush": 83
+            },
+            {
+              "second": 47.81,
+              "sent": 28684,
+              "awaitingAck": 24,
+              "awaitingPush": 41
+            },
+            {
+              "second": 48.81,
+              "sent": 29285,
+              "awaitingAck": 24,
+              "awaitingPush": 47
+            },
+            {
+              "second": 49.81,
+              "sent": 29886,
+              "awaitingAck": 28,
+              "awaitingPush": 28
+            },
+            {
+              "second": 50.81,
+              "sent": 30488,
+              "awaitingAck": 35,
+              "awaitingPush": 35
+            },
+            {
+              "second": 51.82,
+              "sent": 31090,
+              "awaitingAck": 54,
+              "awaitingPush": 54
+            },
+            {
+              "second": 52.82,
+              "sent": 31691,
+              "awaitingAck": 20,
+              "awaitingPush": 42
+            },
+            {
+              "second": 53.82,
+              "sent": 32294,
+              "awaitingAck": 40,
+              "awaitingPush": 50
+            },
+            {
+              "second": 54.83,
+              "sent": 32896,
+              "awaitingAck": 53,
+              "awaitingPush": 70
+            },
+            {
+              "second": 55.84,
+              "sent": 33503,
+              "awaitingAck": 117,
+              "awaitingPush": 120
+            },
+            {
+              "second": 56.84,
+              "sent": 34104,
+              "awaitingAck": 37,
+              "awaitingPush": 37
+            },
+            {
+              "second": 57.85,
+              "sent": 34707,
+              "awaitingAck": 39,
+              "awaitingPush": 41
+            },
+            {
+              "second": 58.85,
+              "sent": 35309,
+              "awaitingAck": 28,
+              "awaitingPush": 28
+            },
+            {
+              "second": 59.86,
+              "sent": 35914,
+              "awaitingAck": 36,
+              "awaitingPush": 36
+            },
+            {
+              "second": 60.01,
+              "sent": 36000,
+              "awaitingAck": 23,
+              "awaitingPush": 46
+            }
+          ],
+          "schedulingLateness": {
+            "n": 36000,
+            "p50Ms": 8.01,
+            "p95Ms": 795.76,
+            "p99Ms": 2630.72,
+            "maxMs": 2920.21
+          },
+          "driverCPUPercentOneCore": 57.61,
+          "driverEventLoopP99Ms": 240.52,
+          "drainWaitSecs": 0.098,
+          "pushMissing": 0,
+          "sequenceChecks": [
+            {
+              "count": 26774,
+              "maxSeq": 26774,
+              "minSeq": 1,
+              "lastSeq": 26774,
+              "sessionId": "17942326070771000"
+            }
+          ],
+          "databaseMessages": 26774,
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        },
+        {
+          "name": "many-r600",
+          "rate": 600,
+          "groupCount": 20,
+          "requests": 36000,
+          "succeeded": 36000,
+          "errorCount": 0,
+          "errors": {},
+          "targetDurationSecs": 60,
+          "durationSecs": 60.125,
+          "sendDurationSecs": 60.005,
+          "actualSendRPS": 599.95,
+          "ackRPS": 598.75,
+          "ack": {
+            "n": 36000,
+            "p50Ms": 170.87,
+            "p95Ms": 406.92,
+            "p99Ms": 579.35,
+            "maxMs": 745.98
+          },
+          "push": {
+            "n": 36000,
+            "p50Ms": 201.96,
+            "p95Ms": 447.44,
+            "p99Ms": 605.45,
+            "maxMs": 778.65
+          },
+          "pushed": 36000,
+          "duringSendDelivered": 35895,
+          "maxInflight": 383,
+          "backlog": [
+            {
+              "second": 1,
+              "sent": 601,
+              "awaitingAck": 85,
+              "awaitingPush": 95
+            },
+            {
+              "second": 2.01,
+              "sent": 1204,
+              "awaitingAck": 88,
+              "awaitingPush": 98
+            },
+            {
+              "second": 3.01,
+              "sent": 1807,
+              "awaitingAck": 128,
+              "awaitingPush": 138
+            },
+            {
+              "second": 4.02,
+              "sent": 2411,
+              "awaitingAck": 81,
+              "awaitingPush": 91
+            },
+            {
+              "second": 5.02,
+              "sent": 3011,
+              "awaitingAck": 139,
+              "awaitingPush": 157
+            },
+            {
+              "second": 6.03,
+              "sent": 3616,
+              "awaitingAck": 169,
+              "awaitingPush": 178
+            },
+            {
+              "second": 7.03,
+              "sent": 4216,
+              "awaitingAck": 128,
+              "awaitingPush": 144
+            },
+            {
+              "second": 8.03,
+              "sent": 4819,
+              "awaitingAck": 105,
+              "awaitingPush": 110
+            },
+            {
+              "second": 9.03,
+              "sent": 5420,
+              "awaitingAck": 150,
+              "awaitingPush": 166
+            },
+            {
+              "second": 10.08,
+              "sent": 6048,
+              "awaitingAck": 129,
+              "awaitingPush": 106
+            },
+            {
+              "second": 11.08,
+              "sent": 6651,
+              "awaitingAck": 57,
+              "awaitingPush": 67
+            },
+            {
+              "second": 12.09,
+              "sent": 7253,
+              "awaitingAck": 68,
+              "awaitingPush": 85
+            },
+            {
+              "second": 13.09,
+              "sent": 7856,
+              "awaitingAck": 109,
+              "awaitingPush": 124
+            },
+            {
+              "second": 14.1,
+              "sent": 8460,
+              "awaitingAck": 64,
+              "awaitingPush": 69
+            },
+            {
+              "second": 15.1,
+              "sent": 9061,
+              "awaitingAck": 65,
+              "awaitingPush": 68
+            },
+            {
+              "second": 16.1,
+              "sent": 9662,
+              "awaitingAck": 58,
+              "awaitingPush": 65
+            },
+            {
+              "second": 17.1,
+              "sent": 10263,
+              "awaitingAck": 87,
+              "awaitingPush": 92
+            },
+            {
+              "second": 18.11,
+              "sent": 10869,
+              "awaitingAck": 52,
+              "awaitingPush": 65
+            },
+            {
+              "second": 19.12,
+              "sent": 11471,
+              "awaitingAck": 161,
+              "awaitingPush": 162
+            },
+            {
+              "second": 20.12,
+              "sent": 12074,
+              "awaitingAck": 163,
+              "awaitingPush": 185
+            },
+            {
+              "second": 21.13,
+              "sent": 12679,
+              "awaitingAck": 163,
+              "awaitingPush": 172
+            },
+            {
+              "second": 22.13,
+              "sent": 13280,
+              "awaitingAck": 139,
+              "awaitingPush": 164
+            },
+            {
+              "second": 23.14,
+              "sent": 13885,
+              "awaitingAck": 179,
+              "awaitingPush": 181
+            },
+            {
+              "second": 24.15,
+              "sent": 14487,
+              "awaitingAck": 126,
+              "awaitingPush": 151
+            },
+            {
+              "second": 25.15,
+              "sent": 15090,
+              "awaitingAck": 130,
+              "awaitingPush": 153
+            },
+            {
+              "second": 26.15,
+              "sent": 15691,
+              "awaitingAck": 62,
+              "awaitingPush": 62
+            },
+            {
+              "second": 27.16,
+              "sent": 16294,
+              "awaitingAck": 62,
+              "awaitingPush": 68
+            },
+            {
+              "second": 28.16,
+              "sent": 16897,
+              "awaitingAck": 64,
+              "awaitingPush": 71
+            },
+            {
+              "second": 29.17,
+              "sent": 17499,
+              "awaitingAck": 151,
+              "awaitingPush": 159
+            },
+            {
+              "second": 30.17,
+              "sent": 18101,
+              "awaitingAck": 100,
+              "awaitingPush": 138
+            },
+            {
+              "second": 31.17,
+              "sent": 18702,
+              "awaitingAck": 154,
+              "awaitingPush": 192
+            },
+            {
+              "second": 32.17,
+              "sent": 19304,
+              "awaitingAck": 123,
+              "awaitingPush": 123
+            },
+            {
+              "second": 33.18,
+              "sent": 19907,
+              "awaitingAck": 161,
+              "awaitingPush": 187
+            },
+            {
+              "second": 34.18,
+              "sent": 20507,
+              "awaitingAck": 118,
+              "awaitingPush": 131
+            },
+            {
+              "second": 35.18,
+              "sent": 21109,
+              "awaitingAck": 81,
+              "awaitingPush": 205
+            },
+            {
+              "second": 36.19,
+              "sent": 21713,
+              "awaitingAck": 207,
+              "awaitingPush": 219
+            },
+            {
+              "second": 37.19,
+              "sent": 22314,
+              "awaitingAck": 207,
+              "awaitingPush": 218
+            },
+            {
+              "second": 38.19,
+              "sent": 22915,
+              "awaitingAck": 168,
+              "awaitingPush": 174
+            },
+            {
+              "second": 39.2,
+              "sent": 23518,
+              "awaitingAck": 219,
+              "awaitingPush": 228
+            },
+            {
+              "second": 40.2,
+              "sent": 24118,
+              "awaitingAck": 115,
+              "awaitingPush": 132
+            },
+            {
+              "second": 41.2,
+              "sent": 24722,
+              "awaitingAck": 124,
+              "awaitingPush": 128
+            },
+            {
+              "second": 42.2,
+              "sent": 25323,
+              "awaitingAck": 110,
+              "awaitingPush": 134
+            },
+            {
+              "second": 43.21,
+              "sent": 25925,
+              "awaitingAck": 115,
+              "awaitingPush": 135
+            },
+            {
+              "second": 44.21,
+              "sent": 26527,
+              "awaitingAck": 58,
+              "awaitingPush": 80
+            },
+            {
+              "second": 45.21,
+              "sent": 27128,
+              "awaitingAck": 72,
+              "awaitingPush": 103
+            },
+            {
+              "second": 46.22,
+              "sent": 27731,
+              "awaitingAck": 81,
+              "awaitingPush": 81
+            },
+            {
+              "second": 47.22,
+              "sent": 28335,
+              "awaitingAck": 64,
+              "awaitingPush": 69
+            },
+            {
+              "second": 48.23,
+              "sent": 28938,
+              "awaitingAck": 61,
+              "awaitingPush": 64
+            },
+            {
+              "second": 49.23,
+              "sent": 29541,
+              "awaitingAck": 177,
+              "awaitingPush": 198
+            },
+            {
+              "second": 50.24,
+              "sent": 30143,
+              "awaitingAck": 141,
+              "awaitingPush": 218
+            },
+            {
+              "second": 51.24,
+              "sent": 30746,
+              "awaitingAck": 278,
+              "awaitingPush": 293
+            },
+            {
+              "second": 52.24,
+              "sent": 31347,
+              "awaitingAck": 305,
+              "awaitingPush": 329
+            },
+            {
+              "second": 53.25,
+              "sent": 31948,
+              "awaitingAck": 350,
+              "awaitingPush": 374
+            },
+            {
+              "second": 54.25,
+              "sent": 32550,
+              "awaitingAck": 204,
+              "awaitingPush": 235
+            },
+            {
+              "second": 55.25,
+              "sent": 33152,
+              "awaitingAck": 82,
+              "awaitingPush": 116
+            },
+            {
+              "second": 56.26,
+              "sent": 33756,
+              "awaitingAck": 80,
+              "awaitingPush": 88
+            },
+            {
+              "second": 57.26,
+              "sent": 34357,
+              "awaitingAck": 61,
+              "awaitingPush": 76
+            },
+            {
+              "second": 58.26,
+              "sent": 34958,
+              "awaitingAck": 88,
+              "awaitingPush": 98
+            },
+            {
+              "second": 59.26,
+              "sent": 35558,
+              "awaitingAck": 148,
+              "awaitingPush": 182
+            },
+            {
+              "second": 60,
+              "sent": 36000,
+              "awaitingAck": 90,
+              "awaitingPush": 105
+            }
+          ],
+          "schedulingLateness": {
+            "n": 36000,
+            "p50Ms": 3.44,
+            "p95Ms": 8.34,
+            "p99Ms": 13.22,
+            "maxMs": 80.86
+          },
+          "driverCPUPercentOneCore": 64.55,
+          "driverEventLoopP99Ms": 19.27,
+          "drainWaitSecs": 0.055,
+          "pushMissing": 0,
+          "sequenceChecks": [
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771001"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771002"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771003"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771004"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771005"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771006"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771007"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771008"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771009"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771010"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771011"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771012"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771013"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771014"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771015"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771016"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771017"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771018"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771019"
+            },
+            {
+              "count": 1805,
+              "maxSeq": 1805,
+              "minSeq": 1,
+              "lastSeq": 1805,
+              "sessionId": "17942326070771020"
+            }
+          ],
+          "databaseMessages": 36100,
+          "committedWithoutStoredAck": 0,
+          "syncMissing": 0
+        }
+      ]
+    }
+  ]
+}
