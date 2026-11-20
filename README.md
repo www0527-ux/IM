@@ -23,7 +23,7 @@ IM is a learning-oriented backend project for one-to-one and group messaging. It
 - Keep WebSocket writes serialized and connection queues bounded.
 - Handle red-packet operations with database-backed idempotency and transactional balance records.
 
-这是一个持续迭代的工程实践项目。项目更关注消息链路、数据一致性和故障边界，而不是单纯堆叠业务功能。
+这是一个持续迭代的工程实践项目。
 
 ## Architecture
 
