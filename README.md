@@ -14,7 +14,7 @@
 
 ## Overview
 
-IM is a learning-oriented backend project for one-to-one and group messaging. It focuses on the engineering problems behind a real-time messaging service rather than only implementing chat APIs:
+IM is a Go-based distributed backend for one-to-one and group messaging. It focuses on the core engineering challenges behind a real-time messaging service rather than only implementing chat APIs:
 
 - Persist messages before acknowledging the sender.
 - Maintain an independent, increasing `Seq` for each conversation.
@@ -114,14 +114,14 @@ These are results from a controlled, single-host development environment—not p
 
 ## Engineering notes
 
-- [Message batching design](message-batching-design.md)
-- [Message push pipeline](message-push-pipeline-design.md)
-- [Message push performance report](message-push-pipeline-performance-report.md)
-- [Group member cache design](group-member-cache-design.md)
-- [Group member cache performance report](group-member-cache-performance-report.md)
-- [Red-packet design and failure boundaries](redpacket-design.md)
-- [Acceptance report](acceptance-report.md)
-- [Load test report](load-test-report.md)
+- [Message batching design](docs/message-batching-design.md)
+- [Message push pipeline](docs/message-push-pipeline-design.md)
+- [Message push performance report](docs/message-push-pipeline-performance-report.md)
+- [Group member cache design](docs/group-member-cache-design.md)
+- [Group member cache performance report](docs/group-member-cache-performance-report.md)
+- [Red-packet design and failure boundaries](docs/redpacket-design.md)
+- [Acceptance report](docs/acceptance-report.md)
+- [Load test report](docs/load-test-report.md)
 
 ## Project boundaries
 
